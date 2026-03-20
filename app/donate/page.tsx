@@ -81,7 +81,7 @@ export default function DonatePage() {
                     </div>
                   </div>
                   <Button asChild variant="secondary" size="lg" className="w-full">
-                    <Link href="https://www.paypal.com/donate/?hosted_button_id=Z4CWC99SLXFTU" target="_blank" rel="noopener noreferrer">
+                    <Link href="https://www.paypal.com/ncp/payment/726ZAHDJS7HZW" target="_blank" rel="noopener noreferrer">
                       Donate via PayPal <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

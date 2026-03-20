@@ -63,7 +63,7 @@ export default function GetInvolvedPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">-</span>
-                    <span>Group lessons at $10 or individual at $15 for 45 minutes</span>
+                    <span>Group and individual lessons available</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">-</span>
