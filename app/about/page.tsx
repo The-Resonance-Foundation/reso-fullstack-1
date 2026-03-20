@@ -90,10 +90,10 @@ export default function AboutPage() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { icon: Users, value: "30+", label: "Dedicated Tutors" },
+              { icon: Users, value: "50+", label: "Dedicated Tutors" },
               { icon: Music, value: "1,000+", label: "Lives Impacted" },
               { icon: Heart, value: "$1000s", label: "Raised for Music Education" },
-              { icon: Award, value: "4", label: "Instrument Programs" },
+              { icon: Award, value: "30+", label: "Leadership Officers" },
             ].map((stat, index) => (
               <div key={index} className="text-center">
                 <stat.icon className="h-10 w-10 mx-auto mb-4 opacity-80" />

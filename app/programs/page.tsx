@@ -60,29 +60,7 @@ export default function ProgramsPage() {
         </div>
       </section>
 
-      {/* Pricing Info */}
-      <section className="py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">
-              Affordable Lessons for Everyone
-            </h2>
-            <div className="flex flex-wrap justify-center gap-8">
-              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-                <div className="text-3xl font-bold text-primary mb-1">$10</div>
-                <div className="text-muted-foreground">Group Lessons (45 min)</div>
-              </div>
-              <div className="bg-card p-6 rounded-xl shadow-sm border border-border">
-                <div className="text-3xl font-bold text-primary mb-1">$15</div>
-                <div className="text-muted-foreground">Individual Lessons (45 min)</div>
-              </div>
-            </div>
-            <p className="mt-6 text-muted-foreground">
-              Financial aid is available for those who qualify. We believe cost should never be a barrier to music education.
-            </p>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Programs */}
       <section className="py-20">
@@ -112,6 +90,9 @@ export default function ProgramsPage() {
                           {instrument}
                         </span>
                       ))}
+                      <span className="px-3 py-1 bg-accent/10 text-accent rounded-full text-sm italic">
+                        More available per request
+                      </span>
                     </div>
                   </div>
                   <Button asChild className="bg-primary hover:bg-primary/90">

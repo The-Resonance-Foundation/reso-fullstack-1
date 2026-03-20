@@ -124,27 +124,27 @@ export default function DonatePage() {
             Your Impact
           </h2>
           <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <Card className="text-center">
+            <Card className="text-center hover:shadow-lg transition-shadow">
               <CardContent className="pt-8">
                 <div className="text-4xl font-bold text-primary mb-2">$10</div>
                 <CardDescription className="text-base">
-                  Provides one group lesson for a student
+                  Inspires a student through a month of lessons for those in need
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="text-center">
+            <Card className="text-center hover:shadow-lg transition-shadow">
               <CardContent className="pt-8">
                 <div className="text-4xl font-bold text-primary mb-2">$50</div>
                 <CardDescription className="text-base">
-                  Sponsors a student for a month of lessons
+                  Puts together a blessed performance day for a senior center
                 </CardDescription>
               </CardContent>
             </Card>
-            <Card className="text-center">
+            <Card className="text-center hover:shadow-lg transition-shadow">
               <CardContent className="pt-8">
                 <div className="text-4xl font-bold text-primary mb-2">$200</div>
                 <CardDescription className="text-base">
-                  Helps fund a community performance event
+                  Helps fund instruments and equipment for students without access
                 </CardDescription>
               </CardContent>
             </Card>
