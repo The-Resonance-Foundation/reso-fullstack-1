@@ -9,12 +9,12 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const navLinks = [
-    { href: "#about", label: "About" },
-    { href: "#programs", label: "Programs" },
-    { href: "#impact", label: "Impact" },
-    { href: "#get-involved", label: "Get Involved" },
-    { href: "#donate", label: "Donate" },
-    { href: "#contact", label: "Contact" },
+    { href: "/about", label: "About" },
+    { href: "/programs", label: "Programs" },
+    { href: "/get-involved", label: "Get Involved" },
+    { href: "/donate", label: "Donate" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/contact", label: "Contact" },
   ]
 
   return (

@@ -10,18 +10,31 @@ export function Hero() {
       
       {/* Musical Notes Animation */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {[
+          { left: 10, top: 15, size: 24 },
+          { left: 85, top: 20, size: 32 },
+          { left: 25, top: 70, size: 28 },
+          { left: 70, top: 80, size: 36 },
+          { left: 5, top: 45, size: 22 },
+          { left: 92, top: 55, size: 30 },
+          { left: 40, top: 10, size: 26 },
+          { left: 60, top: 90, size: 34 },
+          { left: 15, top: 85, size: 24 },
+          { left: 75, top: 35, size: 28 },
+          { left: 50, top: 50, size: 32 },
+          { left: 30, top: 30, size: 26 },
+        ].map((note, i) => (
           <div
             key={i}
             className="absolute text-primary/10 animate-float"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${note.left}%`,
+              top: `${note.top}%`,
               animationDelay: `${i * 0.5}s`,
-              fontSize: `${Math.random() * 40 + 20}px`,
+              fontSize: `${note.size}px`,
             }}
           >
-            ♪
+            {i % 2 === 0 ? '♪' : '♫'}
           </div>
         ))}
       </div>
@@ -71,7 +84,7 @@ export function Hero() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-primary/30 hover:bg-primary/5">
-              <Link href="#about">
+              <Link href="/about">
                 <Play className="mr-2 h-5 w-5" />
                 Learn More
               </Link>

@@ -5,29 +5,29 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
 
   const quickLinks = [
-    { href: "#about", label: "About Us" },
-    { href: "#programs", label: "Programs" },
-    { href: "#impact", label: "Our Impact" },
-    { href: "#get-involved", label: "Get Involved" },
-    { href: "#donate", label: "Donate" },
-    { href: "#contact", label: "Contact" },
+    { href: "/about", label: "About Us" },
+    { href: "/programs", label: "Programs" },
+    { href: "/get-involved", label: "Get Involved" },
+    { href: "/donate", label: "Donate" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/contact", label: "Contact" },
   ]
 
   const getStarted = [
     { href: "https://forms.gle/UNAahk69T6tvsMnv5", label: "Become a Student", external: true },
-    { href: "https://forms.gle/vZd9WBYuQaPwJHfS6", label: "Become a Tutor", external: true },
-    { href: "https://www.paypal.com/ncp/payment/726ZAHDJS7HZW", label: "Make a Donation", external: true },
+    { href: "https://forms.gle/iFDMcXnbG1fY2pAu5", label: "Become a Tutor", external: true },
+    { href: "https://www.paypal.com/donate/?hosted_button_id=Z4CWC99SLXFTU", label: "Make a Donation", external: true },
   ]
 
   const socialLinks = [
     {
       icon: Instagram,
-      href: "https://www.instagram.com/theresonancefoundation._/",
+      href: "https://www.instagram.com/resonancefoundationtx/",
       label: "Instagram",
     },
     {
       icon: Facebook,
-      href: "https://www.facebook.com/people/The-Resonance-Foundation/61567109245575/",
+      href: "https://www.facebook.com/profile.php?id=61559964582578",
       label: "Facebook",
     },
     {
