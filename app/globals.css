@@ -116,6 +116,21 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+    opacity: 0.1; 
+  }
+  50% { 
+    transform: translateY(-20px) rotate(10deg); 
+    opacity: 0.2; 
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

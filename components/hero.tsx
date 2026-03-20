@@ -86,16 +86,6 @@ export function Hero() {
           <div className="w-1.5 h-3 bg-primary rounded-full animate-pulse" />
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.1; }
-          50% { transform: translateY(-20px) rotate(10deg); opacity: 0.2; }
-        }
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-      `}</style>
     </section>
   )
 }
