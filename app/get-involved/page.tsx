@@ -120,7 +120,7 @@ export default function GetInvolvedPage() {
                   </li>
                 </ul>
                 <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                  <Link href="https://forms.gle/iFDMcXnbG1fY2pAu5" target="_blank" rel="noopener noreferrer">
+                  <Link href="https://forms.gle/zhPzhZkDfQpQsgDF7" target="_blank" rel="noopener noreferrer">
                     Apply as Tutor <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
@@ -239,6 +239,7 @@ export default function GetInvolvedPage() {
               width={300}
               height={200}
               className="rounded-xl object-cover h-48 w-full"
+              style={{ width: "auto", height: "auto" }}
             />
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DSC09965-0wXmH5YN3W3nSgb9NuacCtmel6aDyP.webp"
@@ -246,6 +247,7 @@ export default function GetInvolvedPage() {
               width={300}
               height={200}
               className="rounded-xl object-cover h-48 w-full"
+              style={{ width: "auto", height: "auto" }}
             />
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DSC09888-N6vLUyfO892IVDwz8YDPn0hgWpMgve.webp"
@@ -253,6 +255,7 @@ export default function GetInvolvedPage() {
               width={300}
               height={200}
               className="rounded-xl object-cover h-48 w-full"
+              style={{ width: "auto", height: "auto" }}
             />
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/DSC01008-JpNIqTb9BmTKnOQLThNoAqUdlVkyWf.webp"
@@ -260,6 +263,7 @@ export default function GetInvolvedPage() {
               width={300}
               height={200}
               className="rounded-xl object-cover h-48 w-full"
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
         </div>

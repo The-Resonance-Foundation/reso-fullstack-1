@@ -137,7 +137,7 @@ export default function ContactPage() {
                   </CardHeader>
                   <CardContent>
                     <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                      <Link href="https://forms.gle/iFDMcXnbG1fY2pAu5" target="_blank" rel="noopener noreferrer">
+                      <Link href="https://forms.gle/zhPzhZkDfQpQsgDF7" target="_blank" rel="noopener noreferrer">
                         Apply Now <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
