@@ -16,7 +16,7 @@ export function Footer() {
   const getStarted = [
     { href: "https://forms.gle/UNAahk69T6tvsMnv5", label: "Become a Student", external: true },
     { href: "https://forms.gle/iFDMcXnbG1fY2pAu5", label: "Become a Tutor", external: true },
-    { href: "https://www.paypal.com/donate/?hosted_button_id=Z4CWC99SLXFTU", label: "Make a Donation", external: true },
+    { href: "https://www.paypal.com/ncp/payment/726ZAHDJS7HZW", label: "Make a Donation", external: true },
   ]
 
   const socialLinks = [
