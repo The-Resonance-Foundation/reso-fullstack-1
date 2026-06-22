@@ -1,0 +1,27 @@
+{
+  "primaryNav": [
+    { "label": "About", "href": "/about" },
+    { "label": "Programs", "href": "/programs" },
+    { "label": "Get Involved", "href": "/get-involved" },
+    { "label": "Donate", "href": "/donate" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "ctaButton": {
+    "label": "Become a Student",
+    "href": "https://forms.gle/UNAahk69T6tvsMnv5"
+  },
+  "footerQuickLinks": [
+    { "label": "About Us", "href": "/about" },
+    { "label": "Programs", "href": "/programs" },
+    { "label": "Get Involved", "href": "/get-involved" },
+    { "label": "Donate", "href": "/donate" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "footerGetStarted": [
+    { "label": "Become a Student", "href": "https://forms.gle/UNAahk69T6tvsMnv5" },
+    { "label": "Become a Tutor", "href": "https://forms.gle/zhPzhZkDfQpQsgDF7" },
+    { "label": "Make a Donation", "href": "https://www.paypal.com/ncp/payment/726ZAHDJS7HZW" }
+  ]
+}

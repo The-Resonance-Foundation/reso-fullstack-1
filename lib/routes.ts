@@ -1,0 +1,30 @@
+export const routes = {
+  home: "/",
+  about: "/about",
+  programs: "/programs",
+  getInvolved: "/get-involved",
+  donate: "/donate",
+  faq: "/faq",
+  contact: "/contact",
+  enroll: "/enroll",
+  enrollParent: "/enroll/parent",
+  join: "/join",
+  auth: {
+    login: "/login",
+    signup: "/signup",
+    setPassword: "/set-password",
+    callback: "/auth/callback",
+  },
+  portal: {
+    dashboard: "/dashboard",
+    applicants: "/dashboard/applicants",
+    students: "/dashboard/students",
+    tutors: "/dashboard/tutors",
+    volunteers: "/dashboard/volunteers",
+    admin: {
+      chapters: "/dashboard/admin/chapters",
+      roles: "/dashboard/admin/roles",
+      families: "/dashboard/admin/families",
+    },
+  },
+} as const

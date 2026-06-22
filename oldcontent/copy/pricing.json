@@ -1,0 +1,31 @@
+{
+  "lessons": {
+    "group": {
+      "price": 10,
+      "currency": "USD",
+      "durationMinutes": 45,
+      "description": "Group lessons are $10 for 45 minutes"
+    },
+    "individual": {
+      "price": 15,
+      "currency": "USD",
+      "durationMinutes": 45,
+      "description": "Individual lessons are $15 for 45 minutes"
+    },
+    "financialAid": "Financial aid is available for students who qualify — cost should never be a barrier to learning music."
+  },
+  "donationImpact": [
+    {
+      "amount": 10,
+      "description": "Inspires a student through a month of lessons for those in need"
+    },
+    {
+      "amount": 50,
+      "description": "Puts together a blessed performance day for a senior center"
+    },
+    {
+      "amount": 200,
+      "description": "Helps fund instruments and equipment for students without access"
+    }
+  ]
+}

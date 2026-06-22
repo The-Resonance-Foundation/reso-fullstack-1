@@ -1,0 +1,32 @@
+{
+  "primaryNav": [
+    { "label": "About", "href": "/about" },
+    { "label": "Programs", "href": "/programs" },
+    { "label": "Get Involved", "href": "/get-involved" },
+    { "label": "Donate", "href": "/donate" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "ctaButton": {
+    "label": "Enroll",
+    "href": "/enroll"
+  },
+  "secondaryCta": {
+    "label": "Join Our Team",
+    "href": "/join",
+    "title": "Tutor, officer, or volunteer registration"
+  },
+  "footerQuickLinks": [
+    { "label": "About Us", "href": "/about" },
+    { "label": "Programs", "href": "/programs" },
+    { "label": "Get Involved", "href": "/get-involved" },
+    { "label": "Donate", "href": "/donate" },
+    { "label": "FAQ", "href": "/faq" },
+    { "label": "Contact", "href": "/contact" }
+  ],
+  "footerGetStarted": [
+    { "label": "Enroll", "href": "/enroll" },
+    { "label": "Join Our Team", "href": "/join" },
+    { "label": "Make a Donation", "href": "/donate" }
+  ]
+}

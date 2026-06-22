@@ -1,27 +1,32 @@
-import type { Metadata } from 'next'
-import { Playfair_Display, Inter } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import type { Metadata } from "next"
+import { Playfair_Display, Inter } from "next/font/google"
+import "./globals.css"
 
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ["latin"],
-  variable: '--font-playfair',
-  display: 'swap',
-});
+  variable: "--font-playfair",
+  display: "swap",
+})
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
-  variable: '--font-inter',
-  display: 'swap',
-});
+  variable: "--font-inter",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
-  title: 'The Resonance Foundation | Support Music Education Today',
-  description: 'The Resonance Foundation is a non-profit organization dedicated to empowering young musicians by providing access to music education. Empowering Minds, Inspiring Change.',
-  generator: 'v0.app',
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://theresonancefoundation.org"
+  ),
+  title: {
+    default: "The Resonance Foundation | Support Music Education Today",
+    template: "%s | The Resonance Foundation",
+  },
+  description:
+    "The Resonance Foundation is a non-profit organization dedicated to empowering young musicians by providing access to music education. Empowering Minds, Inspiring Change.",
   icons: {
-    icon: '/favicon.jpg',
-    apple: '/favicon.jpg',
+    icon: "/icon.svg",
+    apple: "/icon.svg",
   },
 }
 
@@ -31,10 +36,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+    <html
+      lang="en"
+      className={`${playfair.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         {children}
-        <Analytics />
       </body>
     </html>
   )

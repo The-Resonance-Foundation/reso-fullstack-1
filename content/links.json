@@ -1,0 +1,37 @@
+{
+  "email": {
+    "address": "info@theresonancefoundation.org",
+    "mailto": "mailto:info@theresonancefoundation.org"
+  },
+  "social": {
+    "instagram": {
+      "handle": "@resonancefoundationtx",
+      "url": "https://www.instagram.com/resonancefoundationtx/"
+    },
+    "facebook": {
+      "name": "The Resonance Foundation",
+      "url": "https://www.facebook.com/profile.php?id=61559964582578"
+    }
+  },
+  "forms": {
+    "studentRegistration": "https://forms.gle/UNAahk69T6tvsMnv5",
+    "tutorApplication": "https://forms.gle/zhPzhZkDfQpQsgDF7"
+  },
+  "donation": {
+    "paypal": "https://www.paypal.com/ncp/payment/726ZAHDJS7HZW"
+  },
+  "legacy": {
+    "note": "Alternate URLs found in unused/older components — verify before using",
+    "instagram": {
+      "handle": "@theresonancefoundation._",
+      "url": "https://www.instagram.com/theresonancefoundation._/"
+    },
+    "facebook": {
+      "url": "https://www.facebook.com/people/The-Resonance-Foundation/61567109245575/"
+    },
+    "forms": {
+      "tutorApplication": "https://forms.gle/vZd9WBYuQaPwJHfS6",
+      "officerApplication": "https://forms.gle/sRHomKNVNy2Vyx5V9"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "pageTitle": "Our Music Programs",
+  "pageSubtitle": "Comprehensive instruction across four major instrument families, designed for students of all skill levels.",
+  "programs": [
+    {
+      "id": "woodwind",
+      "name": "Woodwind",
+      "shortDescription": "Flute, Clarinet, Saxophone & more",
+      "description": "Learn to play flute, clarinet, saxophone, oboe, bassoon, and more. Our woodwind program covers proper breathing techniques, embouchure, and musical expression.",
+      "instruments": ["Flute", "Clarinet", "Saxophone", "Oboe", "Bassoon"],
+      "image": "DSC09476-woodwind.webp"
+    },
+    {
+      "id": "brass",
+      "name": "Brass",
+      "shortDescription": "Trumpet, Trombone, Tuba & more",
+      "description": "Master trumpet, trombone, French horn, tuba, and other brass instruments. Our brass program focuses on tone production, range development, and ensemble playing.",
+      "instruments": ["Trumpet", "Trombone", "French Horn", "Tuba", "Euphonium"],
+      "image": "DSC09671-brass.webp"
+    },
+    {
+      "id": "string",
+      "name": "String",
+      "shortDescription": "Guitar, Violin, Cello & more",
+      "description": "Explore guitar, violin, viola, cello, and bass. Our string program teaches proper technique, music theory, and performance skills.",
+      "instruments": ["Guitar", "Violin", "Viola", "Cello", "Bass"],
+      "image": "DSC09568-string.webp"
+    },
+    {
+      "id": "vocal",
+      "name": "Vocal",
+      "shortDescription": "Classical, Contemporary & Choral",
+      "description": "Develop your singing voice with our vocal program. Learn proper breathing, pitch control, vocal health, and performance techniques.",
+      "instruments": ["Classical", "Contemporary", "Choral", "Solo Performance"],
+      "image": "IMG_8912-vocal-ensemble.webp"
+    }
+  ],
+  "instrumentsNote": "More available per request",
+  "performanceOpportunities": {
+    "title": "Performance Opportunities",
+    "paragraphs": [
+      "Beyond lessons, we offer our students real-world performance experience. Our students regularly perform at community events, malls, festivals, and special occasions.",
+      "These performances help students build confidence, develop stage presence, and share their love of music with the community."
+    ]
+  }
+}
