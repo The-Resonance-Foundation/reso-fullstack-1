@@ -5,6 +5,10 @@ export const loginSchema = z.object({
   password: z.string().min(1, { error: "Password is required." }),
 })
 
+export const forgotPasswordSchema = z.object({
+  email: z.email({ error: "Please enter a valid email." }).trim(),
+})
+
 export const signupSchema = z.object({
   fullName: z
     .string()
@@ -59,3 +63,4 @@ export type SignupType = "parent" | "staff"
 export type LoginFormState = AuthFormState
 export type SignupFormState = AuthFormState
 export type SetPasswordFormState = AuthFormState
+export type ForgotPasswordFormState = AuthFormState

@@ -26,8 +26,8 @@ export default async function SetPasswordPage({
       <CardHeader>
         <CardTitle className="font-serif text-2xl">Set your password</CardTitle>
         <CardDescription>
-          Welcome! Create a password for your member portal account, then you can sign
-          in anytime.
+          Choose a password for your member portal account. You&apos;ll use it each
+          time you log in.
         </CardDescription>
       </CardHeader>
       <CardContent>

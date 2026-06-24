@@ -1,21 +1,11 @@
 import "server-only"
 
+import { roleForApplicant } from "@/lib/auth/applicant-roles"
 import { createAdminClient } from "@/lib/supabase/admin"
 import type { Applicant } from "@/types/database"
-import type { ApplicantType, AppRole } from "@/types/enums"
+import type { AppRole } from "@/types/enums"
 
-export function roleForApplicant(applicant: Applicant): AppRole {
-  if (applicant.type === "officer") {
-    return applicant.requested_role ?? "chapter_officer"
-  }
-
-  const map: Record<Exclude<ApplicantType, "officer">, AppRole> = {
-    tutor: "tutor",
-    volunteer: "volunteer",
-  }
-
-  return map[applicant.type as Exclude<ApplicantType, "officer">]
-}
+export { roleForApplicant } from "@/lib/auth/applicant-roles"
 
 async function ensureUserRole(
   admin: ReturnType<typeof createAdminClient>,

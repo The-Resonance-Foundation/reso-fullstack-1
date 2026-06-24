@@ -92,3 +92,141 @@ export function canManageChapter(roles: AppRole[], chapterId: string, roleChapte
       CHAPTER_OFFICER_ROLES.includes(role) && roleChapterIds[index] === chapterId
   )
 }
+
+export const LESSON_STATUSES = [
+  "scheduled",
+  "completed",
+  "cancelled",
+  "no_show",
+] as const
+export type LessonStatus = (typeof LESSON_STATUSES)[number]
+
+export const ATTENDANCE_STATUSES = [
+  "present",
+  "absent",
+  "late",
+  "excused",
+] as const
+export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number]
+
+export const ASSIGNMENT_STATUSES = [
+  "assigned",
+  "submitted",
+  "completed",
+] as const
+export type AssignmentStatus = (typeof ASSIGNMENT_STATUSES)[number]
+
+export const RESOURCE_STORAGE_TYPES = ["link", "drive", "supabase"] as const
+export type ResourceStorageType = (typeof RESOURCE_STORAGE_TYPES)[number]
+
+export const EVENT_STATUSES = [
+  "draft",
+  "published",
+  "cancelled",
+  "completed",
+] as const
+export type EventStatus = (typeof EVENT_STATUSES)[number]
+
+export const RSVP_STATUSES = ["going", "maybe", "declined"] as const
+export type RsvpStatus = (typeof RSVP_STATUSES)[number]
+
+export const VOLUNTEER_HOUR_CATEGORIES = [
+  "teaching",
+  "event_support",
+  "admin_work",
+] as const
+export type VolunteerHourCategory = (typeof VOLUNTEER_HOUR_CATEGORIES)[number]
+
+export const VOLUNTEER_HOUR_STATUSES = [
+  "pending",
+  "approved",
+  "rejected",
+] as const
+export type VolunteerHourStatus = (typeof VOLUNTEER_HOUR_STATUSES)[number]
+
+export const CERTIFICATE_TYPES = ["volunteer_service"] as const
+export type CertificateType = (typeof CERTIFICATE_TYPES)[number]
+
+export const CONVERSATION_TYPES = ["tutor_student"] as const
+export type ConversationType = (typeof CONVERSATION_TYPES)[number]
+
+export const NOTIFICATION_TYPES = [
+  "message",
+  "announcement",
+  "volunteer_approved",
+  "assignment",
+  "event",
+] as const
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
+
+export const DONATION_STATUSES = [
+  "completed",
+  "refunded",
+  "reversed",
+  "pending",
+] as const
+export type DonationStatus = (typeof DONATION_STATUSES)[number]
+
+export const DONATION_SOURCES = ["paypal_webhook", "manual"] as const
+export type DonationSource = (typeof DONATION_SOURCES)[number]
+
+export const AUDIT_ACTIONS = [
+  "donation_received",
+  "donation_refunded",
+  "donation_reversed",
+  "donation_manual",
+  "audit_note",
+  "role_changed",
+] as const
+export type AuditAction = (typeof AUDIT_ACTIONS)[number]
+
+export function isCorporateOfficer(roles: AppRole[]) {
+  return roles.includes("corporate_officer")
+}
+
+export function canViewDonations(roles: AppRole[]) {
+  return (
+    isBoard(roles) ||
+    isProgramAdmin(roles) ||
+    isCorporateOfficer(roles)
+  )
+}
+
+export function canManageDonations(roles: AppRole[]) {
+  return isBoard(roles) || isCorporateOfficer(roles)
+}
+
+export function canViewAuditLogs(roles: AppRole[]) {
+  return isBoard(roles) || isProgramAdmin(roles)
+}
+
+export function canWriteAuditLogs(roles: AppRole[]) {
+  return isBoard(roles) || isProgramAdmin(roles)
+}
+
+export function isProgramAdmin(roles: AppRole[]) {
+  return roles.includes("program_administrator")
+}
+
+export function canAuditMessageThreads(
+  roles: AppRole[],
+  roleChapterIds: (string | null)[],
+  chapterId: string
+) {
+  if (roles.includes("board_of_director")) return true
+  if (roles.includes("program_administrator")) return true
+  return roles.some(
+    (role, index) =>
+      role === "chapter_president" && roleChapterIds[index] === chapterId
+  )
+}
+
+export const DAYS_OF_WEEK = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+] as const

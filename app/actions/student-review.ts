@@ -107,11 +107,18 @@ export async function rejectStudent(
   const parentEmail = authUser.user?.email
 
   if (parentEmail) {
-    await sendStudentRejectionEmail({
+    const emailResult = await sendStudentRejectionEmail({
       to: parentEmail,
       studentName: `${record.first_name} ${record.last_name}`,
       chapterName: record.chapters?.name,
     })
+
+    if (!emailResult.sent) {
+      return {
+        success: true,
+        message: `${record.first_name} ${record.last_name} rejected. Email was not sent (${emailResult.reason}).`,
+      }
+    }
   }
 
   revalidatePath("/dashboard/admin/families")

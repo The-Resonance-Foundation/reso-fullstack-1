@@ -1,0 +1,14 @@
+{
+  "id": "WH-FIXTURE-001",
+  "event_type": "PAYMENT.CAPTURE.COMPLETED",
+  "resource": {
+    "id": "CAPTURE-FIXTURE-001",
+    "amount": { "currency_code": "USD", "value": "25.00" },
+    "create_time": "2026-06-01T10:00:00Z",
+    "update_time": "2026-06-01T10:00:01Z",
+    "payer": {
+      "email_address": "fixture@example.com",
+      "name": { "given_name": "Test", "surname": "Donor" }
+    }
+  }
+}

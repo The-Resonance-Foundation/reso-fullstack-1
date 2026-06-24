@@ -28,6 +28,71 @@ Paste and run each file in order in the Supabase **SQL Editor**:
 6. `20250622000006_schema_migrations.sql`
 7. `20250622000007_workflow_redesign.sql`
 8. `20250622000008_workflow_redesign_rls.sql`
+9. `20250622000009_students_insert_parent_chapter.sql`
+10. `20250622000010_phase2_schema.sql` — lessons, practice, assignments, resources, tutor assignments
+11. `20250622000011_phase2_rls.sql`
+12. `20250622000012_phase3_schema.sql` — events, RSVPs, attendance
+13. `20250622000013_phase3_rls.sql`
+14. `20250622000014_phase4_schema.sql` — volunteer hours, certificates, storage bucket
+15. `20250622000015_phase4_rls.sql`
+16. `20250622000016_phase5_schema.sql` — conversations, messages, announcements, notifications, Realtime
+17. `20250622000017_phase5_rls.sql`
+18. `20250622000018_phase6_schema.sql` — donations, audit_logs, PayPal webhook staging
+19. `20250622000019_phase6_rls.sql`
+
+**Do not use** `supabase/apply_all.sql` — it only concatenates migrations 001–003 and is stale. Always use `npm run db:migrate` or run files 001–019 individually.
+
+## Phase 6 admin features (migrations 018+)
+
+After migrations 018–019, the portal also includes:
+
+- **Donations** — PayPal webhook auto-logging at `/api/webhooks/paypal`, admin list at `/dashboard/admin/donations`
+- **Manual donations** — board and corporate officers can record offline gifts
+- **Audit logs** — append-only trail at `/dashboard/admin/audit-logs` (board + program administrator)
+
+### PayPal webhook env vars
+
+Add to `.env.local` (and Vercel project settings):
+
+```
+PAYPAL_CLIENT_ID=
+PAYPAL_CLIENT_SECRET=
+PAYPAL_WEBHOOK_ID=
+PAYPAL_API_BASE=https://api-m.sandbox.paypal.com
+```
+
+For local signature testing without PayPal credentials, set `PAYPAL_SKIP_VERIFY=true` (development only).
+
+Register webhook URL: `https://<your-domain>/api/webhooks/paypal` with events:
+`PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `PAYMENT.CAPTURE.REVERSED`.
+
+Parse smoke test: `node scripts/test-paypal-webhook-parse.mjs`
+RLS policy check: `node scripts/check-phase6-rls.mjs`
+
+## Phase 4 & 5 portal features (migrations 014+)
+
+After migrations 014–017, the portal also includes:
+
+- **Volunteer hours** — tutors and volunteers log hours; officers approve; certificates + PDF download
+- **Messages** — tutor–student threads (parent always included); Realtime delivery; soft-delete only
+- **Message audit** — read-only for chapter president, program administrator, and board (not chapter officers)
+- **Announcements** — chapter or org-wide; in-app notification fan-out
+- **Notifications** — bell in portal header with unread count
+
+Backfill existing tutor assignments to conversations:
+
+```bash
+node scripts/backfill-conversations.mjs
+```
+
+After migrations 010–013, the portal includes:
+
+- **Lessons** — tutor scheduling, lesson logs, officer tutor assignments
+- **Practice** — parent practice logging with progress chart
+- **Assignments** — tutor homework, parent submission
+- **Resources** — chapter/student materials (link/drive)
+- **Calendar** — combined lessons + events view
+- **Events** — RSVP with capacity guard, officer attendance check-in
 
 ## Enrollment workflows (migration 007+)
 

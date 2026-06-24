@@ -2,20 +2,21 @@
 
 import { redirect } from "next/navigation"
 import { activateAcceptedApplicants } from "@/lib/auth/activate-applicants"
+import { deliverPasswordResetEmail } from "@/lib/auth/send-password-reset"
 import { deliverSignupConfirmationEmail } from "@/lib/auth/send-signup-confirmation"
-import { authCallbackUrl } from "@/lib/config/url"
+import { isDuplicateSignup } from "@/lib/auth/signup-utils"
 import {
+  forgotPasswordSchema,
   loginSchema,
   parentSignupSchema,
   staffSignupSchema,
   setPasswordSchema,
+  type ForgotPasswordFormState,
   type LoginFormState,
   type SignupFormState,
   type SetPasswordFormState,
 } from "@/lib/validations/auth"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
-
-const signupEmailRedirectTo = authCallbackUrl("/dashboard")
 
 function safeRedirectPath(next: string | null) {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
@@ -24,8 +25,16 @@ function safeRedirectPath(next: string | null) {
   return next
 }
 
-function isDuplicateSignup(user: { identities?: unknown[] | null } | null) {
-  return Boolean(user?.identities && user.identities.length === 0)
+async function assertActiveChapter(chapterId: string) {
+  const supabase = await getServerClientOrThrow()
+  const { data } = await supabase
+    .from("chapters")
+    .select("id")
+    .eq("id", chapterId)
+    .eq("status", "active")
+    .maybeSingle()
+
+  return Boolean(data)
 }
 
 export async function login(
@@ -65,6 +74,36 @@ export async function login(
   }
 
   redirect(safeRedirectPath(String(formData.get("next") ?? "")))
+}
+
+export async function requestPasswordReset(
+  _prev: ForgotPasswordFormState,
+  formData: FormData
+): Promise<ForgotPasswordFormState> {
+  const validated = forgotPasswordSchema.safeParse({
+    email: formData.get("email"),
+  })
+
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors }
+  }
+
+  const email = validated.data.email
+  const result = await deliverPasswordResetEmail({
+    email,
+    fullName: email.split("@")[0],
+  })
+
+  if (!result.ok && !result.userMissing) {
+    return { message: result.message }
+  }
+
+  return {
+    success: true,
+    message:
+      "If an account exists for that email, we sent a password reset link. Check your inbox and spam folder.",
+    email,
+  }
 }
 
 export async function resendSignupConfirmation(
@@ -107,12 +146,16 @@ export async function signupParent(
     return { errors: validated.error.flatten().fieldErrors }
   }
 
+  const chapterOk = await assertActiveChapter(validated.data.chapterId)
+  if (!chapterOk) {
+    return { message: "Please select a valid active chapter." }
+  }
+
   const supabase = await getServerClientOrThrow()
   const { data, error } = await supabase.auth.signUp({
     email: validated.data.email,
     password: validated.data.password,
     options: {
-      emailRedirectTo: signupEmailRedirectTo,
       data: {
         full_name: validated.data.fullName,
         phone: validated.data.phone,
@@ -189,7 +232,6 @@ export async function signupStaff(
     email: validated.data.email,
     password: validated.data.password,
     options: {
-      emailRedirectTo: signupEmailRedirectTo,
       data: {
         full_name: validated.data.fullName,
         phone: validated.data.phone,
@@ -238,11 +280,12 @@ export async function signupStaff(
     }
   }
 
+  if (data.user) {
+    await activateAcceptedApplicants(data.user.id)
+  }
+
   redirect("/dashboard")
 }
-
-/** @deprecated Use signupParent — kept for any lingering references. */
-export const signup = signupParent
 
 export async function logout() {
   const supabase = await getServerClientOrThrow()

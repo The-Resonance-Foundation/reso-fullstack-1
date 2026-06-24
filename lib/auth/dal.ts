@@ -7,6 +7,10 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import type { Applicant, Chapter, Profile, Student, UserRole } from "@/types/database"
 import {
   canManageChapter,
+  canManageDonations as roleCanManageDonations,
+  canViewAuditLogs as roleCanViewAuditLogs,
+  canViewDonations as roleCanViewDonations,
+  canWriteAuditLogs as roleCanWriteAuditLogs,
   isBoard,
   isOrgAdmin,
   type AppRole,
@@ -267,6 +271,127 @@ export const getStudentsForParent = cache(async (): Promise<Student[]> => {
 export const isParentAccount = cache(async () => {
   const roles = await getActiveRoleNames()
   return roles.includes("student_parent")
+})
+
+export const isTutorAccount = cache(async () => {
+  const roles = await getActiveRoleNames()
+  return roles.includes("tutor")
+})
+
+export const isVolunteerAccount = cache(async () => {
+  const roles = await getActiveRoleNames()
+  return roles.includes("volunteer")
+})
+
+export const getVolunteerChapterOptions = cache(async () => {
+  const roles = await getUserRoles()
+  const seen = new Set<string>()
+  return roles
+    .filter((r) => ["tutor", "volunteer"].includes(r.role) && r.chapter_id)
+    .flatMap((r) => {
+      if (!r.chapter_id || seen.has(r.chapter_id)) return []
+      seen.add(r.chapter_id)
+      return [{ id: r.chapter_id, name: r.chapters?.name ?? "Chapter" }]
+    })
+})
+
+export const canLogVolunteerHours = cache(async (chapterId?: string) => {
+  const roles = await getUserRoles()
+  const roleNames = roles.map((r) => r.role)
+  if (isOrgAdmin(roleNames)) return true
+  if (!chapterId) {
+    return roleNames.some((role) => ["tutor", "volunteer"].includes(role))
+  }
+  return roles.some(
+    (r) =>
+      ["tutor", "volunteer"].includes(r.role) && r.chapter_id === chapterId
+  )
+})
+
+export const canApproveVolunteerHours = cache(async (chapterId?: string) => {
+  const roles = await getUserRoles()
+  const roleNames = roles.map((r) => r.role)
+  const chapterIds = roles.map((r) => r.chapter_id)
+  if (isOrgAdmin(roleNames)) return true
+  if (!chapterId) {
+    return roleNames.some((role) =>
+      ["chapter_officer", "chapter_president"].includes(role)
+    )
+  }
+  return canManageChapter(roleNames, chapterId, chapterIds)
+})
+
+export const canAuditMessages = cache(async (chapterId?: string) => {
+  const roles = await getUserRoles()
+  const roleNames = roles.map((r) => r.role)
+  const chapterIds = roles.map((r) => r.chapter_id)
+  if (roleNames.includes("board_of_director")) return true
+  if (roleNames.includes("program_administrator")) return true
+  if (!chapterId) {
+    return roleNames.includes("chapter_president")
+  }
+  return roles.some(
+    (r) => r.role === "chapter_president" && r.chapter_id === chapterId
+  )
+})
+
+export const canViewDonations = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return roleCanViewDonations(roleNames)
+})
+
+export const canManageDonations = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return roleCanManageDonations(roleNames)
+})
+
+export const canViewAuditLogs = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return roleCanViewAuditLogs(roleNames)
+})
+
+export const canWriteAuditLogs = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return roleCanWriteAuditLogs(roleNames)
+})
+
+export const canManageLessons = cache(async (chapterId?: string) => {
+  const roles = await getUserRoles()
+  const roleNames = roles.map((r) => r.role)
+  const chapterIds = roles.map((r) => r.chapter_id)
+
+  if (isOrgAdmin(roleNames)) return true
+  if (roleNames.includes("tutor")) {
+    if (!chapterId) return true
+    return roles.some(
+      (r) => r.role === "tutor" && r.chapter_id === chapterId
+    )
+  }
+  if (!chapterId) {
+    return roleNames.some((role) =>
+      ["chapter_officer", "chapter_president"].includes(role)
+    )
+  }
+  return canManageChapter(roleNames, chapterId, chapterIds)
+})
+
+export const canManageEvents = cache(async (chapterId?: string) => {
+  const roles = await getUserRoles()
+  const roleNames = roles.map((r) => r.role)
+  const chapterIds = roles.map((r) => r.chapter_id)
+
+  if (isOrgAdmin(roleNames)) return true
+  if (!chapterId) {
+    return roleNames.some((role) =>
+      ["chapter_officer", "chapter_president"].includes(role)
+    )
+  }
+  return canManageChapter(roleNames, chapterId, chapterIds)
+})
+
+export const canAccessPortalFeatures = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return roleNames.length > 0
 })
 
 export const canManageChapters = cache(async () => {
@@ -646,7 +771,19 @@ export const getDashboardContext = cache(async () => {
     roleNames,
     canReview: await canReviewApplicants(),
     isParent: roleNames.includes("student_parent"),
+    isTutor: roleNames.includes("tutor"),
+    isVolunteer: roleNames.includes("volunteer"),
+    canLogVolunteerHours: await canLogVolunteerHours(),
+    canApproveVolunteerHours: await canApproveVolunteerHours(),
+    canAuditMessages: await canAuditMessages(),
+    canViewDonations: await canViewDonations(),
+    canManageDonations: await canManageDonations(),
+    canViewAuditLogs: await canViewAuditLogs(),
+    canWriteAuditLogs: await canWriteAuditLogs(),
+    canManageLessons: await canManageLessons(),
+    canManageEvents: await canManageEvents(),
     canManageChapters: await canManageChapters(),
     canAssignRoles: await canAssignRoles(),
+    hasPortalRole: roleNames.length > 0,
   }
 })

@@ -1,7 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { verifySession } from "@/lib/auth/dal"
+import { getUserRoles, isParentAccount, verifySession } from "@/lib/auth/dal"
+import { parentMayEnrollInChapter } from "@/lib/auth/signup-utils"
 import { addStudentSchema, type AddStudentFormState } from "@/lib/validations/students"
 import { splitStudentName } from "@/lib/students/name"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
@@ -24,8 +25,22 @@ export async function addStudent(
   }
 
   const user = await verifySession()
-  const supabase = await getServerClientOrThrow()
 
+  const isParent = await isParentAccount()
+  if (!isParent) {
+    return { message: "Only parent accounts can add students." }
+  }
+
+  const roles = await getUserRoles()
+  const parentChapterIds = roles
+    .filter((role) => role.role === "student_parent")
+    .map((role) => role.chapter_id)
+
+  if (!parentMayEnrollInChapter(validated.data.chapterId, parentChapterIds)) {
+    return { message: "You can only add students for your assigned chapter." }
+  }
+
+  const supabase = await getServerClientOrThrow()
   const { first_name, last_name } = splitStudentName(validated.data.studentName)
 
   const { data: student, error } = await supabase
@@ -57,6 +72,7 @@ export async function addStudent(
     .insert(consentRows)
 
   if (consentError) {
+    await supabase.from("students").delete().eq("id", student.id)
     return { message: consentError.message }
   }
 

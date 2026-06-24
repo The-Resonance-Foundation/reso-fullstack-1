@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ApplicantStageActions } from "@/components/portal/applicant-stage-actions"
 import { ApplicantManagementActions } from "@/components/portal/applicant-management-actions"
 import { canReviewApplicants, getApplicantsForReviewer } from "@/lib/auth/dal"
 import { ROLE_LABELS } from "@/types/roles"
@@ -79,6 +80,10 @@ export default async function ApplicantsPage() {
                 ) : applicant.stage === "rejected" ? (
                   <p className="text-destructive">Application rejected.</p>
                 ) : null}
+                <ApplicantStageActions
+                  applicantId={applicant.id}
+                  currentStage={applicant.stage}
+                />
                 <ApplicantManagementActions
                   applicantId={applicant.id}
                   fullName={applicant.full_name}

@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
       return NextResponse.redirect(
-        `${origin}/set-password?error=${encodeURIComponent(error.message)}`
+        `${origin}/login?error=${encodeURIComponent(error.message)}`
       )
     }
   } else if (tokenHash && type) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     })
     if (error) {
       return NextResponse.redirect(
-        `${origin}/set-password?error=${encodeURIComponent(error.message)}`
+        `${origin}/login?error=${encodeURIComponent(error.message)}`
       )
     }
   } else {
