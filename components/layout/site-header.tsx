@@ -32,7 +32,7 @@ export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
             <Music className="h-5 w-5 text-primary" aria-hidden />
           </div>
-          <span className="font-serif text-lg font-bold text-foreground md:text-xl">
+          <span className="font-serif text-sm font-bold leading-tight text-foreground sm:text-lg md:text-xl">
             The Resonance Foundation
           </span>
         </Link>

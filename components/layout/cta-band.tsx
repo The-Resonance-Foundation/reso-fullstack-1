@@ -47,15 +47,18 @@ export function CTABand({
           </p>
         )}
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          {buttons.map((btn) => (
+          {buttons.map((btn) => {
+            const resolvedVariant =
+              btn.variant === "outline" && isPrimary
+                ? "outlineLight"
+                : (btn.variant ?? (isPrimary ? "secondary" : "default"))
+
+            return (
             <Button
               key={btn.href}
               asChild
               size="lg"
-              variant={
-                btn.variant ??
-                (isPrimary ? "secondary" : "default")
-              }
+              variant={resolvedVariant}
             >
               <Link
                 href={btn.href}
@@ -65,7 +68,8 @@ export function CTABand({
                 {btn.label}
               </Link>
             </Button>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

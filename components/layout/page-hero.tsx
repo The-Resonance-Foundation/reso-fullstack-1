@@ -11,7 +11,7 @@ export function PageHero({ title, subtitle, className, compact }: PageHeroProps)
   return (
     <section
       className={cn(
-        "border-b border-border bg-gradient-to-b from-secondary/80 to-background",
+        "border-b border-border bg-gradient-to-b from-secondary via-secondary/40 to-background",
         compact ? "pt-28 pb-12" : "pt-32 pb-16 md:pt-36 md:pb-20",
         className
       )}

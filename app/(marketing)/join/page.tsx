@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { PageHero } from "@/components/layout/page-hero"
 import { SignupForm } from "@/components/auth/signup-form"
 import { SignupPageSection } from "@/components/layout/signup-page-section"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +12,13 @@ export const metadata: Metadata = {
 
 export default function JoinPage() {
   return (
-    <SignupPageSection>
+    <>
+      <PageHero
+        title="Join Our Team"
+        subtitle="Register as a tutor, chapter officer, or volunteer and help make music education accessible."
+        compact
+      />
+      <SignupPageSection className="!pt-8">
       <Card className="w-full overflow-visible">
         <CardHeader>
           <CardTitle className="font-serif text-2xl">
@@ -27,5 +34,6 @@ export default function JoinPage() {
         </CardContent>
       </Card>
     </SignupPageSection>
+    </>
   )
 }

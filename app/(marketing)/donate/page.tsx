@@ -66,7 +66,12 @@ export default function DonatePage() {
               <CardContent className="p-6">
                 <div className="mb-4 text-2xl font-bold">{stats.donationRaised.value} Raised</div>
                 <p className="mb-4 opacity-80">{stats.donationRaised.label}</p>
-                <Button asChild variant="secondary" size="lg" className="w-full">
+                <Button
+                  asChild
+                  variant="secondary"
+                  size="lg"
+                  className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+                >
                   <a
                     href={siteConfig.donation.paypal}
                     target="_blank"

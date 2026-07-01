@@ -57,8 +57,8 @@ export default function HomePage() {
               <Button
                 asChild
                 size="lg"
-                variant="outline"
-                className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                variant="outlineLight"
+                className="border-white/40"
               >
                 <Link href={routes.about}>Learn More</Link>
               </Button>
@@ -99,7 +99,7 @@ export default function HomePage() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
-            <div className="absolute -bottom-4 -left-4 rounded-xl border border-border bg-card px-5 py-3 shadow-lg">
+            <div className="absolute bottom-4 left-4 rounded-xl border border-border bg-card px-5 py-3 shadow-lg sm:-bottom-4 sm:-left-4">
               <div className="font-serif text-2xl font-bold text-primary">100%</div>
               <div className="text-sm text-muted-foreground">Student-Led Initiative</div>
             </div>

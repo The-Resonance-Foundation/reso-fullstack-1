@@ -29,7 +29,7 @@ export function PhotoGrid({ photos, columns = 3, className }: PhotoGridProps) {
         <div
           key={photo.file}
           className={cn(
-            "relative overflow-hidden rounded-xl",
+            "relative overflow-hidden rounded-xl shadow-sm ring-1 ring-border/60",
             photo.wide && "col-span-2",
             columns === 4 ? "h-48" : "h-52 md:h-64"
           )}

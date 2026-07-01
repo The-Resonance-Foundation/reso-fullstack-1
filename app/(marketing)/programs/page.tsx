@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { CTABand } from "@/components/layout/cta-band"
 import { PageHero } from "@/components/layout/page-hero"
-import { Section } from "@/components/layout/section"
+import { Section, SectionHeader } from "@/components/layout/section"
 import { PhotoGrid } from "@/components/marketing/photo-grid"
 import { Button } from "@/components/ui/button"
 import { homePerformanceGallery, programs } from "@/content"
@@ -70,11 +70,13 @@ export default function ProgramsPage() {
       <Section variant="primary">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div>
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">
-              {programs.performanceOpportunities.title}
-            </h2>
+            <SectionHeader
+              title={programs.performanceOpportunities.title}
+              light
+              className="mb-0"
+            />
             {programs.performanceOpportunities.paragraphs.map((p) => (
-              <p key={p.slice(0, 30)} className="mt-4 text-lg opacity-90">
+              <p key={p.slice(0, 30)} className="mt-4 text-lg text-primary-foreground/90">
                 {p}
               </p>
             ))}

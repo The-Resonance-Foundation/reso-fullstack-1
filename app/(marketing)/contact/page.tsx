@@ -59,7 +59,7 @@ const quickActions = [
     title: "Support Our Mission",
     description: "Help us make music education accessible",
     href: routes.donate,
-    variant: "outline" as const,
+    variant: "accent" as const,
   },
 ]
 
@@ -104,13 +104,38 @@ export default function ContactPage() {
             <SectionHeader title="Quick Actions" />
             <div className="space-y-4">
               {quickActions.map((action) => (
-                <Card key={action.title} className={action.variant === "default" ? "bg-primary text-primary-foreground" : ""}>
+                <Card
+                  key={action.title}
+                  className={
+                    action.variant === "default"
+                      ? "bg-primary text-primary-foreground"
+                      : action.variant === "accent"
+                        ? "border-primary/25 bg-primary/5 shadow-sm"
+                        : ""
+                  }
+                >
                   <CardContent className="pt-6">
                     <h3 className="text-lg font-semibold">{action.title}</h3>
-                    <p className={`mt-1 text-sm ${action.variant === "default" ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                    <p
+                      className={`mt-1 text-sm ${
+                        action.variant === "default"
+                          ? "text-primary-foreground/80"
+                          : "text-muted-foreground"
+                      }`}
+                    >
                       {action.description}
                     </p>
-                    <Button asChild variant={action.variant === "default" ? "secondary" : "outline"} className="mt-4 w-full">
+                    <Button
+                      asChild
+                      variant={
+                        action.variant === "default"
+                          ? "secondary"
+                          : action.variant === "accent"
+                            ? "default"
+                            : "outline"
+                      }
+                      className="mt-4 w-full"
+                    >
                       <Link href={action.href}>
                         Go <ArrowRight className="h-4 w-4" />
                       </Link>

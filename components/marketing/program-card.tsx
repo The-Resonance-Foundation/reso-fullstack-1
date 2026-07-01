@@ -17,7 +17,7 @@ type ProgramCardProps = {
 
 export function ProgramCard({ program, href }: ProgramCardProps) {
   const content = (
-    <Card className="group overflow-hidden border-border/80 transition-shadow hover:shadow-lg">
+    <Card className="group overflow-hidden border-border/80 transition-shadow hover:shadow-lg focus-within:ring-2 focus-within:ring-primary/40">
       <div className="relative h-48 overflow-hidden">
         <Image
           src={imagePath(program.image)}

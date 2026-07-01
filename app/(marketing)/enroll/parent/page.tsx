@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { PageHero } from "@/components/layout/page-hero"
 import { SignupForm } from "@/components/auth/signup-form"
 import { SignupPageSection } from "@/components/layout/signup-page-section"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,7 +14,13 @@ export default async function EnrollParentPage() {
   const chapters = await getActiveChapters()
 
   return (
-    <SignupPageSection>
+    <>
+      <PageHero
+        title="Create a Parent Account"
+        subtitle="One household login for all linked students. Add each student in the portal after confirming your email."
+        compact
+      />
+      <SignupPageSection className="!pt-8">
       <Card className="w-full overflow-visible">
         <CardHeader>
           <CardTitle className="font-serif text-2xl">Create a Parent Account</CardTitle>
@@ -27,5 +34,6 @@ export default async function EnrollParentPage() {
         </CardContent>
       </Card>
     </SignupPageSection>
+    </>
   )
 }

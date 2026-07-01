@@ -54,7 +54,9 @@ export default function GetInvolvedPage() {
                   ))}
                 </ul>
                 {opp.disabled ? (
-                  <span className="text-muted-foreground line-through">{opp.cta}</span>
+                  <div className="rounded-md border border-dashed border-border bg-muted/50 px-4 py-3 text-center text-sm text-muted-foreground">
+                    {opp.cta}. Email us if you would like to be notified when applications reopen.
+                  </div>
                 ) : (
                   <Button asChild className="w-full">
                     <Link

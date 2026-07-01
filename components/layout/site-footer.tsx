@@ -89,6 +89,16 @@ export function SiteFooter() {
                 {links.email.address}
               </a>
             </p>
+            <p className="mt-2 text-sm text-background/60">
+              <a
+                href={links.social.instagram.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-background"
+              >
+                {links.social.instagram.handle}
+              </a>
+            </p>
           </div>
         </div>
       </div>
