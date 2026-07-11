@@ -91,36 +91,25 @@ export const getDonationTotalsForAdmin = cache(async (): Promise<DonationTotals>
   await verifySession()
   const supabase = await getServerClientOrThrow()
 
-  const { data, error } = await supabase
-    .from("donations")
-    .select("amount, status, donated_at")
-    .eq("status", "completed")
+  // Aggregate in SQL (get_donation_totals RPC) instead of fetching every
+  // completed donation row and summing in JS.
+  const { data, error } = await supabase.rpc("get_donation_totals")
 
   if (error) {
     console.error("getDonationTotalsForAdmin", error.message)
     return { totalAmount: 0, completedCount: 0, last30DaysAmount: 0 }
   }
 
-  const rows = data ?? []
-  const now = Date.now()
-  const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000
+  const row = Array.isArray(data) ? data[0] : data
 
-  let totalAmount = 0
-  let last30DaysAmount = 0
-
-  for (const row of rows) {
-    const amount = Number(row.amount)
-    totalAmount += amount
-    const donatedAt = new Date(row.donated_at).getTime()
-    if (donatedAt >= thirtyDaysAgo) {
-      last30DaysAmount += amount
-    }
+  if (!row) {
+    return { totalAmount: 0, completedCount: 0, last30DaysAmount: 0 }
   }
 
   return {
-    totalAmount,
-    completedCount: rows.length,
-    last30DaysAmount,
+    totalAmount: Number(row.total_amount ?? 0),
+    completedCount: Number(row.completed_count ?? 0),
+    last30DaysAmount: Number(row.last_30_days_amount ?? 0),
   }
 })
 

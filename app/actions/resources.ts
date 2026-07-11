@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { canManageLessons, isTutorAccount, verifySession } from "@/lib/auth/dal"
+import { canManageLessons, verifySession } from "@/lib/auth/dal"
 import { revalidateTutorStudentPaths } from "@/lib/portal/revalidate-tutor"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import {
@@ -34,13 +34,29 @@ export async function addResource(
   }
 
   const user = await verifySession()
+  // canManageLessons is chapter-scoped for tutors too — no global fallback,
+  // so a tutor in chapter A can no longer post resources into chapter B.
   const allowed = await canManageLessons(validated.data.chapterId)
-  const isTutor = await isTutorAccount()
-  if (!allowed && !isTutor) {
+  if (!allowed) {
     return { message: "You are not authorized to add resources for this chapter." }
   }
 
   const supabase = await getServerClientOrThrow()
+
+  if (validated.data.studentId) {
+    // RLS scopes visibility: tutors can only see assigned students, officers
+    // their chapter's. The student must also live in the target chapter.
+    const { data: student } = await supabase
+      .from("students")
+      .select("id, chapter_id")
+      .eq("id", validated.data.studentId)
+      .maybeSingle()
+
+    if (!student || student.chapter_id !== validated.data.chapterId) {
+      return { message: "You can only attach resources to students you work with." }
+    }
+  }
+
   const { error } = await supabase.from("resources").insert({
     chapter_id: validated.data.chapterId,
     student_id: validated.data.studentId || null,

@@ -30,6 +30,28 @@ export function timeAgo(iso: string, now: Date = new Date()): string {
   })
 }
 
+/** 1284 → "1,284" · 12900 → "12.9K" · 4200000 → "4.2M" */
+export function formatCompact(value: number): string {
+  if (Math.abs(value) >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`
+  }
+  if (Math.abs(value) >= 10_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`
+  }
+  return value.toLocaleString("en-US")
+}
+
+/** 4231.5 → "$4,232" · 4200000 → "$4.2M" */
+export function formatCurrencyCompact(value: number): string {
+  if (Math.abs(value) >= 1_000_000) {
+    return `$${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`
+  }
+  if (Math.abs(value) >= 100_000) {
+    return `$${(value / 1_000).toFixed(0)}K`
+  }
+  return `$${Math.round(value).toLocaleString("en-US")}`
+}
+
 /** "Jane Q. Doe" → "JD" for avatar fallbacks. */
 export function initials(name: string | null | undefined, fallback = "M"): string {
   if (!name?.trim()) return fallback

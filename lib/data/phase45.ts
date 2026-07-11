@@ -14,6 +14,14 @@ import type {
   VolunteerHour,
 } from "@/types/database"
 
+type ConversationLastMessageRow = {
+  conversation_id: string
+  message_id: string
+  sender_id: string
+  body: string
+  message_created_at: string
+}
+
 async function getReviewerChapterIds() {
   const roles = await getUserRoles()
   const roleNames = roles.map((r) => r.role)
@@ -117,23 +125,26 @@ export const getConversationsForUser = cache(
       .select("id, full_name")
       .in("id", tutorIds)
     const tutorById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]))
-    const withPreview = await Promise.all(
-      rows.map(async (row) => {
-        const { data: messages } = await supabase
-          .from("messages")
-          .select("body, created_at, sender_id")
-          .eq("conversation_id", row.id)
-          .is("deleted_at", null)
-          .order("created_at", { ascending: false })
-          .limit(1)
-        return {
-          ...row,
-          tutor_name: tutorById.get(row.tutor_user_id) ?? "Tutor",
-          last_message: messages?.[0] ?? null,
-        }
-      })
+
+    const { data: lastMessages, error: lastMessageError } = await supabase.rpc(
+      "get_conversation_last_messages",
+      { p_conversation_ids: ids }
     )
-    return withPreview
+    if (lastMessageError) {
+      console.error("getConversationsForUser", lastMessageError.message)
+    }
+    const lastMessageByConversationId = new Map(
+      ((lastMessages ?? []) as ConversationLastMessageRow[]).map((m) => [
+        m.conversation_id,
+        { body: m.body, created_at: m.message_created_at, sender_id: m.sender_id },
+      ])
+    )
+
+    return rows.map((row) => ({
+      ...row,
+      tutor_name: tutorById.get(row.tutor_user_id) ?? "Tutor",
+      last_message: lastMessageByConversationId.get(row.id) ?? null,
+    }))
   }
 )
 
@@ -165,7 +176,10 @@ export const getAuditableConversations = cache(
 )
 
 export const getConversationWithMessages = cache(
-  async (conversationId: string): Promise<{
+  async (
+    conversationId: string,
+    includeDeleted = false
+  ): Promise<{
     conversation: ConversationWithPreview | null
     messages: Message[]
   }> => {
@@ -177,11 +191,17 @@ export const getConversationWithMessages = cache(
       .eq("id", conversationId)
       .maybeSingle()
     if (convError || !conversation) return { conversation: null, messages: [] }
-    const { data: messages, error: msgError } = await supabase
+    let messagesQuery = supabase
       .from("messages")
       .select("*")
       .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
+    if (!includeDeleted) {
+      messagesQuery = messagesQuery.is("deleted_at", null)
+    }
+    const { data: messages, error: msgError } = await messagesQuery.order(
+      "created_at",
+      { ascending: true }
+    )
     if (msgError) {
       console.error("getConversationWithMessages", msgError.message)
       return { conversation: conversation as ConversationWithPreview, messages: [] }

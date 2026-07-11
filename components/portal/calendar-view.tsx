@@ -19,8 +19,9 @@ export function CalendarView({ items }: { items: CalendarItem[] }) {
     title: item.title,
     start: item.start,
     end: item.end,
-    backgroundColor: item.type === "lesson" ? "hsl(var(--primary))" : "#d97706",
-    borderColor: item.type === "lesson" ? "hsl(var(--primary))" : "#b45309",
+    backgroundColor: item.type === "lesson" ? "#6b1f3a" : "#d97706",
+    borderColor: item.type === "lesson" ? "#6b1f3a" : "#b45309",
+    textColor: item.type === "lesson" ? "#faf7f2" : undefined,
   }))
 
   return (

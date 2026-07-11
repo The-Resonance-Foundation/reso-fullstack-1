@@ -34,19 +34,19 @@ export async function createAssignment(
   }
 
   const supabase = await getServerClientOrThrow()
-  const { data: student } = await supabase
-    .from("students")
-    .select("chapter_id")
-    .eq("id", validated.data.studentId)
+
+  // Tutors may only assign homework to students actively assigned to them —
+  // being a tutor elsewhere in the chapter is not enough.
+  const { data: assignmentLink } = await supabase
+    .from("student_tutor_assignments")
+    .select("id")
+    .eq("student_id", validated.data.studentId)
+    .eq("tutor_user_id", user.id)
+    .eq("status", "active")
     .maybeSingle()
 
-  if (!student) {
-    return { message: "Student not found." }
-  }
-
-  const allowed = await canManageLessons(student.chapter_id)
-  if (!allowed) {
-    return { message: "You are not authorized to assign homework to this student." }
+  if (!assignmentLink) {
+    return { message: "You can only assign homework to your own students." }
   }
 
   const { error } = await supabase.from("assignments").insert({
@@ -97,8 +97,19 @@ export async function updateAssignmentStatus(
   const isParent = await isParentAccount()
   const isTutor = await isTutorAccount()
 
+  let parentOwnsStudent = false
   if (isParent && validated.data.status === "submitted") {
-    // parents mark submitted
+    const { data: ownStudent } = await supabase
+      .from("students")
+      .select("id")
+      .eq("id", record.student_id)
+      .eq("parent_user_id", user.id)
+      .maybeSingle()
+    parentOwnsStudent = Boolean(ownStudent)
+  }
+
+  if (parentOwnsStudent) {
+    // parents mark their own student's work submitted
   } else if (isTutor && record.tutor_user_id === user.id) {
     // tutors can set any status
   } else {

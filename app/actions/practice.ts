@@ -30,6 +30,19 @@ export async function addPracticeLog(
   }
 
   const supabase = await getServerClientOrThrow()
+
+  // The student must belong to this parent — never trust the submitted id.
+  const { data: student } = await supabase
+    .from("students")
+    .select("id")
+    .eq("id", validated.data.studentId)
+    .eq("parent_user_id", user.id)
+    .maybeSingle()
+
+  if (!student) {
+    return { message: "You can only log practice for your own students." }
+  }
+
   const { error } = await supabase.from("practice_logs").insert({
     student_id: validated.data.studentId,
     minutes: validated.data.minutes,

@@ -267,28 +267,50 @@ export async function approveVolunteerHours(
   }
 
   const now = new Date().toISOString()
-  for (const row of rows) {
-    const { error } = await admin
-      .from("volunteer_hours")
-      .update({
-        status: "approved",
-        approved_by: user.id,
-        approved_at: now,
-      })
-      .eq("id", row.id)
-      .eq("status", "pending")
+  const { data: approvedRows, error: approveError } = await admin
+    .from("volunteer_hours")
+    .update({
+      status: "approved",
+      approved_by: user.id,
+      approved_at: now,
+    })
+    .in(
+      "id",
+      rows.map((row) => row.id)
+    )
+    .eq("status", "pending")
+    .select("id")
 
-    if (error) return { message: error.message }
+  if (approveError) return { message: approveError.message }
+
+  const approvedIds = new Set((approvedRows ?? []).map((r) => r.id))
+  const approvedHours = rows.filter((row) => approvedIds.has(row.id)) as VolunteerHour[]
+
+  if (!approvedHours.length) {
+    return { message: "These entries were already processed by someone else." }
   }
 
-  const certResult = await issueCertificateForHours(
-    rows as VolunteerHour[],
-    user.id
-  )
-  if (certResult.error) return { message: certResult.error }
-
+  // The status flip above already committed, so the pending queue must
+  // reflect it even if certificate issuance below fails.
   revalidateVolunteerPaths()
-  return { success: true, message: "Hours approved and certificate issued." }
+
+  const certResult = await issueCertificateForHours(approvedHours, user.id)
+  if (certResult.error) {
+    return {
+      message: `${approvedHours.length} entr${
+        approvedHours.length === 1 ? "y" : "ies"
+      } approved, but certificate issuance failed: ${certResult.error}. The certificate will need to be re-issued.`,
+    }
+  }
+
+  const skipped = rows.length - approvedHours.length
+  return {
+    success: true,
+    message:
+      skipped > 0
+        ? `${approvedHours.length} of ${rows.length} entries approved and certificate issued (${skipped} already processed).`
+        : "Hours approved and certificate issued.",
+  }
 }
 
 export async function rejectVolunteerHours(

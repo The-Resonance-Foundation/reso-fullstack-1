@@ -179,11 +179,11 @@ async function getMembersByRole(role: AppRole): Promise<ChapterMember[]> {
   const userIds = roleRows.map((row) => row.user_id)
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, email")
     .in("id", userIds)
 
   const profileById = new Map(
-    (profiles ?? []).map((profile) => [profile.id, profile.full_name])
+    (profiles ?? []).map((profile) => [profile.id, profile])
   )
 
   const applicantType =
@@ -212,16 +212,9 @@ async function getMembersByRole(role: AppRole): Promise<ChapterMember[]> {
         ? (applicantByUserChapter.get(`${row.user_id}:${row.chapter_id}`) ?? null)
         : null
 
-    let email = applicant?.email ?? ""
-    let fullName = applicant?.full_name ?? profileById.get(row.user_id) ?? role
-
-    if (!email) {
-      const { data: authUser } = await admin.auth.admin.getUserById(row.user_id)
-      email = authUser.user?.email ?? ""
-      if (!applicant && authUser.user?.user_metadata?.full_name) {
-        fullName = String(authUser.user.user_metadata.full_name)
-      }
-    }
+    const profile = profileById.get(row.user_id)
+    const email = applicant?.email ?? profile?.email ?? ""
+    const fullName = applicant?.full_name ?? profile?.full_name ?? role
 
     const chapter = row.chapters as { name: string } | { name: string }[] | null
     const chapterName = Array.isArray(chapter)
@@ -324,7 +317,6 @@ export const canApproveVolunteerHours = cache(async (chapterId?: string) => {
 export const canAuditMessages = cache(async (chapterId?: string) => {
   const roles = await getUserRoles()
   const roleNames = roles.map((r) => r.role)
-  const chapterIds = roles.map((r) => r.chapter_id)
   if (roleNames.includes("board_of_director")) return true
   if (roleNames.includes("program_administrator")) return true
   if (!chapterId) {
@@ -495,22 +487,19 @@ export const getRoleAssignments = cache(async (): Promise<RoleAssignmentRow[]> =
 
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, email")
     .in("id", userIds)
 
   const profileById = new Map(
-    (profiles ?? []).map((profile) => [profile.id, profile.full_name])
+    (profiles ?? []).map((profile) => [profile.id, profile])
   )
 
-  const rows: RoleAssignmentRow[] = []
-
-  for (const row of roleRows) {
+  return roleRows.map((row) => {
     const chapter = row.chapters
     const chapterName = Array.isArray(chapter) ? chapter[0] : chapter
+    const profile = profileById.get(row.user_id)
 
-    const { data: authUser } = await admin.auth.admin.getUserById(row.user_id)
-
-    rows.push({
+    return {
       id: row.id,
       user_id: row.user_id,
       chapter_id: row.chapter_id,
@@ -518,14 +507,10 @@ export const getRoleAssignments = cache(async (): Promise<RoleAssignmentRow[]> =
       status: row.status,
       created_at: row.created_at,
       chapters: chapterName ? { name: chapterName.name } : null,
-      profiles: profileById.has(row.user_id)
-        ? { full_name: profileById.get(row.user_id)! }
-        : null,
-      email: authUser.user?.email ?? undefined,
-    })
-  }
-
-  return rows
+      profiles: profile?.full_name ? { full_name: profile.full_name } : null,
+      email: profile?.email ?? undefined,
+    }
+  })
 })
 
 export type PortalMember = {
@@ -592,11 +577,11 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
 
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, email")
     .in("id", userIds)
 
   const profileById = new Map(
-    (profiles ?? []).map((profile) => [profile.id, profile.full_name])
+    (profiles ?? []).map((profile) => [profile.id, profile])
   )
 
   const rolesByUser = new Map<string, AppRole[]>()
@@ -606,17 +591,15 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
     rolesByUser.set(row.user_id, list)
   }
 
-  const members: PortalMember[] = []
-
-  for (const userId of userIds) {
-    const { data: authUser } = await admin.auth.admin.getUserById(userId)
-    members.push({
+  const members: PortalMember[] = userIds.map((userId) => {
+    const profile = profileById.get(userId)
+    return {
       userId,
-      fullName: profileById.get(userId) ?? authUser.user?.email ?? "Member",
-      email: authUser.user?.email ?? "",
+      fullName: profile?.full_name ?? profile?.email ?? "Member",
+      email: profile?.email ?? "",
       currentRoles: rolesByUser.get(userId) ?? [],
-    })
-  }
+    }
+  })
 
   return members.sort((a, b) => a.fullName.localeCompare(b.fullName))
 })
@@ -683,21 +666,21 @@ export const getFamiliesForReviewer = cache(async (): Promise<FamilyForReviewer[
 
   const { data: profiles } = await admin
     .from("profiles")
-    .select("id, full_name")
+    .select("id, full_name, email")
     .in("id", [...parentIds])
 
   const profileById = new Map(
-    (profiles ?? []).map((profile) => [profile.id, profile.full_name])
+    (profiles ?? []).map((profile) => [profile.id, profile])
   )
 
   const families = new Map<string, FamilyForReviewer>()
 
   for (const parentId of parentIds) {
-    const { data: authUser } = await admin.auth.admin.getUserById(parentId)
+    const profile = profileById.get(parentId)
     families.set(parentId, {
       parentUserId: parentId,
-      parentName: profileById.get(parentId) ?? "Parent",
-      parentEmail: authUser.user?.email ?? "",
+      parentName: profile?.full_name ?? "Parent",
+      parentEmail: profile?.email ?? "",
       students: [],
     })
   }
@@ -758,32 +741,76 @@ export const getParentChapterOptions = cache(async (): Promise<Chapter[]> => {
 export const getDashboardContext = cache(async () => {
   const user = await verifySession()
 
-  const { activateAcceptedApplicants } = await import("@/lib/auth/activate-applicants")
-  await activateAcceptedApplicants(user.id)
+  const [profile, initialRoles] = await Promise.all([getProfile(), getUserRoles()])
+  let roles = initialRoles
 
-  const [profile, roles] = await Promise.all([getProfile(), getUserRoles()])
+  // Legacy sweep: users whose application was "accepted" before instant
+  // provisioning existed get activated here. Only relevant for accounts with
+  // no active roles yet — everyone else skips this write path entirely.
+  if (roles.length === 0) {
+    const { activateAcceptedApplicants } = await import("@/lib/auth/activate-applicants")
+    const activated = await activateAcceptedApplicants(user.id)
+    if (activated) {
+      const supabase = await getServerClientOrThrow()
+      const { data } = await supabase
+        .from("user_roles")
+        .select("*, chapters(name, slug)")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+      roles = (data ?? []) as UserRoleWithChapter[]
+    }
+  }
+
   const roleNames = roles.map((r) => r.role)
+
+  const [
+    canReview,
+    logVolunteerHours,
+    approveVolunteerHours,
+    auditMessages,
+    viewDonations,
+    manageDonations,
+    viewAuditLogs,
+    writeAuditLogs,
+    manageLessons,
+    manageEvents,
+    manageChapters,
+    assignRoles,
+  ] = await Promise.all([
+    canReviewApplicants(),
+    canLogVolunteerHours(),
+    canApproveVolunteerHours(),
+    canAuditMessages(),
+    canViewDonations(),
+    canManageDonations(),
+    canViewAuditLogs(),
+    canWriteAuditLogs(),
+    canManageLessons(),
+    canManageEvents(),
+    canManageChapters(),
+    canAssignRoles(),
+  ])
 
   return {
     user,
     profile,
     roles,
     roleNames,
-    canReview: await canReviewApplicants(),
+    canReview,
     isParent: roleNames.includes("student_parent"),
     isTutor: roleNames.includes("tutor"),
     isVolunteer: roleNames.includes("volunteer"),
-    canLogVolunteerHours: await canLogVolunteerHours(),
-    canApproveVolunteerHours: await canApproveVolunteerHours(),
-    canAuditMessages: await canAuditMessages(),
-    canViewDonations: await canViewDonations(),
-    canManageDonations: await canManageDonations(),
-    canViewAuditLogs: await canViewAuditLogs(),
-    canWriteAuditLogs: await canWriteAuditLogs(),
-    canManageLessons: await canManageLessons(),
-    canManageEvents: await canManageEvents(),
-    canManageChapters: await canManageChapters(),
-    canAssignRoles: await canAssignRoles(),
+    canLogVolunteerHours: logVolunteerHours,
+    canApproveVolunteerHours: approveVolunteerHours,
+    canAuditMessages: auditMessages,
+    canViewDonations: viewDonations,
+    canManageDonations: manageDonations,
+    canViewAuditLogs: viewAuditLogs,
+    canWriteAuditLogs: writeAuditLogs,
+    canManageLessons: manageLessons,
+    canManageEvents: manageEvents,
+    canManageChapters: manageChapters,
+    canAssignRoles: assignRoles,
     hasPortalRole: roleNames.length > 0,
   }
 })

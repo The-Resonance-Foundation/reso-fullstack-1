@@ -98,7 +98,7 @@ export async function assignUserRole(
   _prev: AdminActionState,
   formData: FormData
 ): Promise<AdminActionState> {
-  await verifySession()
+  const user = await verifySession()
 
   const validated = assignRoleSchema.safeParse({
     userId: formData.get("userId"),
@@ -142,6 +142,16 @@ export async function assignUserRole(
     return { message: error.message }
   }
 
+  await admin.from("audit_logs").insert({
+    actor_user_id: user.id,
+    action: "role_changed",
+    entity_type: "user_role",
+    entity_id: userId,
+    chapter_id: chapterId,
+    summary: `Role ${role} assigned`,
+    metadata: { user_id: userId, role, chapter_id: chapterId, change: "assigned" },
+  })
+
   revalidatePath("/dashboard/admin/roles")
   return { success: true, message: "Role assigned successfully." }
 }
@@ -150,7 +160,7 @@ export async function removeUserRole(
   _prev: AdminActionState,
   formData: FormData
 ): Promise<AdminActionState> {
-  await verifySession()
+  const user = await verifySession()
 
   const userRoleId = String(formData.get("userRoleId") ?? "")
   if (!userRoleId) {
@@ -160,7 +170,7 @@ export async function removeUserRole(
   const supabase = await getServerClientOrThrow()
   const { data: roleRow, error: fetchError } = await supabase
     .from("user_roles")
-    .select("id, chapter_id, role")
+    .select("id, user_id, chapter_id, role")
     .eq("id", userRoleId)
     .maybeSingle()
 
@@ -182,6 +192,21 @@ export async function removeUserRole(
   if (error) {
     return { message: error.message }
   }
+
+  await admin.from("audit_logs").insert({
+    actor_user_id: user.id,
+    action: "role_changed",
+    entity_type: "user_role",
+    entity_id: roleRow.user_id,
+    chapter_id: roleRow.chapter_id,
+    summary: `Role ${roleRow.role} removed`,
+    metadata: {
+      user_id: roleRow.user_id,
+      role: roleRow.role,
+      chapter_id: roleRow.chapter_id,
+      change: "removed",
+    },
+  })
 
   revalidatePath("/dashboard/admin/roles")
   revalidatePath("/dashboard/tutors")

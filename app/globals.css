@@ -42,10 +42,12 @@
   --sidebar-border: #e3dac9;
   --sidebar-primary: #6b1f3a;
   --sidebar-ring: #6b1f3a;
+  /* Categorical chart palette — validated (CVD/contrast/chroma) via dataviz
+     six-checks for light surfaces. Assign in fixed order, never cycle. */
   --chart-1: #8e2d4d;
-  --chart-2: #b8912a;
-  --chart-3: #2f7e72;
-  --chart-4: #55679d;
+  --chart-2: #8f6f1d;
+  --chart-3: #0e8763;
+  --chart-4: #4a63b8;
   --chart-5: #c06744;
   --radius: 0.75rem;
 }
@@ -82,11 +84,13 @@
   --sidebar-border: #2b231e;
   --sidebar-primary: #d6b354;
   --sidebar-ring: #c76d8b;
-  --chart-1: #d17a97;
-  --chart-2: #d9b65c;
-  --chart-3: #5fb3a5;
-  --chart-4: #8fa1d6;
-  --chart-5: #dd9070;
+  /* Dark-mode categorical palette — separately validated against the dark
+     card surface (#1e1815); not an automatic flip of the light palette. */
+  --chart-1: #bb4f6e;
+  --chart-2: #ad8a1f;
+  --chart-3: #12907b;
+  --chart-4: #5c76d2;
+  --chart-5: #c76a45;
 }
 
 @theme inline {

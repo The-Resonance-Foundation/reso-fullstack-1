@@ -33,23 +33,7 @@ async function getScopedChapterIds() {
   return chapterIds
 }
 
-export const getLessonsForUser = cache(async (): Promise<LessonWithTutor[]> => {
-  await verifySession()
-  const supabase = await getServerClientOrThrow()
-
-  const { data, error } = await supabase
-    .from("lessons")
-    .select(
-      "*, students(first_name, last_name, instrument), chapters(name, slug), lesson_logs(*)"
-    )
-    .order("scheduled_start", { ascending: true })
-
-  if (error) {
-    console.error("getLessonsForUser", error.message)
-    return []
-  }
-
-  const rows = (data ?? []) as Lesson[]
+async function attachTutorNames(rows: Lesson[]): Promise<LessonWithTutor[]> {
   if (!rows.length) return []
 
   const tutorIds = [
@@ -73,7 +57,43 @@ export const getLessonsForUser = cache(async (): Promise<LessonWithTutor[]> => {
       ? { full_name: tutorById.get(row.tutor_user_id) ?? "Your tutor" }
       : null,
   }))
-})
+}
+
+export type DateWindow = { from?: string; to?: string }
+
+const DEFAULT_LESSON_WINDOW_MS = 90 * 24 * 60 * 60 * 1000
+const DEFAULT_EVENT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000
+
+export const getLessonsForUser = cache(
+  async (window?: DateWindow): Promise<LessonWithTutor[]> => {
+    await verifySession()
+    const supabase = await getServerClientOrThrow()
+
+    const from = window?.from ?? new Date(Date.now() - DEFAULT_LESSON_WINDOW_MS).toISOString()
+
+    let query = supabase
+      .from("lessons")
+      .select(
+        "*, students(first_name, last_name, instrument), chapters(name, slug), lesson_logs(*)"
+      )
+      .gte("scheduled_start", from)
+      .order("scheduled_start", { ascending: true })
+      .limit(500)
+
+    if (window?.to) {
+      query = query.lte("scheduled_start", window.to)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("getLessonsForUser", error.message)
+      return []
+    }
+
+    return attachTutorNames((data ?? []) as Lesson[])
+  }
+)
 
 export const getAssignedStudentsForTutor = cache(async (): Promise<Student[]> => {
   const user = await verifySession()
@@ -112,15 +132,45 @@ export const getAssignedStudentForTutor = cache(
 
 export const getLessonsForStudent = cache(
   async (studentId: string): Promise<LessonWithTutor[]> => {
-    const lessons = await getLessonsForUser()
-    return lessons.filter((lesson) => lesson.student_id === studentId)
+    await verifySession()
+    const supabase = await getServerClientOrThrow()
+
+    const { data, error } = await supabase
+      .from("lessons")
+      .select(
+        "*, students(first_name, last_name, instrument), chapters(name, slug), lesson_logs(*)"
+      )
+      .eq("student_id", studentId)
+      .order("scheduled_start", { ascending: true })
+      .limit(200)
+
+    if (error) {
+      console.error("getLessonsForStudent", error.message)
+      return []
+    }
+
+    return attachTutorNames((data ?? []) as Lesson[])
   }
 )
 
 export const getAssignmentsForStudent = cache(
   async (studentId: string): Promise<Assignment[]> => {
-    const assignments = await getAssignmentsForUser()
-    return assignments.filter((assignment) => assignment.student_id === studentId)
+    await verifySession()
+    const supabase = await getServerClientOrThrow()
+
+    const { data, error } = await supabase
+      .from("assignments")
+      .select("*, students(first_name, last_name)")
+      .eq("student_id", studentId)
+      .order("created_at", { ascending: false })
+      .limit(200)
+
+    if (error) {
+      console.error("getAssignmentsForStudent", error.message)
+      return []
+    }
+
+    return (data ?? []) as Assignment[]
   }
 )
 
@@ -213,6 +263,7 @@ export const getAssignmentsForUser = cache(async (): Promise<Assignment[]> => {
     .from("assignments")
     .select("*, students(first_name, last_name)")
     .order("created_at", { ascending: false })
+    .limit(300)
 
   if (error) {
     console.error("getAssignmentsForUser", error.message)
@@ -230,6 +281,7 @@ export const getResourcesForUser = cache(async (): Promise<Resource[]> => {
     .from("resources")
     .select("*, chapters(name, slug), students(first_name, last_name)")
     .order("created_at", { ascending: false })
+    .limit(300)
 
   if (error) {
     console.error("getResourcesForUser", error.message)
@@ -314,32 +366,48 @@ export const getTutorAssignmentsForReviewer = cache(
   }
 )
 
-export const getEventsForUser = cache(async (): Promise<Event[]> => {
-  await verifySession()
-  const supabase = await getServerClientOrThrow()
+export const getEventsForUser = cache(
+  async (window?: DateWindow): Promise<Event[]> => {
+    await verifySession()
+    const supabase = await getServerClientOrThrow()
 
-  const { data, error } = await supabase
-    .from("events")
-    .select("*, chapters(name, slug)")
-    .in("status", ["published", "completed"])
-    .order("starts_at", { ascending: true })
+    const from = window?.from ?? new Date(Date.now() - DEFAULT_EVENT_WINDOW_MS).toISOString()
 
-  if (error) {
-    console.error("getEventsForUser", error.message)
-    return []
+    let query = supabase
+      .from("events")
+      .select("*, chapters(name, slug)")
+      .in("status", ["published", "completed"])
+      .gte("starts_at", from)
+      .order("starts_at", { ascending: true })
+      .limit(300)
+
+    if (window?.to) {
+      query = query.lte("starts_at", window.to)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error("getEventsForUser", error.message)
+      return []
+    }
+
+    return (data ?? []) as Event[]
   }
-
-  return (data ?? []) as Event[]
-})
+)
 
 export const getEventsForManager = cache(async (): Promise<Event[]> => {
   await verifySession()
   const supabase = await getServerClientOrThrow()
 
+  const from = new Date(Date.now() - DEFAULT_EVENT_WINDOW_MS).toISOString()
+
   const { data, error } = await supabase
     .from("events")
     .select("*, chapters(name, slug)")
+    .gte("starts_at", from)
     .order("starts_at", { ascending: false })
+    .limit(300)
 
   if (error) {
     console.error("getEventsForManager", error.message)
@@ -433,34 +501,36 @@ export type CalendarItem = {
   chapterName?: string
 }
 
-export const getCalendarItems = cache(async (): Promise<CalendarItem[]> => {
-  const [lessons, events] = await Promise.all([
-    getLessonsForUser(),
-    getEventsForUser(),
-  ])
+export const getCalendarItems = cache(
+  async (window?: DateWindow): Promise<CalendarItem[]> => {
+    const [lessons, events] = await Promise.all([
+      getLessonsForUser(window),
+      getEventsForUser(window),
+    ])
 
-  const lessonItems: CalendarItem[] = lessons.map((lesson) => ({
-    id: lesson.id,
-    title: `Lesson: ${lesson.students?.first_name ?? "Student"} ${lesson.students?.last_name ?? ""}`.trim(),
-    start: lesson.scheduled_start,
-    end: lesson.scheduled_end,
-    type: "lesson",
-    chapterName: lesson.chapters?.name ?? undefined,
-  }))
+    const lessonItems: CalendarItem[] = lessons.map((lesson) => ({
+      id: lesson.id,
+      title: `Lesson: ${lesson.students?.first_name ?? "Student"} ${lesson.students?.last_name ?? ""}`.trim(),
+      start: lesson.scheduled_start,
+      end: lesson.scheduled_end,
+      type: "lesson",
+      chapterName: lesson.chapters?.name ?? undefined,
+    }))
 
-  const eventItems: CalendarItem[] = events.map((event) => ({
-    id: event.id,
-    title: event.title,
-    start: event.starts_at,
-    end: event.ends_at,
-    type: "event",
-    chapterName: event.chapters?.name ?? "Organization-wide",
-  }))
+    const eventItems: CalendarItem[] = events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      start: event.starts_at,
+      end: event.ends_at,
+      type: "event",
+      chapterName: event.chapters?.name ?? "Organization-wide",
+    }))
 
-  return [...lessonItems, ...eventItems].sort(
-    (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
-  )
-})
+    return [...lessonItems, ...eventItems].sort(
+      (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+    )
+  }
+)
 
 export const getTutorsForAssignment = cache(async () => {
   await verifySession()

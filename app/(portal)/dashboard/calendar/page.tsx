@@ -14,7 +14,17 @@ export default async function CalendarPage() {
   const allowed = await canAccessPortalFeatures()
   if (!allowed) redirect("/dashboard")
 
-  const items = await getCalendarItems()
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const from = new Date(startOfMonth)
+  from.setMonth(from.getMonth() - 2)
+  const to = new Date(startOfMonth)
+  to.setMonth(to.getMonth() + 4)
+
+  const items = await getCalendarItems({
+    from: from.toISOString(),
+    to: to.toISOString(),
+  })
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">

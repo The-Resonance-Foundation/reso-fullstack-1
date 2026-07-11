@@ -12,12 +12,13 @@ export async function markNotificationRead(
   const id = String(formData.get("id") ?? "")
   if (!id) return { message: "Missing notification id." }
 
-  await verifySession()
+  const user = await verifySession()
   const supabase = await getServerClientOrThrow()
   const { error } = await supabase
     .from("notifications")
     .update({ read_at: new Date().toISOString() })
     .eq("id", id)
+    .eq("user_id", user.id)
 
   if (error) return { message: error.message }
   revalidatePath("/dashboard")

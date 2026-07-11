@@ -31,18 +31,25 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
   const { audit } = await searchParams
   const auditMode = audit === "1"
 
-  const [user, canAudit, userConversations, { conversation, messages }] =
-    await Promise.all([
-      verifySession(),
-      canAuditMessages(),
-      getConversationsForUser(),
-      getConversationWithMessages(conversationId),
-    ])
+  const [user, canAudit, userConversations] = await Promise.all([
+    verifySession(),
+    canAuditMessages(),
+    getConversationsForUser(),
+  ])
+
+  // Only a genuinely-authorized audit view (query param AND permission) may
+  // see soft-deleted message bodies; a member tacking ?audit=1 onto their own
+  // conversation must not be able to bypass the normal deleted-message filter.
+  const isAuditView = auditMode && canAudit
+  const { conversation, messages } = await getConversationWithMessages(
+    conversationId,
+    isAuditView
+  )
 
   if (!conversation) notFound()
 
   const isMember = userConversations.some((c) => c.id === conversationId)
-  if (!isMember && !(auditMode && canAudit)) {
+  if (!isMember && !isAuditView) {
     redirect(routes.portal.messages)
   }
 

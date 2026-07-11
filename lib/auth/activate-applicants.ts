@@ -7,8 +7,12 @@ import type { ApplicantType } from "@/types/enums"
 
 const STAFF_TYPES: ApplicantType[] = ["tutor", "officer", "volunteer"]
 
-/** Activates legacy applicant rows still in the accepted stage (pre-redesign invites). */
-export async function activateAcceptedApplicants(userId: string) {
+/**
+ * Activates legacy applicant rows still in the accepted stage (pre-redesign
+ * invites). Returns true when any row was processed so callers know to
+ * refresh role state.
+ */
+export async function activateAcceptedApplicants(userId: string): Promise<boolean> {
   const admin = createAdminClient()
 
   const { data: pending, error } = await admin
@@ -17,7 +21,7 @@ export async function activateAcceptedApplicants(userId: string) {
     .eq("converted_user_id", userId)
     .eq("stage", "accepted")
 
-  if (error || !pending?.length) return
+  if (error || !pending?.length) return false
 
   for (const row of pending) {
     const applicant = row as Applicant
@@ -42,4 +46,6 @@ export async function activateAcceptedApplicants(userId: string) {
       console.error("activateAcceptedApplicants update", updateError.message)
     }
   }
+
+  return true
 }
