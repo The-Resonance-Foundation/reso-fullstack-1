@@ -1,11 +1,8 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import {
-  PracticeChart,
-  PracticeLogForm,
-  PracticeLogList,
-} from "@/components/portal/practice-panel"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { LogPracticeDialog, PracticeOverview } from "@/components/portal/practice-panel"
+import { PageHeader } from "@/components/portal/page-header"
+import { Card, CardContent } from "@/components/ui/card"
 import { getStudentsForParent, isParentAccount } from "@/lib/auth/dal"
 import { getPracticeLogsForParent } from "@/lib/data/phase23"
 
@@ -25,38 +22,16 @@ export default async function PracticePage() {
   const activeStudents = students.filter((s) => s.status === "active")
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">Practice log</h1>
-        <p className="mt-2 text-muted-foreground">
-          Log practice minutes and track progress over time.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <PageHeader
+        title="Practice log"
+        description="Log practice minutes and track progress over time."
+        actions={<LogPracticeDialog students={activeStudents} />}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Log practice</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PracticeLogForm students={activeStudents} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PracticeChart logs={logs} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent entries</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PracticeLogList logs={logs} />
+      <Card className="animate-fade-up">
+        <CardContent className="pt-6">
+          <PracticeOverview students={activeStudents} logs={logs} />
         </CardContent>
       </Card>
     </div>

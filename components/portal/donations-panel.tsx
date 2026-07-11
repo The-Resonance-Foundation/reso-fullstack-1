@@ -1,25 +1,41 @@
 "use client"
 
-import { useEffect, useMemo, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
-import {
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type SortingState,
-} from "@tanstack/react-table"
+import { useActionState, useMemo, useState } from "react"
+import { Coins, Plus } from "lucide-react"
+import { toast } from "sonner"
+import type { ColumnDef } from "@tanstack/react-table"
 import { recordManualDonation } from "@/app/actions/donations"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { DataTable } from "@/components/ui/data-table"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { ManualDonationFormState } from "@/lib/validations/phase6"
-import type { Donation, DonationTotals } from "@/types/database"
+import type { Donation } from "@/types/database"
+
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  completed: "border-transparent bg-success/15 text-success",
+  pending: "border-transparent bg-warning/15 text-warning",
+  refunded: "border-transparent bg-destructive/15 text-destructive",
+  reversed: "border-transparent bg-destructive/15 text-destructive",
+}
+
+const SOURCE_LABEL: Record<string, string> = {
+  paypal_webhook: "PayPal",
+  manual: "Manual",
+}
 
 function formatMoney(amount: number, currency = "USD") {
   return new Intl.NumberFormat("en-US", {
@@ -28,215 +44,173 @@ function formatMoney(amount: number, currency = "USD") {
   }).format(amount)
 }
 
-export function DonationSummaryCards({ totals }: { totals: DonationTotals }) {
-  return (
-    <div className="grid gap-4 sm:grid-cols-3">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total raised
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{formatMoney(totals.totalAmount)}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Completed donations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{totals.completedCount}</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Last 30 days
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-2xl font-bold">{formatMoney(totals.last30DaysAmount)}</p>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+/* ------------------------------------------------------------------ */
 
-export function DonationsTable({ donations }: { donations: Donation[] }) {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "donated_at", desc: true },
-  ])
-
+export function DonationsDataTable({ donations }: { donations: Donation[] }) {
   const columns = useMemo<ColumnDef<Donation>[]>(
     () => [
+      {
+        id: "donor",
+        header: "Donor",
+        accessorFn: (row) =>
+          `${row.payer_name ?? ""} ${row.payer_email ?? ""}`.trim() || "Anonymous",
+        cell: ({ row }) => {
+          const { payer_name, payer_email } = row.original
+          if (!payer_name && !payer_email) {
+            return <span className="text-muted-foreground">Anonymous</span>
+          }
+          return (
+            <div className="min-w-0">
+              {payer_name ? (
+                <p className="truncate font-medium">{payer_name}</p>
+              ) : null}
+              {payer_email ? (
+                <p className="truncate text-xs text-muted-foreground">{payer_email}</p>
+              ) : null}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-medium tabular-nums">
+            {formatMoney(Number(row.original.amount), row.original.currency)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "source",
+        header: "Source",
+        cell: ({ row }) => (
+          <Badge variant="secondary">
+            {SOURCE_LABEL[row.original.source] ?? row.original.source}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <Badge
+            variant="outline"
+            className={STATUS_BADGE_CLASS[row.original.status] ?? ""}
+          >
+            {row.original.status}
+          </Badge>
+        ),
+      },
       {
         accessorKey: "donated_at",
         header: "Date",
         cell: ({ row }) => new Date(row.original.donated_at).toLocaleDateString(),
       },
       {
-        accessorKey: "amount",
-        header: "Amount",
-        cell: ({ row }) =>
-          formatMoney(Number(row.original.amount), row.original.currency),
-      },
-      {
-        accessorKey: "payer_name",
-        header: "Donor",
-        cell: ({ row }) =>
-          row.original.payer_name ?? row.original.payer_email ?? "Anonymous",
-      },
-      {
-        accessorKey: "source",
-        header: "Source",
-        cell: ({ row }) => row.original.source.replace("_", " "),
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: "notes",
+        header: "Notes",
         cell: ({ row }) => (
-          <Badge variant="outline">{row.original.status}</Badge>
+          <span
+            className="block max-w-[220px] truncate text-muted-foreground"
+            title={row.original.notes ?? undefined}
+          >
+            {row.original.notes ?? "—"}
+          </span>
         ),
-      },
-      {
-        accessorKey: "recorder_name",
-        header: "Recorded by",
-        cell: ({ row }) => row.original.recorder_name ?? "PayPal",
       },
     ],
     []
   )
 
-  const table = useReactTable({
-    data: donations,
-    columns,
-    state: { sorting },
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-  })
-
-  if (!donations.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No donations recorded yet. PayPal webhook donations and manual entries appear here.
-      </p>
-    )
-  }
-
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <table className="w-full text-sm">
-        <thead className="border-b bg-muted/40">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-3 py-2 text-left font-medium">
-                  {header.isPlaceholder ? null : (
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-1"
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                      {{
-                        asc: " ↑",
-                        desc: " ↓",
-                      }[header.column.getIsSorted() as string] ?? null}
-                    </button>
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-b last:border-0">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-3 py-2">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={donations}
+      searchPlaceholder="Search donors..."
+      pageSize={10}
+      emptyState={
+        <EmptyState
+          icon={<Coins aria-hidden />}
+          title="No donations yet"
+          description="PayPal webhook donations and manual entries will appear here."
+        />
+      }
+    />
   )
 }
 
-export function ManualDonationForm() {
-  const router = useRouter()
-  const [state, setState] = useState<ManualDonationFormState>(undefined)
-  const [pending, startTransition] = useTransition()
+/* ------------------------------------------------------------------ */
+
+export function RecordDonationDialog() {
+  const [open, setOpen] = useState(false)
   const today = new Date().toISOString().slice(0, 10)
 
-  useEffect(() => {
-    if (state?.success) router.refresh()
-  }, [state?.success, router])
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const raw = new FormData(event.currentTarget)
-    const formData = new FormData()
-    formData.set("amount", String(raw.get("amount") ?? ""))
-    formData.set("currency", String(raw.get("currency") ?? "USD"))
-    formData.set("donatedAt", String(raw.get("donatedAt") ?? today))
-    formData.set("payerName", String(raw.get("payerName") ?? ""))
-    formData.set("payerEmail", String(raw.get("payerEmail") ?? ""))
-    formData.set("notes", String(raw.get("notes") ?? ""))
-
-    startTransition(async () => {
-      setState(await recordManualDonation(undefined, formData))
-    })
-  }
+  const [state, formAction, pending] = useActionState<ManualDonationFormState, FormData>(
+    async (prevState, formData) => {
+      const result = await recordManualDonation(prevState, formData)
+      if (result?.success) {
+        toast.success(result.message ?? "Manual donation recorded.")
+        setOpen(false)
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+      return result
+    },
+    undefined
+  )
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="amount">Amount</Label>
-          <Input id="amount" name="amount" type="number" step="0.01" min="0.01" required />
-          <FormFieldError errors={state?.errors?.amount} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="currency">Currency</Label>
-          <Input id="currency" name="currency" defaultValue="USD" maxLength={3} required />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="donatedAt">Donation date</Label>
-        <Input id="donatedAt" name="donatedAt" type="date" defaultValue={today} required />
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="payerName">Donor name (optional)</Label>
-          <Input id="payerName" name="payerName" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="payerEmail">Donor email (optional)</Label>
-          <Input id="payerEmail" name="payerEmail" type="email" />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes (optional)</Label>
-        <Textarea id="notes" name="notes" rows={2} />
-      </div>
-      {state?.message ? (
-        <p className={`text-sm ${state.success ? "text-primary" : "text-destructive"}`}>
-          {state.message}
-        </p>
-      ) : null}
-      <Button type="submit" disabled={pending}>
-        {pending ? "Recording..." : "Record manual donation"}
-      </Button>
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus aria-hidden />
+          Record donation
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Record manual donation</DialogTitle>
+          <DialogDescription>
+            For checks, cash, or other offline gifts. Board and corporate officers only.
+          </DialogDescription>
+        </DialogHeader>
+        <form action={formAction} className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input id="amount" name="amount" type="number" step="0.01" min="0.01" required />
+              <FormFieldError errors={state?.errors?.amount} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Input id="currency" name="currency" defaultValue="USD" maxLength={3} required />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="donatedAt">Donation date</Label>
+            <Input id="donatedAt" name="donatedAt" type="date" defaultValue={today} required />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="payerName">Donor name (optional)</Label>
+              <Input id="payerName" name="payerName" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="payerEmail">Donor email (optional)</Label>
+              <Input id="payerEmail" name="payerEmail" type="email" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes (optional)</Label>
+            <Textarea id="notes" name="notes" rows={2} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Recording..." : "Record donation"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }

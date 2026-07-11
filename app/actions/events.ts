@@ -14,6 +14,20 @@ import {
   type RsvpFormState,
 } from "@/lib/validations/phase23"
 
+/**
+ * RSVP capacity is enforced by a DB trigger (`enforce_event_capacity`) as
+ * the race-safe source of truth — the app-level pre-check below is just an
+ * optimistic fast path. When two people RSVP at once, the trigger raises
+ * `Event is at capacity`; surface that as a friendly toast instead of a raw
+ * Postgres error.
+ */
+function friendlyRsvpError(message: string) {
+  if (/at capacity/i.test(message)) {
+    return "This event just filled up — try RSVPing \"Maybe\" or check back if a spot opens."
+  }
+  return message
+}
+
 export async function createEvent(
   _prev: EventFormState,
   formData: FormData
@@ -148,7 +162,7 @@ export async function submitRsvp(
         : event.goingCount
 
     if (!canRsvpGoing(event.capacity, currentGoing)) {
-      return { message: "This event is at capacity." }
+      return { message: friendlyRsvpError("Event is at capacity") }
     }
   }
 
@@ -163,7 +177,7 @@ export async function submitRsvp(
   )
 
   if (error) {
-    return { message: error.message }
+    return { message: friendlyRsvpError(error.message) }
   }
 
   revalidatePath("/dashboard/events")

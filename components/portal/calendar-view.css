@@ -1,0 +1,102 @@
+/*
+ * Scoped FullCalendar theming for the portal calendar.
+ *
+ * Everything here reads the app's design tokens through CSS variables
+ * (defined in app/globals.css on :root/.light/.dark), so it automatically
+ * tracks light/dark mode without any duplicated color literals. This file
+ * is imported only by components/portal/calendar-view.tsx and every rule
+ * is scoped under .portal-calendar, so it never leaks into other pages.
+ *
+ * The two category colors (maroon for lessons, amber for events) are set
+ * inline per-event in calendar-view.tsx and intentionally are NOT design
+ * tokens — they're a fixed categorical legend, matched here only in the
+ * .portal-calendar-legend swatches for consistency.
+ */
+
+.portal-calendar {
+  /* FullCalendar's own CSS variable API — see fullcalendar.io/docs/css-variables */
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--muted);
+  --fc-neutral-text-color: var(--muted-foreground);
+  --fc-border-color: var(--border);
+
+  --fc-button-text-color: var(--foreground);
+  --fc-button-bg-color: var(--card);
+  --fc-button-border-color: var(--border);
+  --fc-button-hover-bg-color: var(--muted);
+  --fc-button-hover-border-color: var(--border);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+
+  --fc-today-bg-color: color-mix(in srgb, var(--primary) 12%, transparent);
+  --fc-now-indicator-color: var(--primary);
+  --fc-highlight-color: color-mix(in srgb, var(--primary) 16%, transparent);
+
+  --fc-more-link-bg-color: var(--muted);
+  --fc-more-link-text-color: var(--primary);
+
+  --fc-small-font-size: 0.75rem;
+
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.portal-calendar .fc-toolbar-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.portal-calendar .fc-button {
+  box-shadow: none !important;
+  text-transform: capitalize;
+  font-weight: 500;
+  border-radius: 0.5rem !important;
+}
+
+.portal-calendar .fc-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.portal-calendar .fc-button-primary:not(:disabled).fc-button-active,
+.portal-calendar .fc-button-primary:not(:disabled):active {
+  color: var(--primary-foreground);
+}
+
+.portal-calendar .fc-col-header-cell-cushion {
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portal-calendar .fc-daygrid-day-number {
+  color: var(--foreground);
+  font-size: 0.8rem;
+}
+
+.portal-calendar .fc-day-today .fc-daygrid-day-number {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.portal-calendar .fc-event {
+  border-radius: 0.375rem;
+  font-weight: 500;
+}
+
+.portal-calendar .fc-daygrid-more-link {
+  font-weight: 500;
+}
+
+.portal-calendar .fc-scrollgrid,
+.portal-calendar .fc-theme-standard td,
+.portal-calendar .fc-theme-standard th {
+  border-color: var(--border);
+}
+
+.portal-calendar-legend {
+  color: var(--muted-foreground);
+}

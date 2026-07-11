@@ -1,15 +1,31 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+import { useActionState } from "react"
+import { toast } from "sonner"
+import type { ColumnDef } from "@tanstack/react-table"
+import { Plus, UserCog } from "lucide-react"
 import {
   assignTutorToStudent,
   removeTutorAssignment,
 } from "@/app/actions/tutor-assignments"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { NativeSelect } from "@/components/forms/native-select"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { DataTable } from "@/components/ui/data-table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Label } from "@/components/ui/label"
+import { initials, timeAgo } from "@/lib/utils"
 import type { TutorAssignmentFormState } from "@/lib/validations/phase23"
 import type { Student, StudentTutorAssignment } from "@/types/database"
 
@@ -23,13 +39,12 @@ type TutorOption = {
 export function TutorAssignmentForm({
   students,
   tutors,
+  onSuccess,
 }: {
   students: Student[]
   tutors: TutorOption[]
+  onSuccess?: () => void
 }) {
-  const router = useRouter()
-  const [state, setState] = useState<TutorAssignmentFormState>(undefined)
-  const [pending, startTransition] = useTransition()
   const [studentId, setStudentId] = useState("")
   const [tutorUserId, setTutorUserId] = useState("")
 
@@ -38,43 +53,47 @@ export function TutorAssignmentForm({
     ? tutors.filter((t) => t.chapter_id === selectedStudent.chapter_id)
     : tutors
 
-  useEffect(() => {
-    if (!state?.success) return
-    setStudentId("")
-    setTutorUserId("")
-    router.refresh()
-  }, [state?.success, router])
+  const [state, action, pending] = useActionState(
+    async (prevState: TutorAssignmentFormState, formData: FormData) => {
+      const result = await assignTutorToStudent(prevState, formData)
+      if (result?.success) {
+        toast.success(result.message ?? "Tutor assigned.")
+        setStudentId("")
+        setTutorUserId("")
+        onSuccess?.()
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+      return result
+    },
+    undefined
+  )
 
-  useEffect(() => {
-    if (!tutorUserId) return
-    if (!eligibleTutors.some((t) => t.user_id === tutorUserId)) {
+  function handleStudentChange(nextStudentId: string) {
+    setStudentId(nextStudentId)
+    // Reset the tutor pick if it isn't eligible for the new student's chapter.
+    const nextStudent = students.find((s) => s.id === nextStudentId)
+    if (
+      tutorUserId &&
+      nextStudent &&
+      !tutors.some(
+        (t) => t.user_id === tutorUserId && t.chapter_id === nextStudent.chapter_id
+      )
+    ) {
       setTutorUserId("")
     }
-  }, [studentId, eligibleTutors, tutorUserId])
+  }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const raw = new FormData(event.currentTarget)
-    const nextStudentId = String(raw.get("studentId") ?? studentId)
-    const nextTutorUserId = String(raw.get("tutorUserId") ?? tutorUserId)
-
-    if (!nextStudentId || !nextTutorUserId) {
-      setState({ message: "Please select both a student and a tutor." })
-      return
-    }
-
-    const formData = new FormData()
-    formData.set("studentId", nextStudentId)
-    formData.set("tutorUserId", nextTutorUserId)
-
-    startTransition(async () => {
-      const result = await assignTutorToStudent(undefined, formData)
-      setState(result)
-    })
+  if (!students.length) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No active students found for your chapter.
+      </p>
+    )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form action={action} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="studentId">Student</Label>
         <NativeSelect
@@ -82,7 +101,7 @@ export function TutorAssignmentForm({
           name="studentId"
           required
           value={studentId}
-          onChange={(event) => setStudentId(event.target.value)}
+          onChange={(event) => handleStudentChange(event.target.value)}
         >
           <option value="" disabled>
             Select student
@@ -131,18 +150,75 @@ export function TutorAssignmentForm({
         ) : null}
       </div>
 
-      {state?.message ? (
-        <p
-          className={`text-sm ${state.success ? "text-primary" : "text-destructive"}`}
-        >
-          {state.message}
-        </p>
-      ) : null}
-
-      <Button type="submit" disabled={pending || !studentId || !tutorUserId}>
-        {pending ? "Assigning..." : "Assign tutor"}
+      <Button
+        type="submit"
+        disabled={pending || !studentId || !tutorUserId}
+        className="w-full sm:w-auto"
+      >
+        {pending ? "Assigning…" : "Assign tutor"}
       </Button>
     </form>
+  )
+}
+
+export function AssignTutorDialog({
+  students,
+  tutors,
+}: {
+  students: Student[]
+  tutors: TutorOption[]
+}) {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm">
+          <Plus aria-hidden />
+          Assign tutor
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Assign tutor</DialogTitle>
+          <DialogDescription>
+            Connect a tutor with a student they will teach.
+          </DialogDescription>
+        </DialogHeader>
+        <TutorAssignmentForm
+          students={students}
+          tutors={tutors}
+          onSuccess={() => setOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function EndAssignmentButton({ assignmentId }: { assignmentId: string }) {
+  async function handleConfirm() {
+    const formData = new FormData()
+    formData.set("id", assignmentId)
+    const result = await removeTutorAssignment(undefined, formData)
+    if (result?.success) {
+      toast.success(result.message ?? "Tutor assignment ended.")
+    } else {
+      toast.error(result?.message ?? "Couldn't end this assignment.")
+    }
+  }
+
+  return (
+    <ConfirmDialog
+      trigger={
+        <Button type="button" size="sm" variant="outline">
+          End assignment
+        </Button>
+      }
+      title="End this tutor assignment?"
+      description="The tutor will no longer see this student's lessons or be able to schedule new ones."
+      confirmLabel="End assignment"
+      onConfirm={handleConfirm}
+    />
   )
 }
 
@@ -151,63 +227,66 @@ export function TutorAssignmentsList({
 }: {
   assignments: StudentTutorAssignment[]
 }) {
-  const router = useRouter()
-  const [state, setState] = useState<TutorAssignmentFormState>(undefined)
-  const [pending, startTransition] = useTransition()
-
-  useEffect(() => {
-    if (state?.success) {
-      router.refresh()
-    }
-  }, [state?.success, router])
-
-  function handleRemove(assignmentId: string) {
-    const formData = new FormData()
-    formData.set("id", assignmentId)
-
-    startTransition(async () => {
-      const result = await removeTutorAssignment(undefined, formData)
-      setState(result)
-    })
-  }
-
-  if (!assignments.length) {
-    return (
-      <p className="text-sm text-muted-foreground">No tutor assignments yet.</p>
-    )
-  }
+  const columns = useMemo<ColumnDef<StudentTutorAssignment>[]>(
+    () => [
+      {
+        id: "student",
+        header: "Student",
+        accessorFn: (row) =>
+          `${row.students?.first_name ?? ""} ${row.students?.last_name ?? ""}`.trim(),
+        cell: ({ row }) => {
+          const name =
+            `${row.original.students?.first_name ?? ""} ${row.original.students?.last_name ?? ""}`.trim() ||
+            "Student"
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="h-7 w-7">
+                <AvatarFallback className="text-xs">{initials(name)}</AvatarFallback>
+              </Avatar>
+              <span className="font-medium">{name}</span>
+            </div>
+          )
+        },
+      },
+      {
+        id: "tutor",
+        header: "Tutor",
+        accessorFn: (row) => row.profiles?.full_name ?? "Tutor",
+      },
+      {
+        id: "chapter",
+        header: "Chapter",
+        accessorFn: (row) => row.chapters?.name ?? "—",
+      },
+      {
+        id: "since",
+        header: "Since",
+        accessorFn: (row) => row.created_at,
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">{timeAgo(row.original.created_at)}</span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => <EndAssignmentButton assignmentId={row.original.id} />,
+      },
+    ],
+    []
+  )
 
   return (
-    <ul className="space-y-2">
-      {assignments.map((a) => (
-        <li
-          key={a.id}
-          className="flex items-center justify-between rounded-md border p-3 text-sm"
-        >
-          <span>
-            {a.students?.first_name} {a.students?.last_name}
-            {" → "}
-            {a.profiles?.full_name ?? "Tutor"}
-            {a.chapters?.name ? ` · ${a.chapters.name}` : ""}
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={pending}
-            onClick={() => handleRemove(a.id)}
-          >
-            Remove
-          </Button>
-        </li>
-      ))}
-      {state?.message ? (
-        <p
-          className={`text-xs ${state.success ? "text-primary" : "text-destructive"}`}
-        >
-          {state.message}
-        </p>
-      ) : null}
-    </ul>
+    <DataTable
+      columns={columns}
+      data={assignments}
+      searchPlaceholder="Search assignments…"
+      emptyState={
+        <EmptyState
+          icon={<UserCog aria-hidden />}
+          title="No tutor assignments yet"
+          description="Assign a tutor to a student to get started."
+        />
+      }
+    />
   )
 }

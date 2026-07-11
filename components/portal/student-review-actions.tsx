@@ -1,68 +1,68 @@
 "use client"
 
-import { useActionState } from "react"
+import { useTransition } from "react"
+import { toast } from "sonner"
 import { acceptStudent, rejectStudent } from "@/app/actions/student-review"
 import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 
-function ActionMessage({
-  state,
-}: {
-  state: { message?: string; success?: boolean } | undefined
-}) {
-  if (!state?.message) return null
-  return (
-    <p
-      className={`mt-2 text-xs ${state.success ? "text-primary" : "text-destructive"}`}
-    >
-      {state.message}
-    </p>
-  )
+type StudentReviewActionsProps = {
+  studentId: string
+  status: string
+  studentName: string
 }
 
 export function StudentReviewActions({
   studentId,
   status,
-}: {
-  studentId: string
-  status: string
-}) {
-  const [acceptState, acceptAction, acceptPending] = useActionState(
-    acceptStudent,
-    undefined
-  )
-  const [rejectState, rejectAction, rejectPending] = useActionState(
-    rejectStudent,
-    undefined
-  )
+  studentName,
+}: StudentReviewActionsProps) {
+  const [acceptPending, startAcceptTransition] = useTransition()
 
   if (status !== "pending") return null
 
-  const busy = acceptPending || rejectPending
+  function buildFormData() {
+    const formData = new FormData()
+    formData.set("studentId", studentId)
+    return formData
+  }
+
+  function handleAccept() {
+    startAcceptTransition(async () => {
+      const result = await acceptStudent(undefined, buildFormData())
+      if (result?.success) {
+        toast.success(result.message ?? `${studentName} accepted.`)
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+    })
+  }
+
+  async function handleReject() {
+    const result = await rejectStudent(undefined, buildFormData())
+    if (result?.success) {
+      toast.success(result.message ?? `${studentName} rejected.`)
+    } else if (result?.message) {
+      toast.error(result.message)
+    }
+  }
 
   return (
-    <div className="flex flex-wrap items-start gap-2 pt-2">
-      <form action={acceptAction}>
-        <input type="hidden" name="studentId" value={studentId} />
-        <Button type="submit" size="sm" disabled={busy}>
-          {acceptPending ? "Accepting..." : "Accept"}
-        </Button>
-        <ActionMessage state={acceptState} />
-      </form>
-
-      <form
-        action={rejectAction}
-        onSubmit={(event) => {
-          if (!window.confirm("Reject this student enrollment?")) {
-            event.preventDefault()
-          }
-        }}
-      >
-        <input type="hidden" name="studentId" value={studentId} />
-        <Button type="submit" size="sm" variant="outline" disabled={busy}>
-          {rejectPending ? "Rejecting..." : "Reject"}
-        </Button>
-        <ActionMessage state={rejectState} />
-      </form>
+    <div className="flex flex-wrap items-center gap-2">
+      <Button size="sm" disabled={acceptPending} onClick={handleAccept}>
+        {acceptPending ? "Accepting..." : "Accept"}
+      </Button>
+      <ConfirmDialog
+        trigger={
+          <Button size="sm" variant="outline">
+            Reject
+          </Button>
+        }
+        title="Reject student enrollment"
+        description={`This rejects ${studentName}'s enrollment and notifies the parent by email when Resend is configured.`}
+        confirmLabel="Reject"
+        onConfirm={handleReject}
+      />
     </div>
   )
 }

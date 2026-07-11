@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { ResourceForm, ResourcesList } from "@/components/portal/resources-panel"
+import { AddResourceDialog, ResourcesList } from "@/components/portal/resources-panel"
+import { PageHeader } from "@/components/portal/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { canReviewApplicants, getAllChapters } from "@/lib/auth/dal"
 import { getChapterDocs } from "@/lib/data/phase23"
@@ -20,29 +21,22 @@ export default async function ChapterDocsPage() {
   ])
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">Chapter documents</h1>
-        <p className="mt-2 text-muted-foreground">
-          Policies, handbooks, and chapter-wide resources.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <PageHeader
+        title="Chapter documents"
+        description="Policies, handbooks, and chapter-wide resources."
+        actions={<AddResourceDialog chapters={chapters} />}
+      />
 
-      <Card>
+      <Card className="animate-fade-up">
         <CardHeader>
-          <CardTitle>Add document</CardTitle>
+          <CardTitle className="text-lg">Documents</CardTitle>
         </CardHeader>
         <CardContent>
-          <ResourceForm chapters={chapters} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResourcesList resources={docs} canDelete />
+          {/* canDelete reflects the same review permission that gates this
+              page — previously hardcoded to true regardless of the viewer's
+              actual authorization. */}
+          <ResourcesList resources={docs} canDelete={allowed} />
         </CardContent>
       </Card>
     </div>

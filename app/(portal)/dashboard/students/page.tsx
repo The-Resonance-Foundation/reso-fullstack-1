@@ -1,20 +1,35 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { GraduationCap, Music } from "lucide-react"
+import { AddStudentDialog } from "@/components/portal/add-student-form"
+import { PageHeader } from "@/components/portal/page-header"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AddStudentForm } from "@/components/portal/add-student-form"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   getParentChapterOptions,
   getStudentsForParent,
   isParentAccount,
 } from "@/lib/auth/dal"
+import { initials } from "@/lib/utils"
+import type { StudentStatus } from "@/types/enums"
 
-function statusBadgeClass(status: string) {
-  if (status === "pending") return "border-amber-500 text-amber-700"
-  if (status === "rejected") return "border-destructive text-destructive"
-  if (status === "active") return "border-primary text-primary"
-  return undefined
+const STATUS_BADGE_CLASSES: Partial<Record<StudentStatus, string>> = {
+  pending: "bg-warning/15 text-warning border-transparent",
+  active: "bg-success/15 text-success border-transparent",
+  rejected: "bg-destructive/15 text-destructive border-transparent",
+  inactive: "bg-muted text-muted-foreground border-transparent",
+  alumni: "bg-primary/15 text-primary border-transparent",
 }
+
+const ENROLLED_DATE = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+})
+
 export const metadata: Metadata = {
   title: "My Students",
   description: "Manage students linked to your parent account.",
@@ -30,56 +45,93 @@ export default async function StudentsPage() {
   ])
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">My Students</h1>
-        <p className="mt-2 text-muted-foreground">
-          One parent login manages every student in your household. New students are
-          submitted for chapter review before lessons begin.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Add a student</CardTitle>
-          <CardDescription>
-            Required policies are recorded when you add a student.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AddStudentForm chapters={chapters} />
-        </CardContent>
-      </Card>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <PageHeader
+        title="My students"
+        description="One parent login manages every student in your household. New students are submitted for chapter review before lessons begin."
+        actions={<AddStudentDialog chapters={chapters} />}
+      />
 
       {students.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            No students linked yet.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<GraduationCap aria-hidden />}
+          title="No students yet"
+          description="Add a student to request enrollment with your chapter — lessons can begin once they're approved."
+          action={
+            <AddStudentDialog
+              chapters={chapters}
+              trigger={<Button>Add your first student</Button>}
+            />
+          }
+        />
       ) : (
-        <div className="space-y-4">
-          {students.map((student) => (
-            <Card key={student.id}>
-              <CardHeader className="pb-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <CardTitle className="text-lg">
-                    {student.first_name} {student.last_name}
-                  </CardTitle>
-                  <Badge variant="outline" className={statusBadgeClass(student.status)}>
-                    {student.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground">
-                {student.chapters?.name ? (
-                  <p>Chapter: {student.chapters.name}</p>
-                ) : null}
-                {student.instrument ? <p>Instrument: {student.instrument}</p> : null}
-                {student.skill_level ? <p>Skill level: {student.skill_level}</p> : null}
-              </CardContent>
-            </Card>
-          ))}
+        <div className="grid gap-4 sm:grid-cols-2">
+          {students.map((student, index) => {
+            const fullName = `${student.first_name} ${student.last_name}`.trim()
+            return (
+              <Card
+                key={student.id}
+                className="animate-fade-up"
+                style={{ "--stagger-index": index } as React.CSSProperties}
+              >
+                <CardContent className="space-y-4 pt-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Avatar>
+                        <AvatarFallback>{initials(fullName)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{fullName}</p>
+                        {student.instrument ? (
+                          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Music className="h-3 w-3 shrink-0" aria-hidden />
+                            <span className="truncate">{student.instrument}</span>
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                    <Badge
+                      className={
+                        STATUS_BADGE_CLASSES[student.status] ??
+                        "bg-muted text-muted-foreground border-transparent"
+                      }
+                    >
+                      {student.status.charAt(0).toUpperCase() + student.status.slice(1)}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {student.skill_level ? (
+                      <Badge variant="secondary">
+                        {student.skill_level.charAt(0).toUpperCase() +
+                          student.skill_level.slice(1)}
+                      </Badge>
+                    ) : null}
+                    {student.chapters?.name ? (
+                      <Badge variant="outline">{student.chapters.name}</Badge>
+                    ) : null}
+                  </div>
+
+                  {student.status === "pending" ? (
+                    <p className="text-xs text-muted-foreground">
+                      Awaiting chapter review — you&apos;ll be able to schedule
+                      lessons once approved.
+                    </p>
+                  ) : null}
+                  {student.status === "rejected" ? (
+                    <p className="text-xs text-destructive">
+                      This enrollment wasn&apos;t approved. Contact your chapter
+                      for details or to re-apply.
+                    </p>
+                  ) : null}
+
+                  <p className="text-xs text-muted-foreground">
+                    Enrolled {ENROLLED_DATE.format(new Date(student.created_at))}
+                  </p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       )}
     </div>

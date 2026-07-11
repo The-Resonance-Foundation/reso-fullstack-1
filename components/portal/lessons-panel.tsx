@@ -1,24 +1,71 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { useActionState } from "react"
+import { toast } from "sonner"
+import { CalendarClock, CalendarPlus, ClipboardList, MapPin, Video } from "lucide-react"
 import { logLesson, scheduleLesson, updateLessonStatus } from "@/app/actions/lessons"
 import { FormFieldError } from "@/components/forms/form-field-error"
-import { NativeSelect } from "@/components/forms/native-select"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Spinner } from "@/components/ui/spinner"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import type { Lesson, LessonWithTutor, Student } from "@/types/database"
 import { routes } from "@/lib/routes"
+import type { LessonFormState } from "@/lib/validations/phase23"
 import { ATTENDANCE_STATUSES } from "@/types/enums"
 
+export type LessonPerspective = "parent" | "tutor" | "officer"
+
+const LESSON_STATUS_BADGE: Record<Lesson["status"], string> = {
+  scheduled: "bg-warning/15 text-warning border-transparent",
+  completed: "bg-success/15 text-success border-transparent",
+  cancelled: "bg-destructive/15 text-destructive border-transparent",
+  no_show: "bg-destructive/15 text-destructive border-transparent",
+}
+
+const LESSON_STATUS_LABEL: Record<Lesson["status"], string> = {
+  scheduled: "Scheduled",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  no_show: "No-show",
+}
+
+function LessonStatusBadge({ status }: { status: Lesson["status"] }) {
+  return <Badge className={LESSON_STATUS_BADGE[status]}>{LESSON_STATUS_LABEL[status]}</Badge>
+}
+
 function getLessonLog(lesson: Lesson) {
-  return Array.isArray(lesson.lesson_logs)
-    ? lesson.lesson_logs[0]
-    : lesson.lesson_logs
+  return Array.isArray(lesson.lesson_logs) ? lesson.lesson_logs[0] : lesson.lesson_logs
+}
+
+function isUpcomingLesson(lesson: Lesson) {
+  return (
+    lesson.status === "scheduled" && new Date(lesson.scheduled_end).getTime() >= Date.now()
+  )
 }
 
 export function partitionLessons<T extends Lesson>(lessons: T[]) {
@@ -28,19 +75,16 @@ export function partitionLessons<T extends Lesson>(lessons: T[]) {
 
   for (const lesson of lessons) {
     const isUpcoming =
-      lesson.status === "scheduled" &&
-      new Date(lesson.scheduled_end).getTime() >= now
+      lesson.status === "scheduled" && new Date(lesson.scheduled_end).getTime() >= now
     if (isUpcoming) upcoming.push(lesson)
     else past.push(lesson)
   }
 
   upcoming.sort(
-    (a, b) =>
-      new Date(a.scheduled_start).getTime() - new Date(b.scheduled_start).getTime()
+    (a, b) => new Date(a.scheduled_start).getTime() - new Date(b.scheduled_start).getTime()
   )
   past.sort(
-    (a, b) =>
-      new Date(b.scheduled_start).getTime() - new Date(a.scheduled_start).getTime()
+    (a, b) => new Date(b.scheduled_start).getTime() - new Date(a.scheduled_start).getTime()
   )
 
   return { upcoming, past }
@@ -66,385 +110,387 @@ function formatLessonWhen(lesson: Lesson) {
   }
 }
 
-function statusVariant(status: Lesson["status"]) {
-  if (status === "scheduled") return "outline" as const
-  if (status === "completed") return "default" as const
-  return "secondary" as const
-}
-
-export function ScheduleLessonForm({
+/** Schedule-lesson Dialog. Pass a single-item `students` array to preselect (e.g. from a student hub). */
+export function ScheduleLessonDialog({
   students,
+  trigger,
 }: {
   students: Student[]
+  trigger?: React.ReactNode
 }) {
-  const [state, action, pending] = useActionState(scheduleLesson, undefined)
+  const [open, setOpen] = useState(false)
+  const single = students.length === 1 ? students[0] : null
 
-  if (!students.length) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No assigned students yet. Ask a chapter officer to assign students to you.
-      </p>
-    )
-  }
+  const [state, formAction, pending] = useActionState(
+    async (prev: LessonFormState, formData: FormData) => {
+      const result = await scheduleLesson(prev, formData)
+      if (result?.success) {
+        toast.success(result.message ?? "Lesson scheduled.")
+        setOpen(false)
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+      return result
+    },
+    undefined
+  )
 
   return (
-    <form action={action} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="studentId">Student</Label>
-        <NativeSelect id="studentId" name="studentId" required defaultValue="">
-          <option value="" disabled>
-            Select student
-          </option>
-          {students.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.first_name} {s.last_name} ({s.instrument ?? "instrument"})
-            </option>
-          ))}
-        </NativeSelect>
-        <FormFieldError errors={state?.errors?.studentId} />
-      </div>
-      <input type="hidden" name="chapterId" value="" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="scheduledStart">Start</Label>
-          <Input
-            id="scheduledStart"
-            name="scheduledStart"
-            type="datetime-local"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="scheduledEnd">End</Label>
-          <Input
-            id="scheduledEnd"
-            name="scheduledEnd"
-            type="datetime-local"
-            required
-          />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="location">Location (optional)</Label>
-        <Input id="location" name="location" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="meetingLink">Meeting link (optional)</Label>
-        <Input id="meetingLink" name="meetingLink" type="url" />
-      </div>
-      {state?.message ? (
-        <p
-          className={`text-sm ${state.success ? "text-primary" : "text-destructive"}`}
-        >
-          {state.message}
-        </p>
-      ) : null}
-      <Button type="submit" disabled={pending}>
-        {pending ? "Scheduling..." : "Schedule lesson"}
-      </Button>
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <Button disabled={!students.length}>
+            <CalendarPlus className="h-4 w-4" aria-hidden />
+            Schedule lesson
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Schedule a lesson</DialogTitle>
+          <DialogDescription>
+            {students.length === 0
+              ? "You need an assigned student before you can schedule a lesson."
+              : single
+                ? `Set the date and time for ${single.first_name} ${single.last_name}.`
+                : "Pick a student, then set the date and time."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {students.length ? (
+          <form action={formAction} className="space-y-4">
+            <input type="hidden" name="chapterId" value="" />
+            {single ? (
+              <input type="hidden" name="studentId" value={single.id} />
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="studentId">Student</Label>
+                <Select name="studentId" required>
+                  <SelectTrigger id="studentId">
+                    <SelectValue placeholder="Select student" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {students.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.first_name} {s.last_name}
+                        {s.instrument ? ` · ${s.instrument}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormFieldError errors={state?.errors?.studentId} />
+              </div>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="scheduledStart">Start</Label>
+                <Input id="scheduledStart" name="scheduledStart" type="datetime-local" required />
+                <FormFieldError errors={state?.errors?.scheduledStart} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="scheduledEnd">End</Label>
+                <Input id="scheduledEnd" name="scheduledEnd" type="datetime-local" required />
+                <FormFieldError errors={state?.errors?.scheduledEnd} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location (optional)</Label>
+              <Input id="location" name="location" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="meetingLink">Meeting link (optional)</Label>
+              <Input id="meetingLink" name="meetingLink" type="url" placeholder="https://..." />
+              <FormFieldError errors={state?.errors?.meetingLink} />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={pending}>
+                {pending ? <Spinner size="sm" /> : null}
+                {pending ? "Scheduling..." : "Schedule lesson"}
+              </Button>
+            </DialogFooter>
+          </form>
+        ) : null}
+      </DialogContent>
+    </Dialog>
   )
 }
 
-function LessonLogForm({ lesson }: { lesson: Lesson }) {
-  const [state, action, pending] = useActionState(logLesson, undefined)
+function LessonLogDialog({ lesson }: { lesson: Lesson }) {
+  const [open, setOpen] = useState(false)
+  const [, formAction, pending] = useActionState(
+    async (prev: LessonFormState, formData: FormData) => {
+      const result = await logLesson(prev, formData)
+      if (result?.success) {
+        toast.success(result.message ?? "Lesson log saved.")
+        setOpen(false)
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+      return result
+    },
+    undefined
+  )
 
   return (
-    <form action={action} className="mt-3 space-y-3 border-t pt-3">
-      <input type="hidden" name="lessonId" value={lesson.id} />
-      <div className="space-y-2">
-        <Label htmlFor={`attendance-${lesson.id}`}>Attendance</Label>
-        <NativeSelect
-          id={`attendance-${lesson.id}`}
-          name="attendance"
-          required
-          defaultValue="present"
-        >
-          {ATTENDANCE_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </NativeSelect>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor={`topics-${lesson.id}`}>Topics covered</Label>
-        <Textarea id={`topics-${lesson.id}`} name="topicsCovered" rows={2} />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor={`notes-${lesson.id}`}>Tutor notes</Label>
-        <Textarea id={`notes-${lesson.id}`} name="tutorNotes" rows={2} />
-      </div>
-      {state?.message ? (
-        <p
-          className={`text-xs ${state.success ? "text-primary" : "text-destructive"}`}
-        >
-          {state.message}
-        </p>
-      ) : null}
-      <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Saving..." : "Save lesson log"}
-      </Button>
-    </form>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <ClipboardList className="h-3.5 w-3.5" aria-hidden />
+          Log lesson
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Log this lesson</DialogTitle>
+          <DialogDescription>
+            Marks the lesson completed and shares your notes with the family.
+          </DialogDescription>
+        </DialogHeader>
+        <form action={formAction} className="space-y-4">
+          <input type="hidden" name="lessonId" value={lesson.id} />
+          <div className="space-y-2">
+            <Label htmlFor={`attendance-${lesson.id}`}>Attendance</Label>
+            <Select name="attendance" defaultValue="present" required>
+              <SelectTrigger id={`attendance-${lesson.id}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ATTENDANCE_STATUSES.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`topics-${lesson.id}`}>Topics covered</Label>
+            <Textarea id={`topics-${lesson.id}`} name="topicsCovered" rows={2} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`notes-${lesson.id}`}>Notes for family</Label>
+            <Textarea id={`notes-${lesson.id}`} name="tutorNotes" rows={2} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={pending}>
+              {pending ? <Spinner size="sm" /> : null}
+              {pending ? "Saving..." : "Save lesson log"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }
 
 function LessonStatusActions({ lesson }: { lesson: Lesson }) {
-  const [state, action, pending] = useActionState(updateLessonStatus, undefined)
+  const [, formAction, pending] = useActionState(
+    async (prev: LessonFormState, formData: FormData) => {
+      const result = await updateLessonStatus(prev, formData)
+      if (result?.success) toast.success(result.message ?? "Lesson updated.")
+      else if (result?.message) toast.error(result.message)
+      return result
+    },
+    undefined
+  )
 
   if (lesson.status !== "scheduled") return null
 
   return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      {(["cancelled", "no_show"] as const).map((status) => (
-        <form key={status} action={action}>
-          <input type="hidden" name="lessonId" value={lesson.id} />
-          <input type="hidden" name="status" value={status} />
-          <Button type="submit" size="sm" variant="outline" disabled={pending}>
-            Mark {status.replace("_", " ")}
+    <div className="flex flex-wrap items-center gap-2">
+      <form action={formAction}>
+        <input type="hidden" name="lessonId" value={lesson.id} />
+        <input type="hidden" name="status" value="no_show" />
+        <Button type="submit" size="sm" variant="outline" disabled={pending}>
+          Mark no-show
+        </Button>
+      </form>
+      <ConfirmDialog
+        trigger={
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-destructive text-destructive hover:bg-destructive/10"
+          >
+            Cancel lesson
           </Button>
-        </form>
-      ))}
-      {state?.message ? (
-        <p
-          className={`w-full text-xs ${state.success ? "text-primary" : "text-destructive"}`}
-        >
-          {state.message}
-        </p>
-      ) : null}
+        }
+        title="Cancel this lesson?"
+        description="The tutor and family will see this lesson marked cancelled. This can't be undone from here."
+        confirmLabel="Cancel lesson"
+        onConfirm={async () => {
+          const formData = new FormData()
+          formData.set("lessonId", lesson.id)
+          formData.set("status", "cancelled")
+          const result = await updateLessonStatus(undefined, formData)
+          if (result?.success) toast.success(result.message ?? "Lesson cancelled.")
+          else if (result?.message) toast.error(result.message)
+        }}
+      />
     </div>
   )
 }
 
-function ParentLessonCard({ lesson }: { lesson: LessonWithTutor }) {
+function LessonCard({
+  lesson,
+  perspective,
+}: {
+  lesson: LessonWithTutor
+  perspective: LessonPerspective
+}) {
   const when = formatLessonWhen(lesson)
   const log = getLessonLog(lesson)
-  const isUpcoming =
-    lesson.status === "scheduled" &&
-    new Date(lesson.scheduled_end).getTime() >= Date.now()
+  const isUpcoming = isUpcomingLesson(lesson)
+  const isTutorView = perspective === "tutor"
 
   return (
-    <Card>
+    <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
-          <div>
-            <CardTitle className="text-base">
+          <div className="min-w-0">
+            <CardTitle className="truncate text-base">
               {lesson.students?.first_name} {lesson.students?.last_name}
             </CardTitle>
-            {lesson.students?.instrument ? (
-              <p className="text-sm text-muted-foreground">
+            {!isTutorView ? (
+              <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                {lesson.tutor?.full_name
+                  ? `with ${lesson.tutor.full_name}`
+                  : "Tutor not yet assigned"}
+              </p>
+            ) : lesson.students?.instrument ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 {lesson.students.instrument}
               </p>
             ) : null}
           </div>
-          <Badge variant={statusVariant(lesson.status)}>{lesson.status}</Badge>
+          <LessonStatusBadge status={lesson.status} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="flex flex-1 flex-col gap-3 text-sm">
         <div>
           <p className="font-medium text-foreground">{when.date}</p>
           <p className="text-muted-foreground">{when.time}</p>
         </div>
-        {lesson.tutor?.full_name ? (
-          <p className="text-muted-foreground">
-            Tutor:{" "}
-            <span className="text-foreground">{lesson.tutor.full_name}</span>
-          </p>
-        ) : null}
-        {lesson.chapters?.name ? (
+
+        {perspective === "officer" && lesson.chapters?.name ? (
           <p className="text-muted-foreground">{lesson.chapters.name} chapter</p>
         ) : null}
+
         {lesson.location ? (
-          <p className="text-muted-foreground">
-            Location:{" "}
-            <span className="text-foreground">{lesson.location}</span>
+          <p className="flex items-center gap-1.5 text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {lesson.location}
           </p>
         ) : null}
+
         {isUpcoming && lesson.meeting_link ? (
-          <Button asChild size="sm">
+          <Button asChild size="sm" variant="outline" className="w-fit">
             <a href={lesson.meeting_link} target="_blank" rel="noreferrer">
+              <Video className="h-3.5 w-3.5" aria-hidden />
               Join online lesson
             </a>
           </Button>
         ) : null}
+
         {log ? (
-          <div className="rounded-md border bg-muted/40 p-3 space-y-1">
+          <div className="space-y-1 rounded-lg border bg-muted/40 p-3">
             <p className="font-medium text-foreground">Lesson summary</p>
             <p className="text-muted-foreground">
-              Attendance:{" "}
-              <span className="text-foreground">{log.attendance}</span>
+              Attendance: <span className="text-foreground">{log.attendance}</span>
             </p>
             {log.topics_covered ? (
               <p className="text-muted-foreground">
-                Topics:{" "}
-                <span className="text-foreground">{log.topics_covered}</span>
+                Topics: <span className="text-foreground">{log.topics_covered}</span>
               </p>
             ) : null}
             {log.tutor_notes ? (
               <p className="text-muted-foreground">
-                Tutor notes:{" "}
-                <span className="text-foreground">{log.tutor_notes}</span>
+                Notes: <span className="text-foreground">{log.tutor_notes}</span>
               </p>
             ) : null}
           </div>
-        ) : isUpcoming ? (
-          <p className="text-muted-foreground">
-            Your tutor will add notes after the lesson.
-          </p>
+        ) : isUpcoming && !isTutorView ? (
+          <p className="text-muted-foreground">Your tutor will add notes after the lesson.</p>
+        ) : null}
+
+        {isTutorView && lesson.status === "scheduled" ? (
+          <div className="mt-auto flex flex-col gap-2 border-t pt-3">
+            {!log ? <LessonLogDialog lesson={lesson} /> : null}
+            <LessonStatusActions lesson={lesson} />
+          </div>
         ) : null}
       </CardContent>
     </Card>
   )
 }
 
-export function ParentLessonsView({
+export function LessonsView({
   lessons,
-  studentCount,
+  perspective,
+  emptyState,
 }: {
   lessons: LessonWithTutor[]
-  studentCount: number
+  perspective: LessonPerspective
+  /** Rendered instead of the tabs when there are no lessons at all (e.g. no students yet). */
+  emptyState?: React.ReactNode
 }) {
-  if (!studentCount) {
-    return (
-      <div className="space-y-3 text-sm">
-        <p className="text-muted-foreground">
-          Add a student to your family account before lessons can be scheduled.
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <Link href={routes.portal.students}>Go to My Students</Link>
-        </Button>
-      </div>
-    )
-  }
-
-  if (!lessons.length) {
-    return (
-      <div className="space-y-3 text-sm text-muted-foreground">
-        <p>No lessons scheduled yet for your students.</p>
-        <p>
-          Once a tutor is assigned, they will schedule lessons here. You can also
-          check the calendar for chapter events.
-        </p>
-        <Button asChild variant="outline" size="sm">
-          <Link href={routes.portal.calendar}>Open calendar</Link>
-        </Button>
-      </div>
-    )
-  }
-
   const { upcoming, past } = partitionLessons(lessons)
 
+  if (!lessons.length && emptyState) {
+    return <>{emptyState}</>
+  }
+
   return (
-    <div className="space-y-8">
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="font-medium text-foreground">Upcoming</h2>
-          <Link
-            href={routes.portal.calendar}
-            className="text-sm text-primary hover:underline"
-          >
-            Calendar view
-          </Link>
-        </div>
+    <Tabs defaultValue="upcoming" className="animate-fade-up">
+      <TabsList>
+        <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
+        <TabsTrigger value="past">Past ({past.length})</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="upcoming">
         {upcoming.length ? (
-          <div className="space-y-4">
-            {upcoming.map((lesson) => (
-              <ParentLessonCard key={lesson.id} lesson={lesson} />
+          <div className="grid gap-4 md:grid-cols-2">
+            {upcoming.map((lesson, index) => (
+              <div
+                key={lesson.id}
+                className="animate-fade-up"
+                style={{ "--stagger-index": index } as React.CSSProperties}
+              >
+                <LessonCard lesson={lesson} perspective={perspective} />
+              </div>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            No upcoming lessons right now.
-          </p>
+          <EmptyState
+            icon={<CalendarClock aria-hidden />}
+            title="No upcoming lessons"
+            description="Scheduled lessons will show up here as soon as they're booked."
+          />
         )}
-      </section>
+      </TabsContent>
 
-      {past.length ? (
-        <section className="space-y-3">
-          <h2 className="font-medium text-foreground">Past lessons</h2>
-          <div className="space-y-4">
-            {past.map((lesson) => (
-              <ParentLessonCard key={lesson.id} lesson={lesson} />
+      <TabsContent value="past">
+        {past.length ? (
+          <div className="grid gap-4 md:grid-cols-2">
+            {past.map((lesson, index) => (
+              <div
+                key={lesson.id}
+                className="animate-fade-up"
+                style={{ "--stagger-index": index } as React.CSSProperties}
+              >
+                <LessonCard lesson={lesson} perspective={perspective} />
+              </div>
             ))}
           </div>
-        </section>
-      ) : null}
-    </div>
+        ) : (
+          <EmptyState icon={<ClipboardList aria-hidden />} title="No past lessons yet" />
+        )}
+      </TabsContent>
+    </Tabs>
   )
 }
 
-export function LessonsList({
-  lessons,
-  canLog,
-}: {
-  lessons: LessonWithTutor[]
-  canLog: boolean
-}) {
-  if (!lessons.length) {
-    return (
-      <p className="text-sm text-muted-foreground">No lessons scheduled yet.</p>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      {lessons.map((lesson) => (
-        <Card key={lesson.id}>
-          <CardHeader className="pb-2">
-            <div className="flex items-start justify-between gap-2">
-              <CardTitle className="text-base">
-                {lesson.students?.first_name} {lesson.students?.last_name}
-              </CardTitle>
-              <Badge variant="outline">{lesson.status}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm text-muted-foreground">
-            <p>
-              {new Date(lesson.scheduled_start).toLocaleString()} –{" "}
-              {new Date(lesson.scheduled_end).toLocaleTimeString()}
-            </p>
-            {lesson.chapters?.name ? <p>{lesson.chapters.name}</p> : null}
-            {lesson.location ? <p>Location: {lesson.location}</p> : null}
-            {lesson.meeting_link ? (
-              <p>
-                <a
-                  href={lesson.meeting_link}
-                  className="text-primary hover:underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Join meeting
-                </a>
-              </p>
-            ) : null}
-            {(() => {
-              const log = getLessonLog(lesson)
-              if (log) {
-                return (
-                  <p className="text-foreground">
-                    Logged: {log.attendance}
-                    {log.topics_covered ? ` · ${log.topics_covered}` : ""}
-                  </p>
-                )
-              }
-              if (canLog && lesson.status === "scheduled") {
-                return <LessonLogForm lesson={lesson} />
-              }
-              return null
-            })()}
-            {canLog ? <LessonStatusActions lesson={lesson} /> : null}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-export function UpcomingLessonsSummary({
-  lessons,
-}: {
-  lessons: LessonWithTutor[]
-}) {
+export function UpcomingLessonsSummary({ lessons }: { lessons: LessonWithTutor[] }) {
   const { upcoming } = partitionLessons(lessons)
 
   if (!upcoming.length) {
@@ -459,20 +505,21 @@ export function UpcomingLessonsSummary({
   }
 
   return (
-    <ul className="space-y-3 text-sm">
+    <ul className="space-y-2.5 text-sm">
       {upcoming.slice(0, 3).map((lesson) => {
         const when = formatLessonWhen(lesson)
         return (
-          <li key={lesson.id} className="rounded-md border p-3">
-            <p className="font-medium">
+          <li
+            key={lesson.id}
+            className="rounded-lg border border-border p-3 transition-colors hover:border-primary/40 hover:bg-muted/40"
+          >
+            <p className="font-medium text-foreground">
               {lesson.students?.first_name} {lesson.students?.last_name}
             </p>
             <p className="text-muted-foreground">{when.date}</p>
             <p className="text-muted-foreground">{when.time}</p>
             {lesson.tutor?.full_name ? (
-              <p className="text-muted-foreground">
-                with {lesson.tutor.full_name}
-              </p>
+              <p className="text-muted-foreground">with {lesson.tutor.full_name}</p>
             ) : null}
           </li>
         )

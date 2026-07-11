@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 import { TutorStudentHub } from "@/components/portal/tutor-students-panel"
+import { PageHeader } from "@/components/portal/page-header"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { isTutorAccount } from "@/lib/auth/dal"
 import {
@@ -22,9 +25,7 @@ export async function generateMetadata({
   const student = await getAssignedStudentForTutor(studentId)
 
   return {
-    title: student
-      ? `${student.first_name} ${student.last_name}`
-      : "Student",
+    title: student ? `${student.first_name} ${student.last_name}` : "Student",
     description: "Manage lessons and assignments for this student.",
   }
 }
@@ -48,24 +49,37 @@ export default async function TutorStudentPage({
     getPracticeLogsForStudent(studentId),
   ])
 
+  const descriptionParts = [
+    student.chapters?.name ? `${student.chapters.name} chapter` : null,
+    student.skill_level
+      ? student.skill_level.charAt(0).toUpperCase() + student.skill_level.slice(1)
+      : null,
+  ].filter(Boolean)
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={routes.portal.tutorStudents}>← All students</Link>
-          </Button>
-          <h1 className="mt-4 font-serif text-3xl font-bold">
-            {student.first_name} {student.last_name}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Schedule lessons, homework, and resources for this student.
-          </p>
-        </div>
-        <Button asChild variant="outline">
-          <Link href={routes.portal.calendar}>View calendar</Link>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="animate-fade-up">
+        <Button asChild variant="ghost" size="sm" className="-ml-2 text-muted-foreground">
+          <Link href={routes.portal.tutorStudents}>
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            All students
+          </Link>
         </Button>
       </div>
+
+      <PageHeader
+        title={`${student.first_name} ${student.last_name}`}
+        description={
+          descriptionParts.length ? descriptionParts.join(" · ") : undefined
+        }
+        actions={
+          student.instrument ? (
+            <Badge variant="secondary" className="capitalize">
+              {student.instrument}
+            </Badge>
+          ) : undefined
+        }
+      />
 
       <TutorStudentHub
         student={student}

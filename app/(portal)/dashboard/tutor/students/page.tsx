@@ -4,7 +4,7 @@ import {
   AssignedStudentsList,
   type AssignedStudentCard,
 } from "@/components/portal/tutor-students-panel"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PageHeader } from "@/components/portal/page-header"
 import { isTutorAccount } from "@/lib/auth/dal"
 import {
   getAssignedStudentsForTutor,
@@ -16,20 +16,15 @@ export const metadata: Metadata = {
   description: "Students assigned to you for tutoring.",
 }
 
-export default async function TutorStudentsPage() {
-  const isTutor = await isTutorAccount()
-  if (!isTutor) redirect("/dashboard")
-
-  const [students, lessons] = await Promise.all([
-    getAssignedStudentsForTutor(),
-    getLessonsForUser(),
-  ])
-
+function buildStudentCards(
+  students: Awaited<ReturnType<typeof getAssignedStudentsForTutor>>,
+  lessons: Awaited<ReturnType<typeof getLessonsForUser>>
+): AssignedStudentCard[] {
   const now = Date.now()
-  const items: AssignedStudentCard[] = students.map((student) => {
-    const studentLessons = lessons.filter((lesson) => lesson.student_id === student.id)
-    const upcoming = studentLessons.filter(
+  return students.map((student) => {
+    const upcoming = lessons.filter(
       (lesson) =>
+        lesson.student_id === student.id &&
         lesson.status === "scheduled" &&
         new Date(lesson.scheduled_end).getTime() >= now
     )
@@ -44,25 +39,27 @@ export default async function TutorStudentsPage() {
       nextLessonAt: upcoming[0]?.scheduled_start ?? null,
     }
   })
+}
+
+export default async function TutorStudentsPage() {
+  const isTutor = await isTutorAccount()
+  if (!isTutor) redirect("/dashboard")
+
+  const [students, lessons] = await Promise.all([
+    getAssignedStudentsForTutor(),
+    getLessonsForUser(),
+  ])
+
+  const items = buildStudentCards(students, lessons)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">My students</h1>
-        <p className="mt-2 text-muted-foreground">
-          Open a student to schedule lessons, assign homework, share resources, and
-          review their progress.
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHeader
+        title="My students"
+        description="Open a student's hub to schedule lessons, assign homework, share resources, and review their progress."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Assigned students</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AssignedStudentsList items={items} />
-        </CardContent>
-      </Card>
+      <AssignedStudentsList items={items} />
     </div>
   )
 }

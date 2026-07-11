@@ -60,6 +60,9 @@ export async function createAssignment(
   })
 
   if (error) {
+    if (error.code === "23503") {
+      return { message: "Selected student could not be found." }
+    }
     return { message: error.message }
   }
 

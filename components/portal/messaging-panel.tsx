@@ -3,29 +3,28 @@
 import Link from "next/link"
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { sendMessage, softDeleteMessage } from "@/app/actions/messaging"
 import { publishAnnouncement } from "@/app/actions/announcements"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { NativeSelect } from "@/components/forms/native-select"
-import { getSupabaseOrThrow } from "@/lib/supabase/client"
 import { routes } from "@/lib/routes"
+import { initials, timeAgo } from "@/lib/utils"
 import { messagePreview } from "@/lib/messaging/helpers"
-import type { AnnouncementFormState, MessageFormState } from "@/lib/validations/phase45"
-import type {
-  Announcement,
-  ConversationWithPreview,
-  Message,
-} from "@/types/database"
+import type { AnnouncementFormState } from "@/lib/validations/phase45"
+import type { Announcement, ConversationWithPreview } from "@/types/database"
 
 export function ConversationList({
   conversations,
   audit = false,
+  currentUserId,
 }: {
   conversations: ConversationWithPreview[]
   audit?: boolean
+  /** Enables "You:" previews and picks the other party's avatar. */
+  currentUserId?: string
 }) {
   if (!conversations.length) {
     return (
@@ -39,164 +38,67 @@ export function ConversationList({
 
   return (
     <ul className="space-y-2">
-      {conversations.map((c) => (
-        <li key={c.id}>
-          <Link
-            href={
-              audit
-                ? routes.portal.messageThread(c.id) + "?audit=1"
-                : routes.portal.messageThread(c.id)
-            }
-            className="block rounded-md border p-4 text-sm hover:bg-muted/40"
-          >
-            <p className="font-medium">
-              {c.students?.first_name} {c.students?.last_name} · Tutor chat
-            </p>
-            <p className="text-muted-foreground">
-              {c.tutor_name ?? "Tutor"} · {c.chapters?.name}
-            </p>
-            {c.last_message ? (
-              <p className="mt-1 text-muted-foreground">
-                {messagePreview(c.last_message.body)}
-              </p>
-            ) : null}
-          </Link>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-export function MessageThreadView({
-  conversationId,
-  initialMessages,
-  currentUserId,
-  readOnly = false,
-}: {
-  conversationId: string
-  initialMessages: Message[]
-  currentUserId: string
-  readOnly?: boolean
-}) {
-  const router = useRouter()
-  const [messages, setMessages] = useState(initialMessages.filter((m) => !m.deleted_at))
-  const [body, setBody] = useState("")
-  const [state, setState] = useState<MessageFormState>(undefined)
-  const [pending, startTransition] = useTransition()
-
-  useEffect(() => {
-    setMessages(initialMessages.filter((m) => !m.deleted_at))
-  }, [initialMessages])
-
-  useEffect(() => {
-    const supabase = getSupabaseOrThrow()
-    const channel = supabase
-      .channel(`messages:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const row = payload.new as Message
-          if (row.deleted_at) return
-          setMessages((prev) =>
-            prev.some((m) => m.id === row.id) ? prev : [...prev, row]
-          )
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [conversationId])
-
-  function handleSend(event: React.FormEvent) {
-    event.preventDefault()
-    if (readOnly || !body.trim()) return
-    const formData = new FormData()
-    formData.set("conversationId", conversationId)
-    formData.set("body", body.trim())
-    startTransition(async () => {
-      const result = await sendMessage(undefined, formData)
-      setState(result)
-      if (result?.success) {
-        setBody("")
-        router.refresh()
-      }
-    })
-  }
-
-  function handleDelete(messageId: string) {
-    const formData = new FormData()
-    formData.set("messageId", messageId)
-    formData.set("conversationId", conversationId)
-    startTransition(async () => {
-      await softDeleteMessage(undefined, formData)
-      setMessages((prev) => prev.filter((m) => m.id !== messageId))
-      router.refresh()
-    })
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
-        Parents can read all messages in this conversation.
-        {readOnly ? " You have read-only audit access." : null}
-      </div>
-      <ul className="max-h-96 space-y-3 overflow-y-auto rounded-md border p-4">
-        {messages.map((m) => (
+      {conversations.map((c, index) => {
+        const studentName =
+          [c.students?.first_name, c.students?.last_name].filter(Boolean).join(" ") ||
+          "Student"
+        const tutorName = c.tutor_name ?? "Tutor"
+        const viewerIsTutor = currentUserId != null && c.tutor_user_id === currentUserId
+        // Show the other party: tutors (and auditors) see the student,
+        // parents see the tutor.
+        const avatarName = !currentUserId || viewerIsTutor ? studentName : tutorName
+        const lastIsOwn =
+          currentUserId != null && c.last_message?.sender_id === currentUserId
+        return (
           <li
-            key={m.id}
-            className={`text-sm ${m.sender_id === currentUserId ? "text-right" : ""}`}
+            key={c.id}
+            className="animate-fade-up"
+            style={{ "--stagger-index": index } as React.CSSProperties}
           >
-            <p className="text-xs text-muted-foreground">
-              {m.profiles?.full_name ?? "Member"} ·{" "}
-              {new Date(m.created_at).toLocaleString()}
-            </p>
-            <p className="mt-1">{m.body}</p>
-            {!readOnly && m.sender_id === currentUserId ? (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="mt-1 h-auto p-0 text-xs"
-                onClick={() => handleDelete(m.id)}
-              >
-                Remove
-              </Button>
-            ) : null}
+            <Link
+              href={
+                audit
+                  ? routes.portal.messageThread(c.id) + "?audit=1"
+                  : routes.portal.messageThread(c.id)
+              }
+              className="group flex items-center gap-3.5 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarFallback>{initials(avatarName)}</AvatarFallback>
+              </Avatar>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-baseline justify-between gap-2">
+                  <span className="truncate text-sm font-medium">
+                    {studentName} · Tutor chat
+                  </span>
+                  {c.last_message ? (
+                    <span
+                      className="shrink-0 text-xs text-muted-foreground"
+                      suppressHydrationWarning
+                    >
+                      {timeAgo(c.last_message.created_at)}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {tutorName} · {c.chapters?.name ?? "Chapter"}
+                </span>
+                {c.last_message ? (
+                  <span className="mt-1 block truncate text-sm text-muted-foreground">
+                    {lastIsOwn ? "You: " : ""}
+                    {messagePreview(c.last_message.body)}
+                  </span>
+                ) : (
+                  <span className="mt-1 block text-sm italic text-muted-foreground/70">
+                    No messages yet
+                  </span>
+                )}
+              </span>
+            </Link>
           </li>
-        ))}
-        {!messages.length ? (
-          <li className="text-sm text-muted-foreground">No messages yet.</li>
-        ) : null}
-      </ul>
-      {!readOnly ? (
-        <form onSubmit={handleSend} className="space-y-2">
-          <Label htmlFor="body">Message</Label>
-          <Textarea
-            id="body"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={3}
-            required
-          />
-          {state?.message ? (
-            <p className={`text-sm ${state.success ? "text-primary" : "text-destructive"}`}>
-              {state.message}
-            </p>
-          ) : null}
-          <Button type="submit" disabled={pending || !body.trim()}>
-            {pending ? "Sending..." : "Send"}
-          </Button>
-        </form>
-      ) : null}
-    </div>
+        )
+      })}
+    </ul>
   )
 }
 

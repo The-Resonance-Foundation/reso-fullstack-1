@@ -1,117 +1,175 @@
 "use client"
 
+import { useState } from "react"
 import { useActionState } from "react"
-import {
-  assignUserRole,
-  removeUserRole,
-} from "@/app/actions/admin"
+import { toast } from "sonner"
+import { UserPlus } from "lucide-react"
+import { assignUserRole, type AdminActionState } from "@/app/actions/admin"
 import { Button } from "@/components/ui/button"
-import { NativeSelect } from "@/components/forms/native-select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { Label } from "@/components/ui/label"
+import { Spinner } from "@/components/ui/spinner"
 import type { Chapter } from "@/types/database"
 import type { PortalMember } from "@/lib/auth/dal"
-import { APP_ROLES } from "@/types/enums"
+import { APP_ROLES, type AppRole } from "@/types/enums"
 import { ROLE_LABELS } from "@/types/roles"
 
 const ASSIGNABLE_ROLES = APP_ROLES.filter(
   (role) => role !== "board_of_director"
 )
 
-export function AssignRoleForm({
-  chapters,
-  members,
-}: {
+/**
+ * Roles that require a chapter to be selected. Mirrors CHAPTER_SCOPED_ROLES in
+ * app/actions/admin.ts — kept in sync manually since a "use server" module can
+ * only export async functions.
+ */
+const CHAPTER_SCOPED_ROLES: AppRole[] = [
+  "student_parent",
+  "tutor",
+  "volunteer",
+  "chapter_officer",
+  "chapter_president",
+]
+
+type AssignRoleDialogProps = {
   chapters: Chapter[]
   members: PortalMember[]
-}) {
-  const [state, action, pending] = useActionState(assignUserRole, undefined)
-
-  return (
-    <form action={action} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="userId">Member</Label>
-        <NativeSelect id="userId" name="userId" required defaultValue="">
-          <option value="" disabled>
-            Select member
-          </option>
-          {members.map((member) => (
-            <option key={member.userId} value={member.userId}>
-              {member.fullName}
-              {member.email ? ` (${member.email})` : ""}
-            </option>
-          ))}
-        </NativeSelect>
-        <FormFieldError errors={state?.errors?.userId} />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="role">Role</Label>
-        <NativeSelect id="role" name="role" required defaultValue="">
-          <option value="" disabled>
-            Select role
-          </option>
-          {ASSIGNABLE_ROLES.map((role) => (
-            <option key={role} value={role}>
-              {ROLE_LABELS[role]}
-            </option>
-          ))}
-        </NativeSelect>
-        <FormFieldError errors={state?.errors?.role} />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="chapterId">Chapter (for chapter roles)</Label>
-        <NativeSelect id="chapterId" name="chapterId" defaultValue="">
-          <option value="">Organization-wide / none</option>
-          {chapters.map((chapter) => (
-            <option key={chapter.id} value={chapter.id}>
-              {chapter.name}
-            </option>
-          ))}
-        </NativeSelect>
-      </div>
-
-      {state?.message ? (
-        <p className={`text-sm ${state.success ? "text-primary" : "text-destructive"}`}>
-          {state.message}
-        </p>
-      ) : null}
-
-      <Button type="submit" disabled={pending || members.length === 0}>
-        {pending ? "Assigning..." : "Assign role"}
-      </Button>
-    </form>
-  )
+  /** Render a custom trigger (e.g. for an empty-state CTA). Defaults to a primary button. */
+  trigger?: React.ReactNode
 }
 
-export function RemoveRoleButton({ userRoleId }: { userRoleId: string }) {
-  const [state, action, pending] = useActionState(removeUserRole, undefined)
+export function AssignRoleDialog({
+  chapters,
+  members,
+  trigger,
+}: AssignRoleDialogProps) {
+  const [open, setOpen] = useState(false)
+  const [role, setRole] = useState<AppRole | "">("")
+  const needsChapter = role !== "" && CHAPTER_SCOPED_ROLES.includes(role)
+
+  const [state, formAction, pending] = useActionState(
+    async (prev: AdminActionState, formData: FormData) => {
+      const result = await assignUserRole(prev, formData)
+      if (result?.success) {
+        toast.success(result.message ?? "Role assigned.")
+        setOpen(false)
+        setRole("")
+      } else if (result?.message) {
+        toast.error(result.message)
+      }
+      return result
+    },
+    undefined
+  )
 
   return (
-    <form
-      action={action}
-      onSubmit={(event) => {
-        if (!window.confirm("Remove this role assignment?")) {
-          event.preventDefault()
-        }
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (!next) setRole("")
       }}
     >
-      <input type="hidden" name="userRoleId" value={userRoleId} />
-      <Button
-        type="submit"
-        size="sm"
-        variant="outline"
-        className="border-destructive text-destructive hover:bg-destructive/10"
-        disabled={pending}
-      >
-        {pending ? "Removing..." : "Remove"}
-      </Button>
-      {state?.message ? (
-        <p className={`mt-1 text-xs ${state.success ? "text-primary" : "text-destructive"}`}>
-          {state.message}
-        </p>
-      ) : null}
-    </form>
+      <DialogTrigger asChild>
+        {trigger ?? (
+          <Button>
+            <UserPlus className="h-4 w-4" aria-hidden />
+            Assign role
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Assign a role</DialogTitle>
+          <DialogDescription>
+            Grant a member a chapter or organization-wide role.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form action={formAction} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="userId">Member</Label>
+            <Select name="userId" required disabled={members.length === 0}>
+              <SelectTrigger id="userId">
+                <SelectValue placeholder="Select member" />
+              </SelectTrigger>
+              <SelectContent>
+                {members.map((member) => (
+                  <SelectItem key={member.userId} value={member.userId}>
+                    {member.fullName}
+                    {member.email ? ` (${member.email})` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormFieldError errors={state?.errors?.userId} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              name="role"
+              required
+              value={role}
+              onValueChange={(value) => setRole(value as AppRole)}
+            >
+              <SelectTrigger id="role">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                {ASSIGNABLE_ROLES.map((assignableRole) => (
+                  <SelectItem key={assignableRole} value={assignableRole}>
+                    {ROLE_LABELS[assignableRole]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormFieldError errors={state?.errors?.role} />
+          </div>
+
+          {needsChapter ? (
+            <div className="space-y-2">
+              <Label htmlFor="chapterId">Chapter</Label>
+              <Select name="chapterId" required>
+                <SelectTrigger id="chapterId">
+                  <SelectValue placeholder="Select chapter" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chapters.map((chapter) => (
+                    <SelectItem key={chapter.id} value={chapter.id}>
+                      {chapter.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormFieldError errors={state?.errors?.chapterId} />
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button type="submit" disabled={pending || members.length === 0}>
+              {pending ? <Spinner size="sm" /> : null}
+              {pending ? "Assigning..." : "Assign role"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   )
 }

@@ -1,15 +1,25 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { redirect } from "next/navigation"
+import { Award, CheckCircle2, Clock, XCircle } from "lucide-react"
+import { PageHeader } from "@/components/portal/page-header"
+import { StatCard } from "@/components/portal/dashboard/stat-card"
 import {
   VolunteerHourForm,
   VolunteerHoursList,
 } from "@/components/portal/volunteer-hours-panel"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { canLogVolunteerHours, getVolunteerChapterOptions } from "@/lib/auth/dal"
 import { getVolunteerHoursForUser } from "@/lib/data/phase45"
+import { sumVolunteerHours } from "@/lib/volunteer/helpers"
 import { routes } from "@/lib/routes"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
 
@@ -27,20 +37,50 @@ export default async function VolunteerHoursPage() {
     getVolunteerHoursForUser(),
   ])
 
+  // Stat tiles are derived client/server-side from the rows this page already
+  // loads via getVolunteerHoursForUser — no extra queries needed.
+  const currentYear = String(new Date().getFullYear())
+  const approvedThisYear = hours.filter(
+    (h) => h.status === "approved" && h.activity_date.startsWith(currentYear)
+  )
+  const pending = hours.filter((h) => h.status === "pending")
+  const rejected = hours.filter((h) => h.status === "rejected")
+
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-3xl font-bold">Volunteer hours</h1>
-          <p className="mt-2 text-muted-foreground">
-            Log teaching, event support, or admin work. Hours are reviewed by chapter
-            officers before certificates are issued.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={routes.portal.volunteerCertificates}>My certificates</Link>
-        </Button>
-      </div>
+    <div className="mx-auto w-full max-w-4xl space-y-6">
+      <PageHeader
+        title="Volunteer hours"
+        description="Log teaching, event support, or admin work. Hours are reviewed by chapter officers before certificates are issued."
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link href={routes.portal.volunteerCertificates}>
+              <Award aria-hidden />
+              My certificates
+            </Link>
+          </Button>
+        }
+      />
+
+      <section aria-label="Hours overview" className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          index={0}
+          label="Approved this year"
+          value={Math.round(sumVolunteerHours(approvedThisYear))}
+          icon={<CheckCircle2 aria-hidden />}
+        />
+        <StatCard
+          index={1}
+          label="Pending"
+          value={pending.length}
+          icon={<Clock aria-hidden />}
+        />
+        <StatCard
+          index={2}
+          label="Rejected"
+          value={rejected.length}
+          icon={<XCircle aria-hidden />}
+        />
+      </section>
 
       <Card>
         <CardHeader>
@@ -55,7 +95,7 @@ export default async function VolunteerHoursPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Your hours</CardTitle>
-          <CardDescription>Pending entries can be removed until approved</CardDescription>
+          <CardDescription>Pending entries can be edited or removed until approved</CardDescription>
         </CardHeader>
         <CardContent>
           <VolunteerHoursList hours={hours} />

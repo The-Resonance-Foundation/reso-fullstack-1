@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { AvailabilityForm, AvailabilityList } from "@/components/portal/availability-panel"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  AddAvailabilityDialog,
+  WeeklyAvailabilityGrid,
+} from "@/components/portal/availability-panel"
+import { PageHeader } from "@/components/portal/page-header"
 import { getUserRoles, isTutorAccount } from "@/lib/auth/dal"
 import { getTutorAvailability } from "@/lib/data/phase23"
 
@@ -28,32 +31,14 @@ export default async function AvailabilityPage() {
     }))
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">Availability</h1>
-        <p className="mt-2 text-muted-foreground">
-          Set the times you are available to teach each week.
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHeader
+        title="Availability"
+        description="Your weekly teaching windows. Officers and families use these to plan lessons."
+        actions={<AddAvailabilityDialog chapters={tutorChapters} />}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Add availability</CardTitle>
-          <CardDescription>Officers and families can see your schedule.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AvailabilityForm chapters={tutorChapters} />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Your slots</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AvailabilityList slots={slots} />
-        </CardContent>
-      </Card>
+      <WeeklyAvailabilityGrid slots={slots} chapters={tutorChapters} />
     </div>
   )
 }

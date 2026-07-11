@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { ConversationList } from "@/components/portal/messaging-panel"
+import { Eye } from "lucide-react"
+import { AuditConversationList } from "@/components/portal/message-audit-panel"
+import { PageHeader } from "@/components/portal/page-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { canAuditMessages } from "@/lib/auth/dal"
@@ -22,27 +24,35 @@ export default async function MessagesAuditPage() {
   const conversations = await getAuditableConversations()
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-3xl font-bold">Message audit</h1>
-          <p className="mt-2 text-muted-foreground">
-            Read-only access for chapter presidents, program administrators, and board
-            members. You cannot send messages from this view.
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={routes.portal.messages}>Your inbox</Link>
-        </Button>
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <PageHeader
+        title="Message audit"
+        description="Read-only access for chapter presidents, program administrators, and board members."
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <Link href={routes.portal.messages}>Your inbox</Link>
+          </Button>
+        }
+      />
+
+      <div className="animate-fade-up flex items-start gap-3 rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm">
+        <Eye className="mt-0.5 h-4 w-4 shrink-0 text-warning" aria-hidden />
+        <p>
+          <span className="font-medium">Audit view.</span> You can read every message in
+          these tutor–student threads, but you cannot send messages or reply from here.
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Auditable conversations</CardTitle>
-          <CardDescription>Tutor–student threads in your scope</CardDescription>
+          <CardDescription>
+            {conversations.length} tutor–student thread{conversations.length === 1 ? "" : "s"} in
+            your scope
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <ConversationList conversations={conversations} audit />
+          <AuditConversationList conversations={conversations} />
         </CardContent>
       </Card>
     </div>

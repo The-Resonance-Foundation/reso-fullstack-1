@@ -84,6 +84,9 @@ export async function upsertChapter(
     : await supabase.from("chapters").insert(payload)
 
   if (error) {
+    if (error.code === "23505") {
+      return { message: "That slug is already in use — pick another." }
+    }
     return { message: error.message }
   }
 

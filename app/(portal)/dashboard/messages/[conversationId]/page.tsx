@@ -1,10 +1,7 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
-import { MessageThreadView } from "@/components/portal/messaging-panel"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { canAuditMessages, verifySession } from "@/lib/auth/dal"
+import { MessageThread } from "@/components/portal/message-thread"
+import { canAuditMessages, getProfile, verifySession } from "@/lib/auth/dal"
 import { getConversationWithMessages, getConversationsForUser } from "@/lib/data/phase45"
 import { routes } from "@/lib/routes"
 
@@ -31,10 +28,11 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
   const { audit } = await searchParams
   const auditMode = audit === "1"
 
-  const [user, canAudit, userConversations] = await Promise.all([
+  const [user, canAudit, userConversations, profile] = await Promise.all([
     verifySession(),
     canAuditMessages(),
     getConversationsForUser(),
+    getProfile(),
   ])
 
   // Only a genuinely-authorized audit view (query param AND permission) may
@@ -58,36 +56,39 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
     ? `${conversation.students.first_name} ${conversation.students.last_name}`
     : "Student"
 
-  return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-3xl font-bold">{studentName} · Tutor chat</h1>
-          <p className="mt-2 text-muted-foreground">
-            {conversation.chapters?.name ?? "Chapter"}
-            {readOnly ? " · Read-only audit view" : null}
-          </p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={readOnly ? routes.portal.messagesAudit : routes.portal.messages}>
-            Back to {readOnly ? "audit inbox" : "inbox"}
-          </Link>
-        </Button>
-      </div>
+  // userId → name for everyone known to be in this thread, so realtime
+  // messages can be attributed client-side without waiting for a refresh.
+  const conversationEntry = userConversations.find((c) => c.id === conversationId)
+  const memberNames: Record<string, string> = {}
+  for (const message of messages) {
+    if (message.profiles?.full_name) {
+      memberNames[message.sender_id] = message.profiles.full_name
+    }
+  }
+  if (conversationEntry?.tutor_name && !memberNames[conversation.tutor_user_id]) {
+    memberNames[conversation.tutor_user_id] = conversationEntry.tutor_name
+  }
+  if (profile?.full_name && !memberNames[user.id]) {
+    memberNames[user.id] = profile.full_name
+  }
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Conversation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MessageThreadView
-            conversationId={conversationId}
-            initialMessages={messages}
-            currentUserId={user.id}
-            readOnly={readOnly}
-          />
-        </CardContent>
-      </Card>
+  const tutorName =
+    memberNames[conversation.tutor_user_id] ?? conversationEntry?.tutor_name ?? "Tutor"
+
+  return (
+    <div className="mx-auto w-full max-w-3xl">
+      <MessageThread
+        conversationId={conversationId}
+        initialMessages={messages}
+        currentUserId={user.id}
+        memberNames={memberNames}
+        title={`${studentName} · Tutor chat`}
+        subtitle={`${tutorName} · ${conversation.chapters?.name ?? "Chapter"}`}
+        readOnly={readOnly}
+        showDeleted={isAuditView}
+        backHref={readOnly ? routes.portal.messagesAudit : routes.portal.messages}
+        backLabel={readOnly ? "Back to audit inbox" : "Back to inbox"}
+      />
     </div>
   )
 }

@@ -1,12 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import {
-  LessonsList,
-  ParentLessonsView,
-  ScheduleLessonForm,
-} from "@/components/portal/lessons-panel"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CalendarClock } from "lucide-react"
+import { LessonsView, ScheduleLessonDialog } from "@/components/portal/lessons-panel"
+import { PageHeader } from "@/components/portal/page-header"
+import { Button } from "@/components/ui/button"
+import { EmptyState } from "@/components/ui/empty-state"
 import {
   canManageLessons,
   getStudentsForParent,
@@ -31,13 +30,14 @@ export default async function LessonsPage() {
     canManageLessons(),
   ])
 
+  // Tutors always get their own lessons view below — canManageLessons() is
+  // true for any tutor, so this only redirects users with none of the three
+  // roles (e.g. a volunteer-only account).
   if (!isTutor && !isParent && !canManage) {
     redirect("/dashboard")
   }
 
-  if (isTutor && !isParent && !canManage) {
-    redirect(routes.portal.tutorStudents)
-  }
+  const perspective = isParent && !isTutor ? "parent" : isTutor ? "tutor" : "officer"
 
   const [lessons, assignedStudents, familyStudents] = await Promise.all([
     getLessonsForUser(),
@@ -45,76 +45,69 @@ export default async function LessonsPage() {
     isParent ? getStudentsForParent() : Promise.resolve([]),
   ])
 
+  const description =
+    perspective === "parent"
+      ? "Upcoming and past lessons for your students, including times, locations, and tutor notes."
+      : perspective === "tutor"
+        ? "Your scheduled and past lessons. Log attendance or update status right from a lesson."
+        : "Every lesson scheduled across your chapter."
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">
-          {isParent && !isTutor ? "Family lessons" : "Lessons"}
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {isParent && !isTutor
-            ? "Upcoming and past lessons for your students, including times, locations, and tutor notes."
-            : "Upcoming and past lessons for your students."}
-        </p>
-        {isParent && !isTutor ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Need the full schedule?{" "}
-            <Link href={routes.portal.calendar} className="text-primary hover:underline">
-              Open the calendar
-            </Link>
-            .
-          </p>
-        ) : null}
-      </div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <PageHeader
+        title="Lessons"
+        description={description}
+        actions={
+          perspective === "tutor" ? (
+            <ScheduleLessonDialog students={assignedStudents} />
+          ) : undefined
+        }
+      />
 
-      {isTutor ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Schedule a lesson</CardTitle>
-            <CardDescription>
-              Prefer scheduling from{" "}
-              <Link href={routes.portal.tutorStudents} className="text-primary hover:underline">
-                My students
-              </Link>
-              .
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ScheduleLessonForm students={assignedStudents} />
-          </CardContent>
-        </Card>
-      ) : null}
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {isParent && !isTutor
-              ? "Your students"
-              : isTutor
-                ? "All scheduled lessons"
-                : "Chapter lessons"}
-          </CardTitle>
-          {isParent && !isTutor ? (
-            <CardDescription>
-              Lessons for{" "}
-              {familyStudents.length === 1
-                ? "1 student"
-                : `${familyStudents.length} students`}{" "}
-              on your account.
-            </CardDescription>
-          ) : null}
-        </CardHeader>
-        <CardContent>
-          {isParent && !isTutor ? (
-            <ParentLessonsView
-              lessons={lessons}
-              studentCount={familyStudents.length}
-            />
-          ) : (
-            <LessonsList lessons={lessons} canLog={isTutor} />
-          )}
-        </CardContent>
-      </Card>
+      {perspective === "parent" && familyStudents.length === 0 ? (
+        <EmptyState
+          icon={<CalendarClock aria-hidden />}
+          title="Add a student first"
+          description="Enroll a student on your family account before lessons can be scheduled."
+          action={
+            <Button asChild variant="outline" size="sm">
+              <Link href={routes.portal.students}>Go to My Students</Link>
+            </Button>
+          }
+        />
+      ) : (
+        <LessonsView
+          lessons={lessons}
+          perspective={perspective}
+          emptyState={
+            perspective === "tutor" ? (
+              <EmptyState
+                icon={<CalendarClock aria-hidden />}
+                title="No lessons yet"
+                description="Schedule your first lesson with an assigned student to get started."
+                action={<ScheduleLessonDialog students={assignedStudents} />}
+              />
+            ) : (
+              <EmptyState
+                icon={<CalendarClock aria-hidden />}
+                title="No lessons scheduled yet"
+                description={
+                  perspective === "parent"
+                    ? "Once a tutor is assigned, they will schedule lessons here. You can also check the calendar for chapter events."
+                    : "Lessons scheduled across the chapter will show up here."
+                }
+                action={
+                  perspective === "parent" ? (
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={routes.portal.calendar}>Open calendar</Link>
+                    </Button>
+                  ) : undefined
+                }
+              />
+            )
+          }
+        />
+      )}
     </div>
   )
 }

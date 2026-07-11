@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { canManageLessons, isTutorAccount, verifySession } from "@/lib/auth/dal"
+import { isTutorAccount, verifySession } from "@/lib/auth/dal"
 import { getTutorAvailability } from "@/lib/data/phase23"
 import { hasAvailabilityOverlap } from "@/lib/lessons/helpers"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
@@ -65,6 +65,12 @@ export async function addAvailability(
   })
 
   if (error) {
+    if (
+      error.code === "23P01" ||
+      error.message?.includes("tutor_availability_no_overlap")
+    ) {
+      return { message: "This overlaps an existing slot." }
+    }
     return { message: error.message }
   }
 

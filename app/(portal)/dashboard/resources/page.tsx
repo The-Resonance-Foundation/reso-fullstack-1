@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { ResourceForm, ResourcesList } from "@/components/portal/resources-panel"
+import { AddResourceDialog, ResourcesList } from "@/components/portal/resources-panel"
+import { PageHeader } from "@/components/portal/page-header"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   canManageLessons,
@@ -62,32 +63,26 @@ export default async function ResourcesPage() {
     isTutor ? getAssignedStudentsForTutor() : Promise.resolve([]),
   ])
 
-  return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="font-serif text-3xl font-bold">Resources</h1>
-        <p className="mt-2 text-muted-foreground">
-          Chapter and student-specific learning materials.
-        </p>
-      </div>
+  const canAddResources = isTutor || canManage
 
-      {isTutor || canManage ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add resource</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResourceForm
+  return (
+    <div className="mx-auto w-full max-w-5xl space-y-6">
+      <PageHeader
+        title="Resources"
+        description="Chapter and student-specific learning materials."
+        actions={
+          canAddResources ? (
+            <AddResourceDialog
               chapters={chapterOptions}
               students={isTutor ? assignedStudents : undefined}
             />
-          </CardContent>
-        </Card>
-      ) : null}
+          ) : null
+        }
+      />
 
-      <Card>
+      <Card className="animate-fade-up">
         <CardHeader>
-          <CardTitle>Available resources</CardTitle>
+          <CardTitle className="text-lg">Available resources</CardTitle>
         </CardHeader>
         <CardContent>
           <ResourcesList resources={resources} canDelete={canManage} />

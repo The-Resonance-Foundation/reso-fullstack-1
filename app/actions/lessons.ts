@@ -71,6 +71,11 @@ export async function scheduleLesson(
   })
 
   if (error) {
+    if (error.code === "42501") {
+      return {
+        message: "You can only schedule lessons for students assigned to you.",
+      }
+    }
     return { message: error.message }
   }
 

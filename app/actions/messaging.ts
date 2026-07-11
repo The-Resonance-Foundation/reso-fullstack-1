@@ -33,7 +33,12 @@ export async function sendMessage(
     conversationId: formData.get("conversationId"),
     body: formData.get("body"),
   })
-  if (!validated.success) return { errors: validated.error.flatten().fieldErrors }
+  if (!validated.success) {
+    return {
+      errors: validated.error.flatten().fieldErrors,
+      message: "Messages need to be between 1 and 4,000 characters.",
+    }
+  }
 
   const user = await verifySession()
   const supabase = await getServerClientOrThrow()
@@ -43,14 +48,21 @@ export async function sendMessage(
     .eq("conversation_id", validated.data.conversationId)
     .eq("user_id", user.id)
     .maybeSingle()
-  if (!membership) return { message: "You are not a member of this conversation." }
+  if (!membership) {
+    return {
+      message: "You're not a member of this conversation, so you can't send messages here.",
+    }
+  }
 
   const { error } = await supabase.from("messages").insert({
     conversation_id: validated.data.conversationId,
     sender_id: user.id,
     body: validated.data.body,
   })
-  if (error) return { message: error.message }
+  if (error) {
+    console.error("sendMessage", error.message)
+    return { message: "Something went wrong sending your message. Please try again." }
+  }
 
   await supabase
     .from("conversations")
@@ -68,7 +80,9 @@ export async function softDeleteMessage(
 ): Promise<MessageFormState> {
   const messageId = String(formData.get("messageId") ?? "")
   const conversationId = String(formData.get("conversationId") ?? "")
-  if (!messageId) return { message: "Missing message." }
+  if (!messageId) {
+    return { message: "We couldn't tell which message to remove. Refresh and try again." }
+  }
 
   const user = await verifySession()
   const supabase = await getServerClientOrThrow()
@@ -77,7 +91,10 @@ export async function softDeleteMessage(
     .update({ deleted_at: new Date().toISOString() })
     .eq("id", messageId)
     .eq("sender_id", user.id)
-  if (error) return { message: error.message }
+  if (error) {
+    console.error("softDeleteMessage", error.message)
+    return { message: "Something went wrong removing the message. Please try again." }
+  }
   revalidateMessagingPaths(conversationId)
   return { success: true, message: "Message removed." }
 }
