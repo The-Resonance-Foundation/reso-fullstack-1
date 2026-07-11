@@ -1,6 +1,17 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens — The Resonance Foundation
+ * Light is the brand's warm cream/maroon/gold palette (shared with the
+ * marketing site). Dark is a warm charcoal-brown counterpart scoped to
+ * `.dark`; marketing/auth layouts pin themselves to `.light`.
+ */
+:root,
+.light {
+  color-scheme: light;
   --background: #faf7f2;
   --foreground: #2c1810;
   --card: #ffffff;
@@ -20,7 +31,62 @@
   --destructive-foreground: #faf7f2;
   --popover: #ffffff;
   --popover-foreground: #2c1810;
+  --success: #15803d;
+  --success-foreground: #f0fdf4;
+  --warning: #b45309;
+  --warning-foreground: #fffbeb;
+  --sidebar: #f4eee4;
+  --sidebar-foreground: #2c1810;
+  --sidebar-accent: #eae2d3;
+  --sidebar-accent-foreground: #2c1810;
+  --sidebar-border: #e3dac9;
+  --sidebar-primary: #6b1f3a;
+  --sidebar-ring: #6b1f3a;
+  --chart-1: #8e2d4d;
+  --chart-2: #b8912a;
+  --chart-3: #2f7e72;
+  --chart-4: #55679d;
+  --chart-5: #c06744;
   --radius: 0.75rem;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #151110;
+  --foreground: #f2ebe1;
+  --card: #1e1815;
+  --card-foreground: #f2ebe1;
+  --primary: #b13e64;
+  --primary-foreground: #fdf6f8;
+  --secondary: #2b231e;
+  --secondary-foreground: #ecdfd0;
+  --muted: #251f1a;
+  --muted-foreground: #a3958a;
+  --accent: #d6b354;
+  --accent-foreground: #201708;
+  --border: #302823;
+  --input: #362d26;
+  --ring: #c76d8b;
+  --destructive: #e05252;
+  --destructive-foreground: #fef2f2;
+  --popover: #251e1a;
+  --popover-foreground: #f2ebe1;
+  --success: #3fbf7f;
+  --success-foreground: #0b2416;
+  --warning: #f0a83c;
+  --warning-foreground: #241a06;
+  --sidebar: #191412;
+  --sidebar-foreground: #f2ebe1;
+  --sidebar-accent: #292118;
+  --sidebar-accent-foreground: #f2ebe1;
+  --sidebar-border: #2b231e;
+  --sidebar-primary: #d6b354;
+  --sidebar-ring: #c76d8b;
+  --chart-1: #d17a97;
+  --chart-2: #d9b65c;
+  --chart-3: #5fb3a5;
+  --chart-4: #8fa1d6;
+  --chart-5: #dd9070;
 }
 
 @theme inline {
@@ -43,8 +109,25 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
+  --radius-xl: calc(var(--radius) + 4px);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
@@ -64,6 +147,27 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-playfair), Georgia, serif;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+/* Slim, theme-aware scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @keyframes accordion-down {
   from { height: 0; }
   to { height: var(--radix-accordion-content-height); }
@@ -80,4 +184,44 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-accordion-up {
   animation: accordion-up 0.2s ease-out;
+}
+
+/* Skeleton shimmer sweep */
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+/* Staggered list/page entrance — set --stagger-index per item */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) both;
+  animation-delay: calc(var(--stagger-index, 0) * 50ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
 }

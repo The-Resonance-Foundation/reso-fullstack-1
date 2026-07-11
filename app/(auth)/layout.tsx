@@ -8,7 +8,8 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    // Auth pages stay light regardless of the portal theme toggle.
+    <div className="light flex min-h-screen flex-col bg-background text-foreground">
       <header className="border-b border-border px-4 py-4">
         <Link href={routes.home} className="inline-flex items-center gap-2">
           <Music className="h-6 w-6 text-primary" />

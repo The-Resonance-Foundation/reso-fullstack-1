@@ -10,7 +10,8 @@ export default async function MarketingLayout({
   const session = await getSession()
 
   return (
-    <div className="flex min-h-screen flex-col">
+    // Marketing pages stay light regardless of the portal theme toggle.
+    <div className="light flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader isAuthenticated={Boolean(session)} />
       <main className="flex-1">{children}</main>
       <SiteFooter />

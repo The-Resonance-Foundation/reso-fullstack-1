@@ -1,7 +1,9 @@
 import { getDashboardContext } from "@/lib/auth/dal"
 import { getNotificationsForUser, getUnreadNotificationCount } from "@/lib/data/phase45"
 import { PortalHeader } from "@/components/portal/portal-header"
-import { PortalSidebar } from "@/components/portal/portal-sidebar"
+import { PortalSidebar, type RoleChip } from "@/components/portal/portal-sidebar"
+import type { PortalNavFlags } from "@/components/portal/portal-nav"
+import { ROLE_LABELS } from "@/types/roles"
 
 export default async function PortalLayout({
   children,
@@ -11,7 +13,6 @@ export default async function PortalLayout({
   const {
     profile,
     roles,
-    roleNames,
     canReview,
     isParent,
     isTutor,
@@ -19,13 +20,33 @@ export default async function PortalLayout({
     canAuditMessages,
     canViewDonations,
     canViewAuditLogs,
-    canManageLessons,
-    canManageEvents,
     canManageChapters,
     canAssignRoles,
     hasPortalRole,
+    user,
   } = await getDashboardContext()
+
   const displayName = profile?.full_name ?? "Member"
+  const email = user.email ?? ""
+
+  const flags: PortalNavFlags = {
+    isParent,
+    isTutor,
+    hasPortalRole,
+    canLogVolunteerHours,
+    canReview,
+    canManageChapters,
+    canAssignRoles,
+    canAuditMessages,
+    canViewDonations,
+    canViewAuditLogs,
+  }
+
+  const roleChips: RoleChip[] = roles.map((role) => ({
+    id: role.id,
+    label: ROLE_LABELS[role.role],
+    chapter: role.chapters?.name ?? null,
+  }))
 
   const [notifications, unreadCount] = hasPortalRole
     ? await Promise.all([
@@ -35,30 +56,17 @@ export default async function PortalLayout({
     : [[], 0]
 
   return (
-    <div className="flex min-h-screen bg-muted/30">
-      <PortalSidebar
-        roles={roles}
-        roleNames={roleNames}
-        canReview={canReview}
-        isParent={isParent}
-        isTutor={isTutor}
-        canLogVolunteerHours={canLogVolunteerHours}
-        canAuditMessages={canAuditMessages}
-        canViewDonations={canViewDonations}
-        canViewAuditLogs={canViewAuditLogs}
-        canManageLessons={canManageLessons}
-        canManageEvents={canManageEvents}
-        canManageChapters={canManageChapters}
-        canAssignRoles={canAssignRoles}
-        hasPortalRole={hasPortalRole}
-      />
-      <div className="flex flex-1 flex-col">
+    <div className="flex min-h-screen bg-background">
+      <PortalSidebar flags={flags} roleChips={roleChips} />
+      <div className="flex min-w-0 flex-1 flex-col">
         <PortalHeader
           displayName={displayName}
+          email={email}
+          flags={flags}
           notifications={notifications}
           unreadCount={unreadCount}
         />
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
   )
