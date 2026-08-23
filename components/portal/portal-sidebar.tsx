@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Music } from "lucide-react"
+import { BrandMark } from "@/components/portal/aurora-background"
 import { PortalNav, type PortalNavFlags } from "@/components/portal/portal-nav"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { routes } from "@/lib/routes"
@@ -12,52 +12,56 @@ export type RoleChip = {
   chapter: string | null
 }
 
+const ROLE_DOTS = ["var(--acc-hi, #F8B269)", "#8FE3A8", "#6CBDE6", "#B3A1FF"]
+
 type PortalSidebarProps = {
   flags: PortalNavFlags
   roleChips: RoleChip[]
+  badges?: Record<string, number>
 }
 
-export function PortalSidebar({ flags, roleChips }: PortalSidebarProps) {
+export function PortalSidebar({ flags, roleChips, badges }: PortalSidebarProps) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-gradient-to-b from-[rgba(255,242,226,0.035)] to-[rgba(255,242,226,0.01)] lg:flex">
       <Link
         href={routes.portal.dashboard}
-        className="flex h-16 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4"
+        className="flex shrink-0 items-center gap-3 px-4 pb-3 pt-5"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-          <Music className="h-5 w-5" aria-hidden />
-        </span>
+        <BrandMark size={40} />
         <span className="leading-tight">
-          <span className="block font-serif text-sm font-bold text-sidebar-foreground">
+          <span className="block font-serif text-[16px] font-bold tracking-[.01em] text-sidebar-foreground">
             Resonance
           </span>
-          <span className="block text-[11px] text-sidebar-foreground/60">
+          <span className="mt-0.5 block text-[11px] tracking-[.04em] text-muted-foreground">
             Member Portal
           </span>
         </span>
       </Link>
 
-      <ScrollArea className="flex-1">
-        <div className="p-3">
-          <PortalNav flags={flags} instanceId="desktop" />
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="px-3 pb-3 pt-1">
+          <PortalNav flags={flags} instanceId="desktop" badges={badges} />
         </div>
       </ScrollArea>
 
       {roleChips.length > 0 ? (
-        <div className="shrink-0 border-t border-sidebar-border p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+        <div className="shrink-0 border-t border-sidebar-border px-4 py-4">
+          <p className="text-[10.5px] font-bold uppercase tracking-[.14em] text-foreground/40">
             Your roles
           </p>
-          <ul className="mt-2 flex flex-wrap gap-1.5">
-            {roleChips.map((chip) => (
+          <ul className="mt-2.5 flex flex-col gap-2">
+            {roleChips.map((chip, i) => (
               <li
                 key={chip.id}
-                className="inline-flex max-w-full items-center gap-1 rounded-full border border-sidebar-border bg-sidebar-accent/60 px-2.5 py-1 text-[11px] font-medium text-sidebar-foreground"
-                title={chip.chapter ? `${chip.label} · ${chip.chapter}` : chip.label}
+                className="flex items-center gap-2.5 text-[12.5px] font-medium text-[#DAD0C2]"
               >
+                <span
+                  className="h-[5px] w-[5px] flex-none rounded-full"
+                  style={{ background: ROLE_DOTS[i % ROLE_DOTS.length] }}
+                />
                 <span className="truncate">{chip.label}</span>
                 {chip.chapter ? (
-                  <span className="shrink-0 text-sidebar-foreground/55">
+                  <span className="shrink-0 font-normal text-muted-foreground/80">
                     · {chip.chapter}
                   </span>
                 ) : null}

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react"
 import { Megaphone } from "lucide-react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import { publishAnnouncement } from "@/app/actions/announcements"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { NativeSelect } from "@/components/forms/native-select"
@@ -28,6 +29,7 @@ export function AnnouncementComposer({
       const result = await publishAnnouncement(prevState, formData)
       if (result?.success) {
         toast.success(result.message ?? "Announcement published.")
+        celebrate()
         setFormKey((k) => k + 1)
       } else if (result?.message) {
         toast.error(result.message)

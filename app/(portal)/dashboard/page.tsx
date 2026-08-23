@@ -6,6 +6,7 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
+  ChevronRight,
   ClipboardCheck,
   ClipboardList,
   Clock,
@@ -23,7 +24,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { GuestApplicationHub } from "@/components/portal/guest-application-hub"
 import { UpcomingLessonsSummary } from "@/components/portal/lessons-panel"
@@ -68,6 +69,7 @@ const EVENT_DATE = new Intl.DateTimeFormat("en-US", {
 export default async function DashboardPage() {
   const {
     profile,
+    roles,
     roleNames,
     canReview,
     isParent,
@@ -85,6 +87,7 @@ export default async function DashboardPage() {
 
   const isGuest = roleNames.length === 0
   const firstName = profile?.full_name?.trim().split(/\s+/)[0]
+  const chapterName = roles.find((r) => r.chapters?.name)?.chapters?.name ?? null
   const today = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
@@ -197,14 +200,22 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
       {/* Greeting */}
-      <div className="animate-fade-up">
-        <p className="text-sm text-muted-foreground">{today}</p>
-        <h1 className="mt-1 font-serif text-3xl font-bold">
-          Welcome back{firstName ? `, ${firstName}` : ""}
-        </h1>
-        {isGuest ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Signed in as {user.email ?? "member"} — finish your application below.
+      <div className="animate-fade-up flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[12.5px] tracking-[.05em] text-muted-foreground">{today}</p>
+          <h1 className="mt-1 font-serif text-[27px] font-bold">
+            Welcome back{firstName ? `, ${firstName}` : ""}
+          </h1>
+          {isGuest ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Signed in as {user.email ?? "member"} — finish your application below.
+            </p>
+          ) : null}
+        </div>
+        {chapterName ? (
+          <p className="hidden items-center gap-1.5 pb-1 text-[12.5px] font-medium text-muted-foreground sm:flex">
+            <MapPin className="h-3.5 w-3.5 text-[var(--acc-hi,#F8B269)]" aria-hidden />
+            {chapterName} chapter
           </p>
         ) : null}
       </div>
@@ -381,60 +392,115 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      {/* Needs attention */}
-      {needsAttention.length > 0 ? (
-        <Card className="animate-fade-up border-warning/40">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-warning/15">
-                <ClipboardCheck className="h-3.5 w-3.5 text-warning" aria-hidden />
-              </span>
-              Needs your attention
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2 sm:grid-cols-3">
-            {needsAttention.map((item) => (
-              <Link
-                key={item.href + item.label}
-                href={item.href}
-                className="group flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2.5 text-sm transition-colors hover:border-warning/50 hover:bg-warning/5"
-              >
-                <span className="min-w-0 truncate">{item.label}</span>
-                <Badge variant="secondary" className="shrink-0 bg-warning/15 text-warning-foreground group-hover:bg-warning/25 dark:text-warning">
-                  {item.count}
-                </Badge>
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
+      {/* Reviewer command center: charts left, attention rail right */}
+      {canReview && (donationSeries?.length || lessonsPerWeek?.length || needsAttention.length) ? (
+        <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,4fr)]">
+          <div className="min-w-0 space-y-4">
+            {donationSeries?.length ? (
+              <Card className="animate-fade-up" style={{ "--stagger-index": 2 } as React.CSSProperties}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Donations</CardTitle>
+                  <CardDescription>Monthly totals, last 12 months</CardDescription>
+                </CardHeader>
+                <CardContent className="pl-0">
+                  <DonationsTrendChart data={donationSeries} />
+                </CardContent>
+              </Card>
+            ) : null}
+            <div className="grid gap-4 md:grid-cols-2">
+              {adminStats && adminStats.pendingApplicants > 0 ? (
+                <Link
+                  href={routes.portal.applicants}
+                  className="promo-card animate-fade-up flex flex-col p-5"
+                  style={{ "--stagger-index": 3 } as React.CSSProperties}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -bottom-14 -right-10 h-40 w-40 rounded-full opacity-70 blur-[34px]"
+                    style={{ background: "color-mix(in oklab, var(--acc) 30%, transparent)" }}
+                  />
+                  <span className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--acc-hi,#F8B269)]">
+                    {chapterName ? `${chapterName} chapter` : "Your chapter"}
+                  </span>
+                  <span className="mt-2 font-serif text-xl font-bold leading-snug">
+                    {adminStats.pendingApplicants} application
+                    {adminStats.pendingApplicants === 1 ? "" : "s"}
+                    <br />
+                    awaiting review
+                  </span>
+                  <span className="mt-2 text-[12.5px] leading-relaxed text-foreground/70">
+                    New tutors and volunteers are ready to join the chapter.
+                  </span>
+                  <span className="mt-auto pt-4">
+                    <span className="block rounded-xl bg-[#FBF6EE] px-4 py-2.5 text-center text-[13px] font-bold text-[#22150A] shadow-[0_8px_20px_rgba(0,0,0,.3)]">
+                      Review applicants
+                    </span>
+                  </span>
+                </Link>
+              ) : null}
+              {lessonsPerWeek?.length ? (
+                <Card
+                  className={cn("animate-fade-up", adminStats && adminStats.pendingApplicants > 0 ? "" : "md:col-span-2")}
+                  style={{ "--stagger-index": 4 } as React.CSSProperties}
+                >
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Lessons taught</CardTitle>
+                    <CardDescription>Per week, last 8 weeks</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-0">
+                    <LessonsPerWeekChart data={lessonsPerWeek} />
+                  </CardContent>
+                </Card>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="min-w-0 space-y-4">
+            {needsAttention.length > 0 ? (
+              <Card className="animate-fade-up" style={{ "--stagger-index": 3 } as React.CSSProperties}>
+                <CardHeader className="pb-1">
+                  <CardTitle className="flex items-center gap-2.5 text-base">
+                    <span className="animate-pulse-ring h-2 w-2 rounded-full bg-[var(--acc-hi,#F8B269)]" />
+                    Needs your attention
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-1">
+                  {needsAttention.map((item) => (
+                    <Link
+                      key={item.href + item.label}
+                      href={item.href}
+                      className="group flex items-center gap-2.5 border-b border-[rgba(255,240,222,.07)] px-1 py-3 text-sm transition-transform last:border-b-0 hover:translate-x-[3px]"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium">
+                        {item.label}
+                      </span>
+                      <span className="font-serif text-[13.5px] font-bold text-[var(--acc-hi,#F8B269)]">
+                        {item.count}
+                      </span>
+                      <ChevronRight
+                        className="h-3.5 w-3.5 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                        aria-hidden
+                      />
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            ) : null}
+          </div>
+        </section>
       ) : null}
 
-      {/* Charts row (officers/admins) */}
-      {donationSeries?.length || lessonsPerWeek?.length ? (
-        <section className="grid gap-4 lg:grid-cols-2">
-          {donationSeries?.length ? (
-            <Card className="animate-fade-up">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Donations</CardTitle>
-                <CardDescription>Monthly totals, last 12 months</CardDescription>
-              </CardHeader>
-              <CardContent className="pl-0">
-                <DonationsTrendChart data={donationSeries} />
-              </CardContent>
-            </Card>
-          ) : null}
-          {lessonsPerWeek?.length ? (
-            <Card className="animate-fade-up">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Lessons taught</CardTitle>
-                <CardDescription>Per week, last 8 weeks</CardDescription>
-              </CardHeader>
-              <CardContent className="pl-0">
-                <LessonsPerWeekChart data={lessonsPerWeek} />
-              </CardContent>
-            </Card>
-          ) : null}
-        </section>
+      {/* Non-reviewer charts */}
+      {!canReview && donationSeries?.length ? (
+        <Card className="animate-fade-up">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Donations</CardTitle>
+            <CardDescription>Monthly totals, last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent className="pl-0">
+            <DonationsTrendChart data={donationSeries} />
+          </CardContent>
+        </Card>
       ) : null}
 
       {/* Parent: practice chart + upcoming lessons */}

@@ -55,7 +55,7 @@ function AnimatedValue({ value, format }: { value: number; format: StatFormat })
   }, [value, format, reduceMotion])
 
   return (
-    <span className="font-sans text-3xl font-semibold leading-none tracking-tight">
+    <span className="font-serif text-[26px] font-bold leading-none tracking-tight">
       {display}
     </span>
   )
@@ -98,7 +98,7 @@ export function StatCard({
               <p className="text-xs text-muted-foreground">{hint}</p>
             ) : null}
           </div>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:h-5 [&_svg]:w-5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_oklab,var(--acc,#f08c2e)_13%,transparent)] text-[var(--acc-hi,#F8B269)] [&_svg]:h-5 [&_svg]:w-5">
             {icon}
           </span>
         </div>

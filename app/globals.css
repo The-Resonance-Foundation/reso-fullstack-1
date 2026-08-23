@@ -204,7 +204,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -213,8 +213,282 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .animate-fade-up {
-  animation: fade-up 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) both;
-  animation-delay: calc(var(--stagger-index, 0) * 50ms);
+  animation: fade-up 0.55s cubic-bezier(0.22, 0.9, 0.35, 1) both;
+  animation-delay: calc(var(--stagger-index, 0) * 55ms);
+}
+
+/* ===========================================================================
+ * Aurora glass theme — member portal
+ * Warm amber glassmorphism from the "Resonance ERP" Claude Design project.
+ * Scoped to `.portal-aurora` (paired with `.dark` so dark tokens apply);
+ * marketing/auth-light surfaces are untouched.
+ * ======================================================================== */
+
+.portal-aurora {
+  color-scheme: dark;
+  --background: #14100d;
+  --foreground: #f4ede3;
+  --card: #221a13;
+  --card-foreground: #f4ede3;
+  --primary: #f08c2e;
+  --primary-foreground: #251403;
+  --secondary: rgba(255, 242, 226, 0.07);
+  --secondary-foreground: #ecdfd0;
+  --muted: rgba(255, 242, 226, 0.055);
+  --muted-foreground: #a89a89;
+  --accent: rgba(255, 242, 226, 0.08);
+  --accent-foreground: #f4ede3;
+  --border: rgba(255, 240, 222, 0.12);
+  --input: rgba(255, 240, 222, 0.14);
+  --ring: #f6a54a;
+  --destructive: #ff7d68;
+  --destructive-foreground: #2a0e08;
+  --popover: #251c14;
+  --popover-foreground: #f4ede3;
+  --success: #8fe3a8;
+  --success-foreground: #0b2416;
+  --warning: #f8b269;
+  --warning-foreground: #241a06;
+  --sidebar: transparent;
+  --sidebar-foreground: #f4ede3;
+  --sidebar-accent: rgba(255, 242, 226, 0.07);
+  --sidebar-accent-foreground: #f4ede3;
+  --sidebar-border: rgba(255, 240, 222, 0.08);
+  --sidebar-primary: #f8b269;
+  --sidebar-ring: #f6a54a;
+  /* Categorical palette tuned for the warm dark glass surface. */
+  --chart-1: #f5a75c;
+  --chart-2: #8fe3a8;
+  --chart-3: #6cbde6;
+  --chart-4: #b3a1ff;
+  --chart-5: #f0e3d0;
+  --radius: 0.85rem;
+  /* Accent ramp (hi = +26% white, lo = +20% black of #F08C2E) */
+  --acc: #f08c2e;
+  --acc-hi: #f8b269;
+  --acc-lo: #c57326;
+  font-family: var(--font-dm), var(--font-inter), system-ui, sans-serif;
+}
+
+.portal-aurora h1,
+.portal-aurora h2,
+.portal-aurora h3,
+.portal-aurora h4,
+.portal-aurora h5,
+.portal-aurora h6,
+.portal-aurora .font-serif {
+  font-family: var(--font-sora), var(--font-dm), sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.portal-aurora ::selection {
+  background: rgba(240, 140, 46, 0.35);
+}
+
+.portal-aurora a {
+  text-decoration-color: rgba(246, 165, 74, 0.5);
+}
+
+/* --- Shell + surfaces ---------------------------------------------------- */
+
+.portal-aurora .glass-shell {
+  border: 1px solid rgba(255, 240, 222, 0.13);
+  background: rgba(24, 18, 13, 0.66);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.portal-aurora .surface-card {
+  border-radius: 20px;
+  border: 1px solid rgba(255, 238, 216, 0.1);
+  background: linear-gradient(165deg, rgba(255, 241, 224, 0.055), rgba(255, 241, 224, 0.018));
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Global (not scope-nested): Radix overlays portal into <body>, outside the
+   .portal-aurora wrapper, so content components carry the theme classes
+   themselves. */
+.surface-popover {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 240, 222, 0.13);
+  background: rgba(32, 24, 17, 0.94);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.portal-aurora .surface-inset {
+  border-radius: 12px;
+  background: rgba(255, 242, 226, 0.035);
+}
+
+/* --- Controls ------------------------------------------------------------ */
+
+.portal-aurora .btn-primary {
+  background: linear-gradient(135deg, var(--acc-hi), var(--acc-lo));
+  color: #251403;
+  font-weight: 700;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 8px 18px color-mix(in oklab, var(--acc-lo) 35%, transparent);
+  transition: transform 0.18s, box-shadow 0.2s, filter 0.2s;
+}
+.portal-aurora .btn-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 24px color-mix(in oklab, var(--acc-lo) 42%, transparent);
+}
+.portal-aurora .btn-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.portal-aurora .btn-outline {
+  background: rgba(255, 242, 226, 0.06);
+  border: 1px solid rgba(255, 240, 222, 0.14);
+  color: var(--foreground);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.18s;
+}
+.portal-aurora .btn-outline:hover {
+  background: rgba(255, 242, 226, 0.11);
+  color: var(--foreground);
+}
+.portal-aurora .btn-outline:active {
+  transform: scale(0.98);
+}
+
+.portal-aurora .btn-secondary {
+  background: rgba(255, 242, 226, 0.07);
+  color: var(--secondary-foreground);
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+.portal-aurora .btn-secondary:hover {
+  background: rgba(255, 242, 226, 0.12);
+}
+
+.portal-aurora .btn-ghost {
+  border-radius: 10px;
+  transition: background 0.2s, color 0.2s;
+}
+.portal-aurora .btn-ghost:hover {
+  background: rgba(255, 242, 226, 0.07);
+}
+
+.portal-aurora .field-control {
+  background: rgba(255, 242, 226, 0.05);
+  border: 1px solid rgba(255, 240, 222, 0.12);
+  border-radius: 12px;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.portal-aurora .field-control:hover {
+  border-color: rgba(255, 240, 222, 0.2);
+}
+.portal-aurora .field-control:focus,
+.portal-aurora .field-control:focus-visible,
+.portal-aurora .field-control:focus-within {
+  border-color: color-mix(in oklab, var(--acc) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--acc) 18%, transparent);
+  outline: none;
+}
+
+/* --- Motion vocabulary ---------------------------------------------------- */
+
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(50px, -36px) scale(1.1); }
+}
+
+@keyframes grow-bar {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.animate-grow-bar {
+  transform-origin: bottom;
+  animation: grow-bar 0.7s cubic-bezier(0.3, 1.3, 0.4, 1) both;
+  animation-delay: calc(var(--stagger-index, 0) * 60ms + 250ms);
+}
+
+@keyframes chart-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(240, 140, 46, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(240, 140, 46, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(240, 140, 46, 0); }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s ease-out infinite;
+}
+
+@keyframes eq-bar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
+}
+.animate-eq {
+  transform-origin: center;
+  animation: eq-bar 2.2s ease-in-out infinite;
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.7); }
+  60% { transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+  animation: pop-in 0.45s cubic-bezier(0.3, 1.3, 0.4, 1) both;
+}
+
+/* Success burst particles (see lib/celebrate.ts) */
+@keyframes celebrate-particle {
+  0% { opacity: 1; transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% {
+    opacity: 0;
+    transform: translate(var(--cx, 0px), var(--cy, -70px)) scale(0.4) rotate(var(--cr, 180deg));
+  }
+}
+.celebrate-particle {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 2px;
+  animation: celebrate-particle 0.8s cubic-bezier(0.16, 0.8, 0.4, 1) both;
+}
+
+/* Accent promo card (e.g. "applications awaiting review") */
+.portal-aurora .promo-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid color-mix(in oklab, var(--acc) 28%, transparent);
+  background:
+    radial-gradient(
+      130% 140% at 12% 0%,
+      color-mix(in oklab, var(--acc) 52%, transparent),
+      color-mix(in oklab, var(--acc-lo) 22%, transparent) 48%,
+      transparent 72%
+    ),
+    linear-gradient(160deg, #33200f, #1d1108);
+  transition: transform 0.2s;
+}
+.portal-aurora .promo-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Nav active pill glow */
+.portal-aurora .nav-pill-active {
+  background: linear-gradient(135deg, var(--acc-hi), var(--acc-lo));
+  box-shadow: 0 6px 16px color-mix(in oklab, var(--acc) 35%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

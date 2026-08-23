@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import { UserPlus } from "lucide-react"
 import { addStudent } from "@/app/actions/students"
 import { FormFieldError } from "@/components/forms/form-field-error"
@@ -45,6 +46,7 @@ export function AddStudentDialog({
       const result = await addStudent(prev, formData)
       if (result?.success) {
         toast.success(result.message ?? "Student submitted for review.")
+        celebrate()
         setOpen(false)
       } else if (result?.message) {
         toast.error(result.message)

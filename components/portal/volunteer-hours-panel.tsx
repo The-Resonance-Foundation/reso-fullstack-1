@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Clock, Pencil, Trash2 } from "lucide-react"
 import {
@@ -71,6 +72,7 @@ export function VolunteerHourForm({ chapters }: { chapters: ChapterOption[] }) {
       const result = await submitVolunteerHours(prev, formData)
       if (result?.success) {
         toast.success(result.message ?? "Volunteer hours submitted.")
+        celebrate()
       } else if (result?.message) {
         toast.error(result.message)
       }

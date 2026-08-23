@@ -1,5 +1,7 @@
 import { getDashboardContext } from "@/lib/auth/dal"
 import { getNotificationsForUser, getUnreadNotificationCount } from "@/lib/data/phase45"
+import { getNavBadges } from "@/lib/data/nav-badges"
+import { AuroraBackground } from "@/components/portal/aurora-background"
 import { PortalHeader } from "@/components/portal/portal-header"
 import { PortalSidebar, type RoleChip } from "@/components/portal/portal-sidebar"
 import type { PortalNavFlags } from "@/components/portal/portal-nav"
@@ -48,25 +50,35 @@ export default async function PortalLayout({
     chapter: role.chapters?.name ?? null,
   }))
 
-  const [notifications, unreadCount] = hasPortalRole
+  const [notifications, unreadCount, badges] = hasPortalRole
     ? await Promise.all([
         getNotificationsForUser(),
         getUnreadNotificationCount(),
+        getNavBadges(),
       ])
-    : [[], 0]
+    : [[], 0, {}]
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <PortalSidebar flags={flags} roleChips={roleChips} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <PortalHeader
-          displayName={displayName}
-          email={email}
-          flags={flags}
-          notifications={notifications}
-          unreadCount={unreadCount}
-        />
-        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
+    <div className="dark portal-aurora relative min-h-dvh bg-background text-foreground">
+      <AuroraBackground />
+      <div className="relative z-10 flex h-dvh flex-col lg:p-5">
+        <div className="glass-shell flex min-h-0 flex-1 overflow-hidden lg:rounded-[26px]">
+          <PortalSidebar flags={flags} roleChips={roleChips} badges={badges} />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <PortalHeader
+              displayName={displayName}
+              email={email}
+              flags={flags}
+              roleChips={roleChips}
+              badges={badges}
+              notifications={notifications}
+              unreadCount={unreadCount}
+            />
+            <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 md:px-7 md:py-7">
+              {children}
+            </main>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -196,17 +196,19 @@ type PortalNavProps = {
   /** Distinguishes motion layout animations between desktop/mobile instances. */
   instanceId: string
   onNavigate?: () => void
+  /** Pending-work counts keyed by nav item label. */
+  badges?: Record<string, number>
 }
 
-export function PortalNav({ flags, instanceId, onNavigate }: PortalNavProps) {
+export function PortalNav({ flags, instanceId, onNavigate, badges }: PortalNavProps) {
   const pathname = usePathname()
   const groups = buildPortalNav(flags)
 
   return (
-    <nav aria-label="Portal navigation" className="flex flex-col gap-5">
+    <nav aria-label="Portal navigation" className="flex flex-col gap-4">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+          <p className="mb-1.5 px-3 text-[10.5px] font-bold uppercase tracking-[.14em] text-foreground/40">
             {group.label}
           </p>
           <ul className="space-y-0.5">
@@ -215,12 +217,13 @@ export function PortalNav({ flags, instanceId, onNavigate }: PortalNavProps) {
                 ? pathname === item.href
                 : pathname === item.href || pathname.startsWith(`${item.href}/`)
               const Icon = item.icon
+              const badge = badges?.[item.label]
               return (
                 <li key={`${group.label}-${item.href}`} className="relative">
                   {active ? (
                     <motion.span
                       layoutId={`${instanceId}-active-pill`}
-                      className="absolute inset-0 rounded-lg bg-sidebar-accent"
+                      className="nav-pill-active absolute inset-0 rounded-[11px]"
                       transition={{ type: "spring", stiffness: 400, damping: 32 }}
                     />
                   ) : null}
@@ -229,20 +232,30 @@ export function PortalNav({ flags, instanceId, onNavigate }: PortalNavProps) {
                     onClick={onNavigate}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative z-10 flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      "group relative z-10 flex items-center gap-2.5 rounded-[11px] px-3 py-2 text-[13px] transition-[color,transform] duration-200",
                       active
-                        ? "text-sidebar-primary"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground"
+                        ? "font-bold text-[#251403]"
+                        : "font-medium text-[#C7B9A9] hover:translate-x-[3px] hover:text-foreground"
                     )}
                   >
                     <Icon
                       aria-hidden
                       className={cn(
                         "h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110",
-                        active ? "text-sidebar-primary" : "text-sidebar-foreground/50"
+                        active ? "text-[#251403]" : "text-[#C7B9A9]/70"
                       )}
                     />
-                    {item.label}
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                    {badge ? (
+                      <span
+                        className={cn(
+                          "flex-none text-[11px] font-bold",
+                          active ? "text-[#2A1706]" : "text-[var(--acc-hi,#F8B269)]"
+                        )}
+                      >
+                        {badge}
+                      </span>
+                    ) : null}
                   </Link>
                 </li>
               )

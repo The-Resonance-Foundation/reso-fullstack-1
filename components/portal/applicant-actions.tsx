@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useTransition } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import { MoreHorizontal } from "lucide-react"
 import {
   AlertDialog,
@@ -118,6 +119,7 @@ export function ApplicantActions({ applicantId, fullName, stage }: ApplicantActi
     const result = await acceptAndProvisionApplicant(undefined, formData)
     if (result?.success) {
       toast.success(result.message ?? `${fullName} accepted and provisioned.`)
+      celebrate()
     } else if (result?.message) {
       toast.error(result.message)
     }

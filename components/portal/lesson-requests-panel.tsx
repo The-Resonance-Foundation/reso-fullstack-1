@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import { CalendarPlus, CheckCircle2, XCircle } from "lucide-react"
 import {
   cancelLessonRequest,
@@ -16,6 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { DateField } from "@/components/ui/date-picker"
 import {
   Dialog,
   DialogContent,
@@ -24,7 +26,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { ParentRequestContext } from "@/lib/data/lesson-requests"
@@ -76,12 +77,15 @@ function RequestLessonDialog({ context }: { context: ParentRequestContext }) {
   const [tutorId, setTutorId] = useState(student?.tutors[0]?.id ?? "")
   const tutor =
     student?.tutors.find((t) => t.id === tutorId) ?? student?.tutors[0] ?? null
+  const [slotId, setSlotId] = useState("")
+  const selectedSlot = tutor?.availability.find((s) => s.id === slotId) ?? null
 
   const [state, action, pending] = useActionState(
     async (prev: LessonRequestFormState, formData: FormData) => {
       const result = await requestLesson(prev, formData)
       if (result?.success) {
         toast.success(result.message ?? "Request sent.")
+        celebrate()
         setOpen(false)
       } else if (result?.message) {
         toast.error(result.message)
@@ -121,6 +125,7 @@ function RequestLessonDialog({ context }: { context: ParentRequestContext }) {
                 setStudentId(e.target.value)
                 const next = context.students.find((s) => s.id === e.target.value)
                 setTutorId(next?.tutors[0]?.id ?? "")
+                setSlotId("")
               }}
             >
               {context.students.map((s) => (
@@ -139,7 +144,10 @@ function RequestLessonDialog({ context }: { context: ParentRequestContext }) {
               name="tutorUserId"
               required
               value={tutor?.id ?? ""}
-              onChange={(e) => setTutorId(e.target.value)}
+              onChange={(e) => {
+                setTutorId(e.target.value)
+                setSlotId("")
+              }}
             >
               {(student?.tutors ?? []).map((t) => (
                 <option key={t.id} value={t.id}>
@@ -153,7 +161,13 @@ function RequestLessonDialog({ context }: { context: ParentRequestContext }) {
           <div className="space-y-2">
             <Label htmlFor="availabilityId">Availability slot</Label>
             {slots.length ? (
-              <NativeSelect id="availabilityId" name="availabilityId" required defaultValue="">
+              <NativeSelect
+                id="availabilityId"
+                name="availabilityId"
+                required
+                value={slotId}
+                onChange={(e) => setSlotId(e.target.value)}
+              >
                 <option value="" disabled>
                   Choose a weekly slot
                 </option>
@@ -175,10 +189,19 @@ function RequestLessonDialog({ context }: { context: ParentRequestContext }) {
 
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
-            <Input id="date" name="date" type="date" required />
-            <p className="text-xs text-muted-foreground">
-              Pick a date that falls on the slot&rsquo;s weekday.
-            </p>
+            <DateField
+              key={slotId}
+              id="date"
+              name="date"
+              required
+              minDate={new Date()}
+              allowedWeekdays={selectedSlot ? [selectedSlot.day_of_week] : undefined}
+              placeholder={
+                selectedSlot
+                  ? `Pick a ${DAYS_OF_WEEK[selectedSlot.day_of_week]}`
+                  : "Pick a slot first"
+              }
+            />
             <FormFieldError errors={state?.errors?.date} />
           </div>
 

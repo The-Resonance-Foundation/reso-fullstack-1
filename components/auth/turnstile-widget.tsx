@@ -50,9 +50,10 @@ export function TurnstileWidget({ resetSignal }: { resetSignal?: unknown }) {
     let cancelled = false
     loadScript(() => {
       if (cancelled || !containerRef.current || widgetIdRef.current !== null) return
+      // Auth pages always render on the dark aurora surface.
       widgetIdRef.current = window.turnstile!.render(containerRef.current, {
         sitekey: SITE_KEY,
-        theme: "auto",
+        theme: "dark",
         "response-field-name": "captchaToken",
       })
     })

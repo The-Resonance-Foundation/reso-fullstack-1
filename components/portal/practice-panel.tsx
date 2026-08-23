@@ -2,6 +2,7 @@
 
 import { useActionState, useMemo, useState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import { CalendarDays, Flame, Timer, Trash2 } from "lucide-react"
 import { addPracticeLog, deletePracticeLog } from "@/app/actions/practice"
 import {
@@ -97,6 +98,7 @@ export function LogPracticeDialog({ students }: { students: Student[] }) {
       const result = await addPracticeLog(prev, formData)
       if (result?.success) {
         toast.success(result.message ?? "Practice logged.")
+        celebrate()
         setOpen(false)
       } else if (result?.message) {
         toast.error(result.message)

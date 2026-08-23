@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useMemo, useState } from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import type { ColumnDef } from "@tanstack/react-table"
 import {
   CalendarDays,
@@ -26,6 +27,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { DataTable } from "@/components/ui/data-table"
+import { DateTimeField } from "@/components/ui/date-picker"
 import {
   Dialog,
   DialogContent,
@@ -142,6 +144,7 @@ export function EventForm({
       const result = await createEvent(prevState, formData)
       if (result?.success) {
         toast.success(result.message ?? "Event created.")
+        celebrate()
         onSuccess?.()
       } else if (result?.message) {
         toast.error(result.message)
@@ -175,14 +178,14 @@ export function EventForm({
         <Label htmlFor="location">Location</Label>
         <Input id="location" name="location" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4">
         <div className="space-y-2">
           <Label htmlFor="startsAt">Starts</Label>
-          <Input id="startsAt" name="startsAt" type="datetime-local" required />
+          <DateTimeField id="startsAt" name="startsAt" required defaultTime="17:00" />
         </div>
         <div className="space-y-2">
           <Label htmlFor="endsAt">Ends</Label>
-          <Input id="endsAt" name="endsAt" type="datetime-local" required />
+          <DateTimeField id="endsAt" name="endsAt" required defaultTime="19:00" />
         </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -387,6 +390,7 @@ function RsvpSegmentedControl({
       const result = await submitRsvp(prevState, formData)
       if (result?.success) {
         toast.success(result.message ?? "RSVP saved.")
+        celebrate()
       } else if (result?.message) {
         // Includes the friendly "event just filled up" message when the DB
         // capacity trigger rejects a "going" RSVP.

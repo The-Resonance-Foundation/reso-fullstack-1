@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useActionState } from "react"
 import { toast } from "sonner"
+import { celebrate } from "@/lib/celebrate"
 import {
   ArrowRight,
   ClipboardList,
@@ -155,6 +156,7 @@ function AddResourceDialog({ student }: { student: Student }) {
       const result = await addResource(prev, formData)
       if (result?.success) {
         toast.success(result.message ?? "Resource added.")
+        celebrate()
         setOpen(false)
       } else if (result?.message) {
         toast.error(result.message)
