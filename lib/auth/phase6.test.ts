@@ -68,14 +68,16 @@ describe("PayPal donation parser", () => {
 })
 
 describe("phase6 permissions", () => {
-  it("allows board and corp officer to manage donations", () => {
+  it("restricts donations to the board alone", () => {
     expect(canManageDonations(["board_of_director"])).toBe(true)
-    expect(canManageDonations(["corporate_officer"])).toBe(true)
+    expect(canManageDonations(["corporate_officer"])).toBe(false)
     expect(canManageDonations(["program_administrator"])).toBe(false)
   })
 
-  it("allows program admin to view donations but not chapter officers", () => {
-    expect(canViewDonations(["program_administrator"])).toBe(true)
+  it("keeps donation visibility board-only", () => {
+    expect(canViewDonations(["board_of_director"])).toBe(true)
+    expect(canViewDonations(["program_administrator"])).toBe(false)
+    expect(canViewDonations(["corporate_officer"])).toBe(false)
     expect(canViewDonations(["chapter_officer"])).toBe(false)
   })
 
