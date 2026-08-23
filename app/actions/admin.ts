@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import {
-  canManageChapterRoles,
+  canAssignRole,
+  canRemoveRole,
   canManageChapters,
   verifySession,
 } from "@/lib/auth/dal"
@@ -33,16 +34,18 @@ const assignRoleSchema = z.object({
   chapterId: z.string().optional(),
 })
 
+// Volunteers/performers are corporate-level — their role is org-wide, never
+// tied to a chapter.
 const ORG_ROLES: AppRole[] = [
   "board_of_director",
   "program_administrator",
   "corporate_officer",
+  "volunteer",
 ]
 
 const CHAPTER_SCOPED_ROLES: AppRole[] = [
   "student_parent",
   "tutor",
-  "volunteer",
   "chapter_officer",
   "chapter_president",
 ]
@@ -124,7 +127,7 @@ export async function assignUserRole(
     return { message: "Organization roles cannot be tied to a chapter." }
   }
 
-  const allowed = await canManageChapterRoles(chapterId ?? undefined, role)
+  const allowed = await canAssignRole(role, chapterId)
   if (!allowed) {
     return { message: "You are not authorized to assign this role." }
   }
@@ -181,10 +184,7 @@ export async function removeUserRole(
     return { message: "Role assignment not found or access denied." }
   }
 
-  const allowed = await canManageChapterRoles(
-    roleRow.chapter_id,
-    roleRow.role as AppRole
-  )
+  const allowed = await canRemoveRole(roleRow.role as AppRole, roleRow.chapter_id)
   if (!allowed) {
     return { message: "You are not authorized to remove this role." }
   }

@@ -212,7 +212,7 @@ function EditHourDialog({ hour }: { hour: VolunteerHour }) {
         </DialogHeader>
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={hour.id} />
-          <input type="hidden" name="chapterId" value={hour.chapter_id} />
+          <input type="hidden" name="chapterId" value={hour.chapter_id ?? "org"} />
           <div className="space-y-2">
             <Label htmlFor={`category-${hour.id}`}>Category</Label>
             <Select name="category" defaultValue={hour.category}>
@@ -367,7 +367,7 @@ export function VolunteerHoursList({ hours }: { hours: VolunteerHour[] }) {
         <EmptyState
           icon={<Clock aria-hidden />}
           title="No volunteer hours yet"
-          description="Log your first entry above — chapter officers review it before a certificate is issued."
+          description="Log your first entry above — it's reviewed by your chapter president or the organization before a certificate is issued."
         />
       }
     />

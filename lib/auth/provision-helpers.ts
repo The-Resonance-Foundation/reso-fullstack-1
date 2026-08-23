@@ -10,16 +10,19 @@ export { roleForApplicant } from "@/lib/auth/applicant-roles"
 async function ensureUserRole(
   admin: ReturnType<typeof createAdminClient>,
   userId: string,
-  chapterId: string,
+  chapterId: string | null,
   role: AppRole
 ) {
-  const { data: existing } = await admin
+  let existingQuery = admin
     .from("user_roles")
     .select("id")
     .eq("user_id", userId)
-    .eq("chapter_id", chapterId)
     .eq("role", role)
-    .maybeSingle()
+  existingQuery =
+    chapterId === null
+      ? existingQuery.is("chapter_id", null)
+      : existingQuery.eq("chapter_id", chapterId)
+  const { data: existing } = await existingQuery.maybeSingle()
 
   if (existing) return { ok: true as const }
 
@@ -57,12 +60,11 @@ export async function provisionStaffApplicant(
   const userId = applicant.converted_user_id
   const role = roleForApplicant(applicant)
 
-  const roleResult = await ensureUserRole(
-    admin,
-    userId,
-    applicant.chapter_id,
-    role
-  )
+  // Volunteers/performers are corporate-level: their role is org-wide rather
+  // than tied to the chapter they applied through.
+  const roleChapterId = role === "volunteer" ? null : applicant.chapter_id
+
+  const roleResult = await ensureUserRole(admin, userId, roleChapterId, role)
 
   if (!roleResult.ok) {
     return { ok: false, message: roleResult.message }

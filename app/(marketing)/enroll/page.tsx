@@ -10,7 +10,7 @@ import { routes } from "@/lib/routes"
 
 export const metadata: Metadata = {
   title: "Enroll",
-  description: "Sign up for affordable music lessons with The Resonance Foundation.",
+  description: "Sign up for free music lessons with The Resonance Foundation.",
 }
 
 const steps = [
@@ -24,8 +24,9 @@ export default function EnrollPage() {
   return (
     <>
       <PageHero
+        eyebrow="For Students"
         title="Enroll"
-        subtitle="Start your musical journey with affordable lessons from dedicated student tutors."
+        subtitle="Start your musical journey with free lessons from dedicated student tutors."
       />
 
       <Section>
@@ -55,7 +56,7 @@ export default function EnrollPage() {
             </ul>
 
             <div className="mt-8 rounded-xl border border-border bg-muted/50 p-6">
-              <h3 className="font-serif text-lg font-bold">Lesson Pricing</h3>
+              <h3 className="text-lg font-medium">All Lessons Are Free</h3>
               <p className="mt-2 text-muted-foreground">{pricing.lessons.group.description}</p>
               <p className="mt-1 text-muted-foreground">{pricing.lessons.individual.description}</p>
               <p className="mt-3 text-sm text-muted-foreground">{pricing.lessons.financialAid}</p>

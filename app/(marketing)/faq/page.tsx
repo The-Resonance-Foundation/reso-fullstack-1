@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function FaqPage() {
   return (
     <>
-      <PageHero title={faq.pageTitle} subtitle={faq.pageSubtitle} />
+      <PageHero eyebrow="FAQ" title={faq.pageTitle} subtitle={faq.pageSubtitle} />
 
       <Section>
         <div className="mx-auto max-w-3xl">

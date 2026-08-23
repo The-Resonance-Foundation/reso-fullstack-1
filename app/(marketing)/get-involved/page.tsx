@@ -22,6 +22,7 @@ export default function GetInvolvedPage() {
   return (
     <>
       <PageHero
+        eyebrow="Get Involved"
         title="Get Involved"
         subtitle="There are many ways to join our mission of making music education accessible to all."
       />
@@ -81,7 +82,7 @@ export default function GetInvolvedPage() {
 
       <CTABand
         title="Support Our Mission"
-        description="Your donation helps us provide affordable music education to students who might otherwise not have access. Every contribution makes a difference."
+        description="Your donation helps us keep music education completely free for students who might otherwise not have access. Every contribution makes a difference."
         buttons={[{ label: "Donate Now", href: routes.donate }]}
       />
     </>

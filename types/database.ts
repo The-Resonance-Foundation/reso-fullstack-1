@@ -286,7 +286,7 @@ export interface EventAttendance {
 export interface VolunteerHour {
   id: string
   user_id: string
-  chapter_id: string
+  chapter_id: string | null
   category: VolunteerHourCategory
   hours: number
   activity_date: string
@@ -306,7 +306,7 @@ export interface VolunteerHour {
 export interface Certificate {
   id: string
   user_id: string
-  chapter_id: string
+  chapter_id: string | null
   certificate_type: CertificateType
   title: string
   total_hours: number
@@ -674,7 +674,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          chapter_id: string
+          chapter_id: string | null
           category: VolunteerHourCategory
           hours: number
           activity_date: string
@@ -695,7 +695,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          chapter_id: string
+          chapter_id: string | null
           certificate_type?: CertificateType
           title: string
           total_hours: number

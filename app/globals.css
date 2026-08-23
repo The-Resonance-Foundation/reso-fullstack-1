@@ -523,3 +523,167 @@ h1, h2, h3, h4, h5, h6 {
     scroll-behavior: auto;
   }
 }
+
+/* ==========================================================================
+   Marketing site — "Nocturne" theme (Claude Design project: Resonance Site)
+   Deep indigo ground, blurple accent, Inter throughout, hairline elevation.
+   Scoped to .marketing-nocturne so the portal (aurora) and auth pages keep
+   their own palettes.
+   ========================================================================== */
+.marketing-nocturne {
+  color-scheme: dark;
+  --background: #161826;
+  --foreground: #e9e9ed;
+  --card: #232532;
+  --card-foreground: #e9e9ed;
+  --popover: #232532;
+  --popover-foreground: #e9e9ed;
+  --primary: #9184d9;
+  --primary-foreground: #161826;
+  --secondary: #232532;
+  --secondary-foreground: #e9e9ed;
+  --muted: #1d1f2e;
+  --muted-foreground: #b2b6ca;
+  --accent: #2b2741;
+  --accent-foreground: #e7e5fe;
+  --border: color-mix(in srgb, #e9e9ed 16%, transparent);
+  --input: color-mix(in srgb, #e9e9ed 16%, transparent);
+  --ring: #9184d9;
+  --destructive: #e05252;
+  --destructive-foreground: #fef2f2;
+  --success: #3fbf7f;
+  --success-foreground: #0b2416;
+  --warning: #f0a83c;
+  --warning-foreground: #241a06;
+
+  /* Nocturne ramps used by bespoke marketing styling */
+  --noc-accent-100: #f5f4ff;
+  --noc-accent-200: #e7e5fe;
+  --noc-accent-300: #d2cefd;
+  --noc-accent-400: #b5abfc;
+  --noc-accent-600: #796cbf;
+  --noc-accent-700: #5d5294;
+  --noc-accent-800: #423a6a;
+  --noc-accent-900: #2b2741;
+  --noc-accent-2-200: #e7e5fe;
+  --noc-neutral-300: #cfd3e5;
+  --noc-neutral-400: #b2b6ca;
+  --noc-neutral-800: #3f424d;
+  --noc-section: #262a60;
+  --noc-section-glow: #353b80;
+  --noc-section-ghost: #4c5397;
+  --noc-shadow-sm: 0 0 0 1px #3f424d;
+  --noc-shadow-md: 0 0 0 1px #595d6c, 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+/* Nocturne sets everything in Inter — headings at weight 500, tight tracking. */
+.marketing-nocturne h1,
+.marketing-nocturne h2,
+.marketing-nocturne h3,
+.marketing-nocturne h4,
+.marketing-nocturne h5,
+.marketing-nocturne h6,
+.marketing-nocturne .font-serif {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  font-style: normal;
+}
+
+.marketing-nocturne ::selection {
+  background: color-mix(in srgb, #9184d9 30%, transparent);
+}
+
+/* Buttons — Nocturne's signature outlined-accent style. The stable btn-*
+   classes come from components/ui/button.tsx variants. */
+.marketing-nocturne .btn-primary {
+  background: transparent;
+  color: #9184d9;
+  border: 1px solid #9184d9;
+}
+.marketing-nocturne .btn-primary:hover {
+  background: color-mix(in srgb, #9184d9 12%, transparent);
+  color: var(--noc-accent-300);
+}
+.marketing-nocturne .btn-primary:active {
+  background: color-mix(in srgb, #9184d9 22%, transparent);
+}
+.marketing-nocturne .btn-secondary,
+.marketing-nocturne .btn-outline {
+  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+.marketing-nocturne .btn-secondary:hover,
+.marketing-nocturne .btn-outline:hover {
+  background: color-mix(in srgb, #e9e9ed 7%, transparent);
+  color: var(--foreground);
+}
+.marketing-nocturne .btn-ghost {
+  color: #9184d9;
+}
+.marketing-nocturne .btn-ghost:hover {
+  background: color-mix(in srgb, #9184d9 10%, transparent);
+  color: var(--noc-accent-200);
+}
+
+/* Section eyebrow — gradient dash + letterspaced small caps. */
+.marketing-nocturne .noc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--noc-accent-300);
+}
+.marketing-nocturne .noc-eyebrow::before {
+  content: "";
+  width: 44px;
+  height: 1px;
+  flex: none;
+  background: linear-gradient(90deg, #9184d9, transparent);
+}
+.marketing-nocturne .noc-eyebrow-center {
+  justify-content: center;
+}
+.marketing-nocturne .noc-eyebrow-center::after {
+  content: "";
+  width: 44px;
+  height: 1px;
+  flex: none;
+  background: linear-gradient(90deg, transparent, #9184d9);
+}
+
+/* Indigo "section" ground for stat strips (deck-scale fill, not interface). */
+.marketing-nocturne .noc-section-ground {
+  background: radial-gradient(
+    130% 180% at 18% 0%,
+    var(--noc-section-glow),
+    var(--noc-section) 62%
+  );
+  border-top: 1px solid color-mix(in srgb, var(--noc-section-ghost) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--noc-section-ghost) 60%, transparent);
+}
+
+/* Hairline-elevation cards (design's shadow-sm) */
+.marketing-nocturne .noc-card {
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--noc-shadow-sm);
+}
+
+.marketing-nocturne img {
+  filter: saturate(0.92);
+}
+
+@keyframes noc-cue-drop {
+  0% { transform: translateY(-100%); }
+  55% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+@keyframes noc-float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}

@@ -13,7 +13,7 @@ import { imagePath } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "Donate",
-  description: "Your generosity helps us provide affordable music education to students who need it most.",
+  description: "Your generosity helps us provide free music education to students who need it most.",
 }
 
 const impactItems = [
@@ -38,8 +38,9 @@ export default function DonatePage() {
   return (
     <>
       <PageHero
+        eyebrow="Support Us"
         title="Support Music Education"
-        subtitle="Your generosity helps us provide affordable music education to students who need it most."
+        subtitle="Your generosity helps us provide free music education to students who need it most."
       />
 
       <Section>
@@ -62,16 +63,11 @@ export default function DonatePage() {
                 </li>
               ))}
             </ul>
-            <Card className="mt-8 bg-primary text-primary-foreground">
+            <Card className="mt-8 border-[var(--noc-accent-700)] bg-[var(--noc-accent-900)]/60 text-foreground" data-reveal="1">
               <CardContent className="p-6">
                 <div className="mb-4 text-2xl font-bold">{stats.donationRaised.value} Raised</div>
                 <p className="mb-4 opacity-80">{stats.donationRaised.label}</p>
-                <Button
-                  asChild
-                  variant="secondary"
-                  size="lg"
-                  className="w-full bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-                >
+                <Button asChild size="lg" className="w-full">
                   <a
                     href={siteConfig.donation.paypal}
                     target="_blank"

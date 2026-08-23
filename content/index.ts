@@ -12,7 +12,7 @@ export const getInvolvedOpportunities = [
   {
     id: "student",
     title: "Enroll",
-    description: "Start your musical journey with affordable lessons from dedicated tutors.",
+    description: "Start your musical journey with free lessons from dedicated tutors.",
     image: "DSC00055-student-flute.webp",
     imageAlt: "Student learning flute",
     bullets: [
@@ -87,7 +87,7 @@ export const whatWeDo = [
   {
     title: "Music Lessons",
     description:
-      "We provide affordable music lessons in woodwind, brass, string, and vocal instruction to students of all skill levels.",
+      "We provide free music lessons in woodwind, brass, string, and vocal instruction to students of all skill levels.",
   },
   {
     title: "Community Events",

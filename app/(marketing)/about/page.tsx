@@ -27,6 +27,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
+        eyebrow="About Us"
         title="About The Resonance Foundation"
         subtitle={siteMetadata.taglineExtended}
       />
@@ -36,7 +37,7 @@ export default function AboutPage() {
           <div>
             <SectionHeader
               title="Our Mission"
-              description="The Resonance Foundation is a nonprofit organization dedicated to offering low-cost music education to students, fostering a love for music while helping them improve their skills."
+              description="The Resonance Foundation is a nonprofit organization dedicated to offering completely free music education to students, fostering a love for music while helping them improve their skills."
             />
             <p className="mb-8 text-lg text-muted-foreground">
               We believe that every child deserves access to quality music education, regardless of
@@ -57,12 +58,13 @@ export default function AboutPage() {
               })}
             </div>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl">
+          <div data-reveal="1" className="noc-card relative aspect-[4/3.6] overflow-hidden">
             <Image
               src={imagePath("DSC09907-tutor-student.webp")}
               alt="Tutor working with a young student"
               fill
-              className="object-cover"
+              data-plx="0.09"
+              className="scale-[1.14] object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
@@ -75,7 +77,12 @@ export default function AboutPage() {
         <SectionHeader title="What We Do" align="center" className="mx-auto" />
         <div className="grid gap-6 md:grid-cols-3">
           {whatWeDo.map((item, i) => (
-            <Card key={item.title} className="text-center">
+            <Card
+              key={item.title}
+              data-reveal="1"
+              data-reveal-delay={i ? String(i * 100) : undefined}
+              className="text-center"
+            >
               <CardContent className="pt-8">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
                   {i === 0 && <Music className="h-7 w-7 text-primary" />}

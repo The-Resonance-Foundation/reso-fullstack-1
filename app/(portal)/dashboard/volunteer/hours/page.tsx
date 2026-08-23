@@ -50,7 +50,7 @@ export default async function VolunteerHoursPage() {
     <div className="mx-auto w-full max-w-4xl space-y-6">
       <PageHeader
         title="Volunteer hours"
-        description="Log teaching, event support, or admin work. Hours are reviewed by chapter officers before certificates are issued."
+        description="Log teaching, event support, or admin work. Hours are reviewed by your chapter president or the organization before certificates are issued."
         actions={
           <Button asChild variant="outline" size="sm">
             <Link href={routes.portal.volunteerCertificates}>

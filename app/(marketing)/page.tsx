@@ -3,8 +3,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { ArrowRight } from "lucide-react"
 import { CTABand } from "@/components/layout/cta-band"
-import { Section, SectionHeader } from "@/components/layout/section"
-import { PhotoGrid } from "@/components/marketing/photo-grid"
+import { Section } from "@/components/layout/section"
 import { ProgramCard } from "@/components/marketing/program-card"
 import { StatsBar } from "@/components/marketing/stats-bar"
 import { Button } from "@/components/ui/button"
@@ -23,109 +22,145 @@ export const metadata: Metadata = {
 }
 
 export default function HomePage() {
+  const [g1, g2, g3] = homePerformanceGallery
   return (
     <>
-      {/* Hero */}
-      <section className="relative min-h-[85vh] pt-16 md:pt-20">
-        <Image
-          src={imagePath("DSC00055-student-flute.webp")}
-          alt="Student learning flute with tutor guidance"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/30" />
-        <div className="container relative mx-auto flex min-h-[85vh] items-center px-4 py-20">
-          <div className="max-w-2xl text-white">
-            <p className="mb-4 inline-block rounded-full border border-white/30 bg-white/10 px-4 py-1.5 text-sm font-medium backdrop-blur-sm">
-              {siteMetadata.heroBadge}
-            </p>
-            <h1 className="font-serif text-4xl font-bold leading-tight md:text-6xl">
-              {siteMetadata.organizationName}
-            </h1>
-            <p className="mt-3 font-serif text-xl italic text-white/90 md:text-2xl">
-              {siteMetadata.tagline}
-            </p>
-            <p className="mt-5 text-lg leading-relaxed text-white/85">
-              {siteMetadata.heroDescription}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
-                <Link href={routes.enroll}>Enroll Today</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outlineLight"
-                className="border-white/40"
-              >
-                <Link href={routes.about}>Learn More</Link>
-              </Button>
-            </div>
-          </div>
+      {/* Hero — text over the resonance field */}
+      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-[150px] pt-[120px] text-center">
+        <div className="mb-6 flex items-center gap-4">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary sm:w-12" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--noc-accent-300)] sm:text-[13px]">
+            {siteMetadata.heroBadge}
+          </span>
+          <span className="h-px w-8 bg-gradient-to-r from-primary to-transparent sm:w-12" />
+        </div>
+        <div style={{ perspective: "1100px" }}>
+          <h1
+            id="heroT"
+            className="text-[clamp(48px,7.4vw,110px)] leading-[1.02] tracking-[-0.025em] will-change-transform"
+          >
+            The Resonance
+            <br />
+            Foundation
+          </h1>
+        </div>
+        <p className="mb-3 mt-7 text-[clamp(18px,1.6vw,23px)] tracking-[0.06em] text-[var(--noc-accent-200)]">
+          {siteMetadata.tagline}
+        </p>
+        <p className="mb-10 max-w-[600px] text-[17px] leading-[1.7] text-[var(--noc-neutral-300)]">
+          {siteMetadata.heroDescription}
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button asChild size="lg" className="px-8 text-[15px]">
+            <Link href={routes.enroll}>Enroll Today</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="px-8 text-[15px]">
+            <Link href={routes.about}>Learn More</Link>
+          </Button>
+        </div>
+        {/* Scroll cue */}
+        <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2.5 md:flex">
+          <span className="text-[11px] uppercase tracking-[0.24em] text-[var(--noc-neutral-400)]">
+            Scroll
+          </span>
+          <span className="relative block h-11 w-px overflow-hidden bg-[var(--noc-neutral-800)]">
+            <span className="absolute left-0 top-0 h-full w-px animate-[noc-cue-drop_1.8s_cubic-bezier(0.6,0,0.4,1)_infinite] bg-primary" />
+          </span>
         </div>
       </section>
 
       <StatsBar stats={stats.homeStats} />
 
       {/* Mission */}
-      <Section>
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          <div>
-            <SectionHeader
-              eyebrow="Our Mission"
-              title="Empowering Young Musicians Through Accessible Education"
-              description="The Resonance Foundation is a nonprofit organization dedicated to offering low-cost music education to students, fostering a love for music while helping them improve their skills. We believe every child deserves the opportunity to explore their musical potential."
-            />
+      <Section className="md:py-[130px]">
+        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+          <div data-reveal="1">
+            <p className="noc-eyebrow">Our Mission</p>
+            <h2 className="mb-6 mt-5 text-3xl leading-[1.12] tracking-[-0.015em] [text-wrap:pretty] md:text-[clamp(34px,3.3vw,48px)]">
+              Empowering Young Musicians Through Accessible Education
+            </h2>
+            <p className="mb-9 max-w-[540px] text-[16.5px] leading-[1.75] text-[var(--noc-neutral-300)]">
+              The Resonance Foundation is a nonprofit organization dedicated to
+              offering completely free music education to students, fostering a
+              love for music while helping them improve their skills. We believe
+              every child deserves the opportunity to explore their musical
+              potential.
+            </p>
             <div className="flex flex-wrap gap-4">
               <Button asChild size="lg">
                 <Link href={routes.about}>
                   Learn More <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href={routes.programs}>View Programs</Link>
+              <Button asChild size="lg" variant="ghost">
+                <Link href={routes.programs}>
+                  View Programs <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </div>
-          <div className="relative">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl">
+          <div data-reveal="1" className="relative">
+            <div className="noc-card relative aspect-[4/4.2] overflow-hidden">
               <Image
                 src={imagePath("DSC00055-student-flute.webp")}
-                alt="Student learning flute"
+                alt="Student learning flute with tutor guidance"
                 fill
-                className="object-cover"
+                data-plx="0.09"
+                className="scale-[1.14] object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
-            <div className="absolute bottom-4 left-4 rounded-xl border border-border bg-card px-5 py-3 shadow-lg sm:-bottom-4 sm:-left-4">
-              <div className="font-serif text-2xl font-bold text-primary">100%</div>
-              <div className="text-sm text-muted-foreground">Student-Led Initiative</div>
+            <div className="absolute -left-2 bottom-8 animate-[noc-float-y_5.5s_ease-in-out_infinite] rounded-lg bg-card px-6 py-4 shadow-[var(--noc-shadow-md)] lg:-left-7">
+              <div className="text-3xl font-medium text-[var(--noc-accent-200)]">100%</div>
+              <div className="text-xs uppercase tracking-[0.16em] text-[var(--noc-neutral-300)]">
+                Student-Led Initiative
+              </div>
             </div>
           </div>
         </div>
       </Section>
 
+      {/* Scroll-linked marquee */}
+      <div className="overflow-hidden whitespace-nowrap border-y border-border py-6">
+        <div
+          id="noc-marquee"
+          className="inline-block text-[40px] font-medium tracking-[0.02em] text-foreground/25 will-change-transform md:text-[56px]"
+          aria-hidden
+        >
+          {Array.from({ length: 6 })
+            .map(() => "Empowering Minds  —  Inspiring Change  —  ")
+            .join("")}
+        </div>
+      </div>
+
       {/* Programs preview */}
-      <Section variant="muted">
-        <SectionHeader
-          eyebrow="What We Offer"
-          title="Our Music Programs"
-          description="We offer comprehensive instruction across four major instrument families, plus performance opportunities."
-          align="center"
-          className="mx-auto"
-        />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {programs.programs.map((program) => (
+      <Section className="md:py-[130px]">
+        <div
+          data-reveal="1"
+          className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-10"
+        >
+          <div>
+            <p className="noc-eyebrow">What We Offer</p>
+            <h2 className="mt-5 text-3xl leading-[1.12] tracking-[-0.015em] md:text-[clamp(34px,3.3vw,48px)]">
+              Our Music Programs
+            </h2>
+          </div>
+          <p className="max-w-[380px] text-[15.5px] leading-[1.65] text-[var(--noc-neutral-300)]">
+            We offer comprehensive instruction across four major instrument
+            families, plus performance opportunities — and every lesson is free.
+          </p>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {programs.programs.map((program, i) => (
             <ProgramCard
               key={program.id}
               program={program}
               href={routes.programs}
+              index={i}
             />
           ))}
         </div>
-        <div className="mt-10 text-center">
+        <div data-reveal="1" className="mt-11">
           <Button asChild size="lg">
             <Link href={routes.programs}>
               Explore All Programs <ArrowRight className="h-4 w-4" />
@@ -135,16 +170,57 @@ export default function HomePage() {
       </Section>
 
       {/* Community impact */}
-      <Section>
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          <PhotoGrid photos={homePerformanceGallery} columns={2} />
-          <div>
-            <SectionHeader
-              eyebrow="Community Impact"
-              title="Live Performances & Community Events"
-              description="Our students regularly perform at community events, malls, senior centers, and special occasions. These performances provide valuable experience and help raise awareness for music education."
-            />
-            <Button asChild size="lg" variant="outline">
+      <Section className="md:pb-[150px]">
+        <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+          <div data-reveal="1" className="grid grid-cols-2 gap-4">
+            {g1 && (
+              <div className="noc-card col-span-2 h-[250px] overflow-hidden">
+                <Image
+                  src={imagePath(g1.file)}
+                  alt={g1.alt}
+                  width={1200}
+                  height={500}
+                  data-plx="0.07"
+                  className="h-full w-full scale-[1.14] object-cover"
+                />
+              </div>
+            )}
+            {g2 && (
+              <div className="noc-card h-[210px] overflow-hidden">
+                <Image
+                  src={imagePath(g2.file)}
+                  alt={g2.alt}
+                  width={600}
+                  height={420}
+                  data-plx="0.12"
+                  className="h-full w-full scale-[1.16] object-cover"
+                />
+              </div>
+            )}
+            {g3 && (
+              <div className="noc-card mt-6 h-[210px] overflow-hidden">
+                <Image
+                  src={imagePath(g3.file)}
+                  alt={g3.alt}
+                  width={600}
+                  height={420}
+                  data-plx="0.05"
+                  className="h-full w-full scale-[1.14] object-cover"
+                />
+              </div>
+            )}
+          </div>
+          <div data-reveal="1">
+            <p className="noc-eyebrow">Community Impact</p>
+            <h2 className="mb-6 mt-5 text-3xl leading-[1.12] tracking-[-0.015em] [text-wrap:pretty] md:text-[clamp(34px,3.3vw,48px)]">
+              Live Performances &amp; Community Events
+            </h2>
+            <p className="mb-9 text-[16.5px] leading-[1.75] text-[var(--noc-neutral-300)]">
+              Our students regularly perform at community events, malls, senior
+              centers, and special occasions. These performances provide valuable
+              experience and help raise awareness for music education.
+            </p>
+            <Button asChild size="lg">
               <Link href={routes.getInvolved}>
                 Get Involved <ArrowRight className="h-4 w-4" />
               </Link>
@@ -155,7 +231,7 @@ export default function HomePage() {
 
       <CTABand
         title="Ready to Start Your Musical Journey?"
-        description="Whether you want to learn an instrument, become a tutor, or support our mission, there is a place for you at The Resonance Foundation."
+        description="Whether you want to learn an instrument, become a tutor, or support our mission, there is a place for you at The Resonance Foundation. Every lesson is completely free."
         buttons={[
           { label: "Enroll", href: routes.enroll },
           { label: "Support Our Mission", href: routes.donate, variant: "outline" },

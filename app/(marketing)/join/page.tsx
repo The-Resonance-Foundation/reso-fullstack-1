@@ -14,6 +14,7 @@ export default function JoinPage() {
   return (
     <>
       <PageHero
+        eyebrow="Join Us"
         title="Join Our Team"
         subtitle="Register as a tutor, chapter officer, or volunteer and help make music education accessible."
         compact

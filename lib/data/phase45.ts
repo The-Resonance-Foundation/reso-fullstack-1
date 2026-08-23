@@ -22,16 +22,6 @@ type ConversationLastMessageRow = {
   message_created_at: string
 }
 
-async function getReviewerChapterIds() {
-  const roles = await getUserRoles()
-  const roleNames = roles.map((r) => r.role)
-  if (isOrgAdmin(roleNames)) return null
-  return roles
-    .filter((r) => ["chapter_officer", "chapter_president"].includes(r.role))
-    .map((r) => r.chapter_id)
-    .filter(Boolean) as string[]
-}
-
 export const getVolunteerHoursForUser = cache(async (): Promise<VolunteerHour[]> => {
   const user = await verifySession()
   const supabase = await getServerClientOrThrow()
@@ -50,16 +40,30 @@ export const getVolunteerHoursForUser = cache(async (): Promise<VolunteerHour[]>
 export const getPendingVolunteerHoursForReviewer = cache(
   async (): Promise<VolunteerHour[]> => {
     await verifySession()
-    const supabase = await getServerClientOrThrow()
-    const chapterIds = await getReviewerChapterIds()
-    let query = supabase
+    const roles = await getUserRoles()
+    const roleNames = roles.map((r) => r.role)
+    const admin = createAdminClient()
+
+    // Board sees everything (incl. corporate hours). Program administrators
+    // see chapter-level hours only. Chapter presidents see their chapters.
+    // Chapter officers no longer review hours.
+    let query = admin
       .from("volunteer_hours")
       .select("*, chapters(name, slug)")
       .eq("status", "pending")
       .order("activity_date", { ascending: false })
-    if (chapterIds) {
-      if (!chapterIds.length) return []
-      query = query.in("chapter_id", chapterIds)
+
+    if (!roleNames.includes("board_of_director")) {
+      if (roleNames.includes("program_administrator")) {
+        query = query.not("chapter_id", "is", null)
+      } else {
+        const presidentChapters = roles
+          .filter((r) => r.role === "chapter_president")
+          .map((r) => r.chapter_id)
+          .filter(Boolean) as string[]
+        if (!presidentChapters.length) return []
+        query = query.in("chapter_id", presidentChapters)
+      }
     }
     const { data, error } = await query
     if (error) {
@@ -69,7 +73,6 @@ export const getPendingVolunteerHoursForReviewer = cache(
     const rows = (data ?? []) as VolunteerHour[]
     if (!rows.length) return []
     const userIds = [...new Set(rows.map((r) => r.user_id))]
-    const admin = createAdminClient()
     const { data: profiles } = await admin
       .from("profiles")
       .select("id, full_name")

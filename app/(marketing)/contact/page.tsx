@@ -67,6 +67,7 @@ export default function ContactPage() {
   return (
     <>
       <PageHero
+        eyebrow="Contact"
         title="Contact Us"
         subtitle="We would love to hear from you. Get in touch with The Resonance Foundation."
       />
@@ -108,7 +109,7 @@ export default function ContactPage() {
                   key={action.title}
                   className={
                     action.variant === "default"
-                      ? "bg-primary text-primary-foreground"
+                      ? "border-[var(--noc-accent-700)] bg-[var(--noc-accent-900)]/60"
                       : action.variant === "accent"
                         ? "border-primary/25 bg-primary/5 shadow-sm"
                         : ""
@@ -116,13 +117,7 @@ export default function ContactPage() {
                 >
                   <CardContent className="pt-6">
                     <h3 className="text-lg font-semibold">{action.title}</h3>
-                    <p
-                      className={`mt-1 text-sm ${
-                        action.variant === "default"
-                          ? "text-primary-foreground/80"
-                          : "text-muted-foreground"
-                      }`}
-                    >
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {action.description}
                     </p>
                     <Button

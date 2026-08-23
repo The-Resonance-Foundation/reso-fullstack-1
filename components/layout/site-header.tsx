@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, Music } from "lucide-react"
+import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -26,23 +26,30 @@ export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
   const accountLabel = isAuthenticated ? "Dashboard" : "Log In"
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border/80 bg-background/95 backdrop-blur-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:h-20">
-        <Link href={routes.home} className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-            <Music className="h-5 w-5 text-primary" aria-hidden />
-          </div>
-          <span className="font-serif text-sm font-bold leading-tight text-foreground sm:text-lg md:text-xl">
+    <header
+      id="navBar"
+      // Transparent at the top; NocturneEffects paints the glass treatment
+      // (background, blur, border) once the page scrolls past 50px.
+      className="fixed inset-x-0 top-0.5 z-50 border-b border-transparent transition-[background,border-color,backdrop-filter] duration-300"
+    >
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:h-[70px]">
+        <Link href={routes.home} className="group flex items-center gap-3">
+          <span className="relative inline-flex h-[26px] w-[26px] items-center justify-center">
+            <span className="absolute inset-0 rounded-full border border-primary opacity-90" />
+            <span className="absolute inset-[5px] rounded-full border border-[var(--noc-accent-600)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          </span>
+          <span className="text-sm font-medium leading-tight tracking-[0.01em] text-foreground transition-colors group-hover:text-[var(--noc-accent-200)] sm:text-base md:text-[16.5px]">
             The Resonance Foundation
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 xl:gap-6 lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main">
           {navigation.primaryNav.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+              className="whitespace-nowrap rounded-md px-3 py-2 text-[13.5px] font-medium text-[var(--noc-neutral-300)] transition-colors hover:bg-primary/10 hover:text-[var(--noc-accent-200)]"
             >
               {link.label}
             </Link>
@@ -69,9 +76,10 @@ export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent>
+          {/* Radix portals escape the theme wrapper — re-scope the sheet. */}
+          <SheetContent className="marketing-nocturne border-border bg-background text-foreground">
             <SheetHeader>
-              <SheetTitle className="font-serif text-left">Menu</SheetTitle>
+              <SheetTitle className="text-left">Menu</SheetTitle>
             </SheetHeader>
             <nav className="mt-8 flex flex-col gap-4" aria-label="Mobile">
               {navigation.primaryNav.map((link) => (

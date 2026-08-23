@@ -95,7 +95,7 @@ function drawNote(
 
 export async function generateVolunteerCertificatePdf(input: {
   volunteerName: string
-  chapterName: string
+  chapterName: string | null
   totalHours: number
   periodStart: string
   periodEnd: string
@@ -309,7 +309,9 @@ export async function generateVolunteerCertificatePdf(input: {
     { text: hoursLabel, font: poppinsBold, color: NAVY },
     { text: " of dedicated volunteer service,", font: poppins, color: INK },
   ]
-  const line2 = `helping bring music education and live performance to the ${input.chapterName} community.`
+  const line2 = input.chapterName
+    ? `helping bring music education and live performance to the ${input.chapterName} community.`
+    : "helping bring music education and live performance to communities across the region."
   const line1Width = line1.reduce(
     (a, seg) => a + seg.font.widthOfTextAtSize(seg.text, bodySize),
     0

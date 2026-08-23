@@ -280,18 +280,36 @@ export const isVolunteerAccount = cache(async () => {
 export const getVolunteerChapterOptions = cache(async () => {
   const roles = await getUserRoles()
   const seen = new Set<string>()
-  return roles
+  const options = roles
     .filter((r) => ["tutor", "volunteer"].includes(r.role) && r.chapter_id)
     .flatMap((r) => {
       if (!r.chapter_id || seen.has(r.chapter_id)) return []
       seen.add(r.chapter_id)
       return [{ id: r.chapter_id, name: r.chapters?.name ?? "Chapter" }]
     })
+  // Corporate-level volunteers (org-wide role, no chapter) log hours at the
+  // corporate level — "org" is the sentinel value the submit action maps to a
+  // null chapter.
+  const hasChapterlessRole = roles.some((r) => r.chapter_id === null)
+  if (hasChapterlessRole) {
+    options.push({ id: "org", name: "Corporate (organization-wide)" })
+  }
+  return options
 })
 
-export const canLogVolunteerHours = cache(async (chapterId?: string) => {
+/**
+ * Logging hours: pass a chapter id for chapter hours, explicit null for
+ * corporate-level hours (requires an org-level tutor/volunteer role), or
+ * nothing for the generic "can log at all" UI check.
+ */
+export const canLogVolunteerHours = cache(async (chapterId?: string | null) => {
   const roles = await getUserRoles()
   const roleNames = roles.map((r) => r.role)
+  if (chapterId === null) {
+    // Corporate hours: any member whose role is org-level (chapterless) —
+    // corporate volunteers, corporate officers, program admins, board.
+    return roles.some((r) => r.chapter_id === null)
+  }
   if (isOrgAdmin(roleNames)) return true
   if (!chapterId) {
     return roleNames.some((role) => ["tutor", "volunteer"].includes(role))
@@ -302,18 +320,27 @@ export const canLogVolunteerHours = cache(async (chapterId?: string) => {
   )
 })
 
-export const canApproveVolunteerHours = cache(async (chapterId?: string) => {
-  const roles = await getUserRoles()
-  const roleNames = roles.map((r) => r.role)
-  const chapterIds = roles.map((r) => r.chapter_id)
-  if (isOrgAdmin(roleNames)) return true
-  if (!chapterId) {
-    return roleNames.some((role) =>
-      ["chapter_officer", "chapter_president"].includes(role)
+/**
+ * Volunteer-hour approvals: the board approves everything, including
+ * corporate-level hours (explicit null chapter). Program administrators and
+ * chapter presidents approve chapter-level hours (presidents only their own
+ * chapter). Chapter officers do not approve hours.
+ */
+export const canApproveVolunteerHours = cache(
+  async (chapterId?: string | null) => {
+    const roles = await getUserRoles()
+    const roleNames = roles.map((r) => r.role)
+    if (isBoard(roleNames)) return true
+    if (chapterId === null) return false // corporate hours: board only
+    if (roleNames.includes("program_administrator")) return true
+    if (!chapterId) {
+      return roleNames.includes("chapter_president")
+    }
+    return roles.some(
+      (r) => r.role === "chapter_president" && r.chapter_id === chapterId
     )
   }
-  return canManageChapter(roleNames, chapterId, chapterIds)
-})
+)
 
 export const canAuditMessages = cache(async (chapterId?: string) => {
   const roles = await getUserRoles()
@@ -401,25 +428,47 @@ export const canManageChapters = cache(async () => {
   return isBoard(roles)
 })
 
-export const canManageChapterRoles = cache(
-  async (chapterId?: string | null, role?: AppRole) => {
+/**
+ * Assignment rules:
+ * - Board: any role.
+ * - Program administrators: anything except chapter_president and
+ *   board_of_director (both board-only), including corporate_officer.
+ * - Chapter presidents/officers: chapter-scoped roles in their own chapter,
+ *   except chapter_president (board-only).
+ */
+export const canAssignRole = cache(
+  async (role: AppRole, chapterId?: string | null) => {
     const roles = await getUserRoles()
     const roleNames = roles.map((r) => r.role)
-
     if (isBoard(roleNames)) return true
+    if (role === "chapter_president" || role === "board_of_director") return false
+    if (roleNames.includes("program_administrator")) return true
+    if (!chapterId) return false
+    const chapterIds = roles.map((r) => r.chapter_id)
+    return canManageChapter(roleNames, chapterId, chapterIds)
+  }
+)
 
-    const orgRoles: AppRole[] = [
-      "board_of_director",
-      "program_administrator",
-      "corporate_officer",
-    ]
-
-    if (role && orgRoles.includes(role)) {
+/**
+ * Removal rules: no officer (chapter officer, chapter president, corporate
+ * officer, board member) can be removed except by the board. Tutors,
+ * volunteers, and parent roles follow the assignment scoping — chapter
+ * leadership can still manage and remove tutors in their chapter.
+ */
+export const canRemoveRole = cache(
+  async (role: AppRole, chapterId?: string | null) => {
+    const roles = await getUserRoles()
+    const roleNames = roles.map((r) => r.role)
+    if (isBoard(roleNames)) return true
+    if (
+      ["chapter_officer", "chapter_president", "corporate_officer", "board_of_director"].includes(
+        role
+      )
+    ) {
       return false
     }
-
+    if (roleNames.includes("program_administrator")) return true
     if (!chapterId) return false
-
     const chapterIds = roles.map((r) => r.chapter_id)
     return canManageChapter(roleNames, chapterId, chapterIds)
   }
@@ -430,7 +479,7 @@ export const canAssignRoles = cache(async () => {
   const roleNames = roles.map((r) => r.role)
   if (isBoard(roleNames)) return true
   return roleNames.some((role) =>
-    ["chapter_officer", "chapter_president"].includes(role)
+    ["program_administrator", "chapter_officer", "chapter_president"].includes(role)
   )
 })
 

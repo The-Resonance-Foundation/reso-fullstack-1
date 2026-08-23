@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function ProgramsPage() {
   return (
     <>
-      <PageHero title={programs.pageTitle} subtitle={programs.pageSubtitle} />
+      <PageHero eyebrow="What We Offer" title={programs.pageTitle} subtitle={programs.pageSubtitle} />
 
       <Section>
         <div className="space-y-20">
@@ -30,21 +30,28 @@ export default function ProgramsPage() {
                 index % 2 === 1 ? "lg:[&>div:first-child]:order-2" : ""
               }`}
             >
-              <div>
-                <h2 className="font-serif text-3xl font-bold">{program.name}</h2>
+              <div data-reveal="1">
+                <div
+                  className="text-[74px] font-medium leading-none text-transparent"
+                  style={{ WebkitTextStroke: "1px var(--noc-accent-700)" }}
+                  aria-hidden
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+                <h2 className="mt-3 text-3xl md:text-[clamp(32px,3vw,44px)]">{program.name}</h2>
                 <p className="mt-4 text-lg text-muted-foreground">{program.description}</p>
                 <div className="mt-6">
-                  <h3 className="font-semibold">Instruments Offered</h3>
+                  <h3 className="text-[11.5px] font-semibold uppercase tracking-[0.22em] text-[var(--noc-accent-300)]">Instruments Offered</h3>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {program.instruments.map((instrument) => (
                       <span
                         key={instrument}
-                        className="rounded-full bg-primary/10 px-3 py-1 text-sm text-primary"
+                        className="rounded-md bg-[var(--noc-neutral-800)] px-3 py-1 text-sm text-[var(--noc-accent-100)]"
                       >
                         {instrument}
                       </span>
                     ))}
-                    <span className="rounded-full bg-accent/15 px-3 py-1 text-sm italic text-accent-foreground">
+                    <span className="rounded-md px-3 py-1 text-sm italic text-[var(--noc-neutral-400)]">
                       {programs.instrumentsNote}
                     </span>
                   </div>
@@ -53,12 +60,13 @@ export default function ProgramsPage() {
                   <Link href={routes.enroll}>Sign Up for {program.name} Lessons</Link>
                 </Button>
               </div>
-              <div className="relative aspect-[3/2] overflow-hidden rounded-2xl shadow-lg">
+              <div data-reveal="1" className="noc-card relative aspect-[3/2.2] overflow-hidden">
                 <Image
                   src={imagePath(program.image)}
                   alt={`${program.name} program`}
                   fill
-                  className="object-cover"
+                  data-plx="0.08"
+                  className="scale-[1.14] object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
               </div>
@@ -76,11 +84,11 @@ export default function ProgramsPage() {
               className="mb-0"
             />
             {programs.performanceOpportunities.paragraphs.map((p) => (
-              <p key={p.slice(0, 30)} className="mt-4 text-lg text-primary-foreground/90">
+              <p key={p.slice(0, 30)} className="mt-4 text-lg leading-[1.7] text-[var(--noc-neutral-200,#e4e7f5)]">
                 {p}
               </p>
             ))}
-            <Button asChild variant="secondary" size="lg" className="mt-6">
+            <Button asChild variant="outline" size="lg" className="mt-6">
               <a href={siteConfig.links.email.mailto}>Inquire About Performing</a>
             </Button>
           </div>

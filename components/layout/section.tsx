@@ -13,8 +13,8 @@ export function Section({ children, className, id, variant = "default" }: Sectio
       id={id}
       className={cn(
         "py-16 md:py-24",
-        variant === "muted" && "bg-muted/60",
-        variant === "primary" && "bg-primary text-primary-foreground",
+        variant === "muted" && "bg-card/40",
+        variant === "primary" && "noc-section-ground",
         className
       )}
     >
@@ -38,10 +38,10 @@ export function SectionHeader({
   description,
   align = "left",
   className,
-  light = false,
 }: SectionHeaderProps) {
   return (
     <div
+      data-reveal="1"
       className={cn(
         "mb-10 max-w-3xl",
         align === "center" && "mx-auto text-center",
@@ -51,28 +51,18 @@ export function SectionHeader({
       {eyebrow && (
         <p
           className={cn(
-            "mb-3 text-sm font-semibold uppercase tracking-wider",
-            light ? "text-primary-foreground/80" : "text-primary"
+            "noc-eyebrow mb-5",
+            align === "center" && "noc-eyebrow-center"
           )}
         >
           {eyebrow}
         </p>
       )}
-      <h2
-        className={cn(
-          "font-serif text-3xl font-bold tracking-tight md:text-4xl",
-          light ? "text-primary-foreground" : "text-foreground"
-        )}
-      >
+      <h2 className="text-3xl tracking-tight text-foreground md:text-[clamp(34px,3.3vw,48px)] md:leading-[1.12]">
         {title}
       </h2>
       {description && (
-        <p
-          className={cn(
-            "mt-4 text-lg leading-relaxed",
-            light ? "text-primary-foreground/90" : "text-muted-foreground"
-          )}
-        >
+        <p className="mt-5 text-[16.5px] leading-[1.75] text-[var(--noc-neutral-300)]">
           {description}
         </p>
       )}

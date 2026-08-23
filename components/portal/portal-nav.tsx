@@ -37,6 +37,7 @@ export type PortalNavFlags = {
   isTutor: boolean
   hasPortalRole: boolean
   canLogVolunteerHours: boolean
+  canApproveHours: boolean
   canReview: boolean
   canManageChapters: boolean
   canAssignRoles: boolean
@@ -141,17 +142,19 @@ export function buildPortalNav(flags: PortalNavFlags): NavGroup[] {
         icon: UserCog,
       },
       {
-        label: "Volunteer Approvals",
-        href: routes.portal.admin.volunteerHours,
-        icon: CheckCircle2,
-      },
-      {
         label: "Publish Announcements",
         href: routes.portal.admin.announcements,
         icon: Megaphone,
       },
       { label: "Chapter Docs", href: routes.portal.admin.docs, icon: FileText },
     )
+  }
+  if (flags.canApproveHours) {
+    admin.push({
+      label: "Volunteer Approvals",
+      href: routes.portal.admin.volunteerHours,
+      icon: CheckCircle2,
+    })
   }
   if (flags.canManageChapters) {
     admin.push({ label: "Chapters", href: routes.portal.admin.chapters, icon: Building2 })

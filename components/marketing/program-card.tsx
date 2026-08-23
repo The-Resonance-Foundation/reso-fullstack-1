@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Card } from "@/components/ui/card"
 import { imagePath } from "@/lib/utils"
 
 type Program = {
@@ -13,26 +12,37 @@ type Program = {
 type ProgramCardProps = {
   program: Program
   href?: string
+  /** Position in the grid — renders the design's "01"-style index and staggers the reveal. */
+  index?: number
 }
 
-export function ProgramCard({ program, href }: ProgramCardProps) {
+export function ProgramCard({ program, href, index = 0 }: ProgramCardProps) {
   const content = (
-    <Card className="group overflow-hidden border-border/80 transition-shadow hover:shadow-lg focus-within:ring-2 focus-within:ring-primary/40">
-      <div className="relative h-48 overflow-hidden">
+    <div
+      data-reveal="1"
+      data-reveal-delay={index ? String(index * 90) : undefined}
+      data-tilt="1"
+      className="noc-card group h-full cursor-pointer overflow-hidden will-change-transform"
+    >
+      <div className="relative h-[200px] overflow-hidden">
         <Image
           src={imagePath(program.image)}
           alt={`${program.name} program`}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 25vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4">
-          <h3 className="font-serif text-xl font-bold text-white">{program.name}</h3>
-          <p className="text-sm text-white/85">{program.shortDescription}</p>
-        </div>
       </div>
-    </Card>
+      <div className="px-[22px] pb-6 pt-[22px]">
+        <div className="mb-2 text-[11px] uppercase tracking-[0.2em] text-[var(--noc-accent-400)]">
+          {String(index + 1).padStart(2, "0")}
+        </div>
+        <h3 className="mb-1.5 text-[21px] font-medium">{program.name}</h3>
+        <p className="text-[13.5px] leading-[1.5] text-[var(--noc-neutral-300)]">
+          {program.shortDescription}
+        </p>
+      </div>
+    </div>
   )
 
   if (href) {

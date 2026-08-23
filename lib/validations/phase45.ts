@@ -6,7 +6,10 @@ export type FormState =
   | undefined
 
 export const volunteerHourSchema = z.object({
-  chapterId: z.uuid({ error: "Please select a chapter." }),
+  // "org" = corporate-level hours (no chapter)
+  chapterId: z.union([z.uuid(), z.literal("org")], {
+    error: "Please select a chapter.",
+  }),
   category: z.enum(VOLUNTEER_HOUR_CATEGORIES),
   hours: z.coerce.number().gt(0).max(24),
   activityDate: z.string().min(1),

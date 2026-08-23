@@ -1,18 +1,18 @@
 {
   "lessons": {
     "group": {
-      "price": 10,
+      "price": 0,
       "currency": "USD",
       "durationMinutes": 45,
-      "description": "Group lessons are $10 for 45 minutes"
+      "description": "Group lessons are completely free — 45 minutes"
     },
     "individual": {
-      "price": 15,
+      "price": 0,
       "currency": "USD",
       "durationMinutes": 45,
-      "description": "Individual lessons are $15 for 45 minutes"
+      "description": "Individual lessons are completely free — 45 minutes"
     },
-    "financialAid": "Financial aid is available for students who qualify — cost should never be a barrier to learning music."
+    "financialAid": "Every lesson is 100% free — cost is never a barrier to learning music."
   },
   "donationImpact": [
     {

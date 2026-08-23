@@ -158,6 +158,17 @@ function buildQueueColumns(): ColumnDef<VolunteerHour>[] {
       ),
     },
     {
+      id: "chapter",
+      header: "Chapter",
+      accessorFn: (row) => row.chapters?.name ?? "Corporate",
+      enableGlobalFilter: false,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {row.original.chapters?.name ?? "Corporate"}
+        </span>
+      ),
+    },
+    {
       id: "category",
       header: "Category",
       accessorFn: (row) => CATEGORY_LABELS[row.category] ?? row.category,

@@ -25,11 +25,13 @@ export function PhotoGrid({ photos, columns = 3, className }: PhotoGridProps) {
         className
       )}
     >
-      {photos.map((photo) => (
+      {photos.map((photo, i) => (
         <div
           key={photo.file}
+          data-reveal="1"
+          data-reveal-delay={i % 3 ? String((i % 3) * 70) : undefined}
           className={cn(
-            "relative overflow-hidden rounded-xl shadow-sm ring-1 ring-border/60",
+            "relative overflow-hidden rounded-[14px] shadow-[var(--noc-shadow-sm)]",
             photo.wide && "col-span-2",
             columns === 4 ? "h-48" : "h-52 md:h-64"
           )}

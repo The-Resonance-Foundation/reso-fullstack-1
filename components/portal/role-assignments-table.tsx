@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import { ShieldCheck, Trash2, Users } from "lucide-react"
 import type { ColumnDef } from "@tanstack/react-table"
 import { removeUserRole } from "@/app/actions/admin"
-import { AssignRoleDialog } from "@/components/portal/role-assignment-form"
+import { AssignRoleDialog, type AssignerScope } from "@/components/portal/role-assignment-form"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
@@ -69,7 +69,25 @@ function RemoveRoleAction({ assignment }: { assignment: RoleAssignmentRow }) {
   )
 }
 
-function buildAssignmentColumns(): ColumnDef<RoleAssignmentRow>[] {
+const OFFICER_ROLES = [
+  "chapter_officer",
+  "chapter_president",
+  "corporate_officer",
+  "board_of_director",
+]
+
+/** Mirrors canRemoveRole in lib/auth/dal.ts so the button only shows when the
+ * server would allow the removal. */
+function canRemoveAssignment(scope: AssignerScope, row: RoleAssignmentRow) {
+  if (scope === "board") return true
+  if (OFFICER_ROLES.includes(row.role)) return false
+  if (scope === "org_admin") return true
+  // Chapter leadership can only remove chapter-scoped, non-officer roles
+  // (tutors, parents) — corporate-level rows are out of scope.
+  return row.chapter_id !== null && ["tutor", "student_parent"].includes(row.role)
+}
+
+function buildAssignmentColumns(scope: AssignerScope): ColumnDef<RoleAssignmentRow>[] {
   return [
     {
       id: "member",
@@ -120,11 +138,12 @@ function buildAssignmentColumns(): ColumnDef<RoleAssignmentRow>[] {
       header: "",
       enableSorting: false,
       enableGlobalFilter: false,
-      cell: ({ row }) => (
-        <div className="flex justify-end">
-          <RemoveRoleAction assignment={row.original} />
-        </div>
-      ),
+      cell: ({ row }) =>
+        canRemoveAssignment(scope, row.original) ? (
+          <div className="flex justify-end">
+            <RemoveRoleAction assignment={row.original} />
+          </div>
+        ) : null,
     },
   ]
 }
@@ -170,12 +189,14 @@ export function RoleAssignmentsTabs({
   assignments,
   chapters,
   members,
+  scope,
 }: {
   assignments: RoleAssignmentRow[]
   chapters: Chapter[]
   members: PortalMember[]
+  scope: AssignerScope
 }) {
-  const assignmentColumns = buildAssignmentColumns()
+  const assignmentColumns = buildAssignmentColumns(scope)
   const memberColumns = buildMemberColumns()
 
   return (
@@ -200,6 +221,7 @@ export function RoleAssignmentsTabs({
                 <AssignRoleDialog
                   chapters={chapters}
                   members={members}
+                  scope={scope}
                   trigger={<Button>Assign role</Button>}
                 />
               }

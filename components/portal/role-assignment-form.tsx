@@ -30,19 +30,30 @@ import type { PortalMember } from "@/lib/auth/dal"
 import { APP_ROLES, type AppRole } from "@/types/enums"
 import { ROLE_LABELS } from "@/types/roles"
 
-const ASSIGNABLE_ROLES = APP_ROLES.filter(
-  (role) => role !== "board_of_director"
-)
+/** Who is doing the assigning — drives which roles the form offers. */
+export type AssignerScope = "board" | "org_admin" | "chapter"
+
+function assignableRolesFor(scope: AssignerScope): AppRole[] {
+  if (scope === "board") return [...APP_ROLES]
+  if (scope === "org_admin") {
+    // Program administrators may grant anything except presidencies and board
+    // seats — those are board-only appointments.
+    return APP_ROLES.filter(
+      (role) => role !== "chapter_president" && role !== "board_of_director"
+    )
+  }
+  // Chapter leadership: chapter-scoped, non-presidential roles only.
+  return ["student_parent", "tutor", "chapter_officer"]
+}
 
 /**
  * Roles that require a chapter to be selected. Mirrors CHAPTER_SCOPED_ROLES in
  * app/actions/admin.ts — kept in sync manually since a "use server" module can
- * only export async functions.
+ * only export async functions. Volunteers are corporate-level (no chapter).
  */
 const CHAPTER_SCOPED_ROLES: AppRole[] = [
   "student_parent",
   "tutor",
-  "volunteer",
   "chapter_officer",
   "chapter_president",
 ]
@@ -50,6 +61,7 @@ const CHAPTER_SCOPED_ROLES: AppRole[] = [
 type AssignRoleDialogProps = {
   chapters: Chapter[]
   members: PortalMember[]
+  scope: AssignerScope
   /** Render a custom trigger (e.g. for an empty-state CTA). Defaults to a primary button. */
   trigger?: React.ReactNode
 }
@@ -57,10 +69,12 @@ type AssignRoleDialogProps = {
 export function AssignRoleDialog({
   chapters,
   members,
+  scope,
   trigger,
 }: AssignRoleDialogProps) {
   const [open, setOpen] = useState(false)
   const [role, setRole] = useState<AppRole | "">("")
+  const assignableRoles = assignableRolesFor(scope)
   const needsChapter = role !== "" && CHAPTER_SCOPED_ROLES.includes(role)
 
   const [state, formAction, pending] = useActionState(
@@ -133,7 +147,7 @@ export function AssignRoleDialog({
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                {ASSIGNABLE_ROLES.map((assignableRole) => (
+                {assignableRoles.map((assignableRole) => (
                   <SelectItem key={assignableRole} value={assignableRole}>
                     {ROLE_LABELS[assignableRole]}
                   </SelectItem>

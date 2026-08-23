@@ -36,11 +36,15 @@ async function issueCertificateForHours(
   const chapterId = hours[0].chapter_id
   const hourIds = hours.map((h) => h.id)
 
-  const { data: existingCerts } = await admin
+  let certQuery = admin
     .from("certificates")
     .select("id, source_hour_ids")
     .eq("user_id", userId)
-    .eq("chapter_id", chapterId)
+  certQuery =
+    chapterId === null
+      ? certQuery.is("chapter_id", null)
+      : certQuery.eq("chapter_id", chapterId)
+  const { data: existingCerts } = await certQuery
 
   const overlap = (existingCerts ?? []).find((cert) =>
     (cert.source_hour_ids ?? []).some((id: string) => hourIds.includes(id))
@@ -55,11 +59,10 @@ async function issueCertificateForHours(
     .eq("id", userId)
     .maybeSingle()
 
-  const { data: chapter } = await admin
-    .from("chapters")
-    .select("name")
-    .eq("id", chapterId)
-    .maybeSingle()
+  // Corporate hours have no chapter — the certificate uses generic wording.
+  const { data: chapter } = chapterId
+    ? await admin.from("chapters").select("name").eq("id", chapterId).maybeSingle()
+    : { data: null }
 
   // The approver signs the certificate with their highest-ranking role.
   const [{ data: approverProfile }, { data: approverRoles }] = await Promise.all([
@@ -105,7 +108,7 @@ async function issueCertificateForHours(
 
   const pdfBytes = await generateVolunteerCertificatePdf({
     volunteerName: profile?.full_name ?? "Volunteer",
-    chapterName: chapter?.name ?? "Chapter",
+    chapterName: chapter?.name ?? null,
     totalHours,
     periodStart: start,
     periodEnd: end,
@@ -161,8 +164,12 @@ export async function submitVolunteerHours(
     return { message: "Activity date cannot be in the future." }
   }
 
+  // "org" is the corporate-level sentinel from the form — stored as NULL.
+  const chapterId =
+    validated.data.chapterId === "org" ? null : validated.data.chapterId
+
   const user = await verifySession()
-  const allowed = await canLogVolunteerHours(validated.data.chapterId)
+  const allowed = await canLogVolunteerHours(chapterId)
   if (!allowed) {
     return { message: "You are not authorized to log hours for this chapter." }
   }
@@ -170,7 +177,7 @@ export async function submitVolunteerHours(
   const supabase = await getServerClientOrThrow()
   const { error } = await supabase.from("volunteer_hours").insert({
     user_id: user.id,
-    chapter_id: validated.data.chapterId,
+    chapter_id: chapterId,
     category: validated.data.category,
     hours: validated.data.hours,
     activity_date: validated.data.activityDate,

@@ -21,44 +21,26 @@ export function CTABand({
   title,
   description,
   buttons,
-  variant = "primary",
   className,
 }: CTABandProps) {
-  const isPrimary = variant === "primary"
-
   return (
-    <section
-      className={cn(
-        "py-16 md:py-20",
-        isPrimary ? "bg-primary text-primary-foreground" : "bg-muted/60",
-        className
-      )}
-    >
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="font-serif text-3xl font-bold md:text-4xl">{title}</h2>
+    <section className={cn("py-20 md:py-28", className)}>
+      <div data-reveal="1" className="container mx-auto max-w-[900px] px-4 text-center">
+        <h2 className="text-3xl leading-[1.1] tracking-[-0.02em] md:text-[clamp(36px,3.8vw,54px)]">
+          {title}
+        </h2>
         {description && (
-          <p
-            className={cn(
-              "mx-auto mt-4 max-w-2xl text-lg",
-              isPrimary ? "text-primary-foreground/90" : "text-muted-foreground"
-            )}
-          >
+          <p className="mx-auto mt-5 max-w-[620px] text-[17px] leading-[1.7] text-[var(--noc-neutral-300)]">
             {description}
           </p>
         )}
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
-          {buttons.map((btn) => {
-            const resolvedVariant =
-              btn.variant === "outline" && isPrimary
-                ? "outlineLight"
-                : (btn.variant ?? (isPrimary ? "secondary" : "default"))
-
-            return (
+        <div className="mt-9 flex flex-wrap justify-center gap-4">
+          {buttons.map((btn, i) => (
             <Button
               key={btn.href}
               asChild
               size="lg"
-              variant={resolvedVariant}
+              variant={i === 0 ? "default" : "outline"}
             >
               <Link
                 href={btn.href}
@@ -68,8 +50,7 @@ export function CTABand({
                 {btn.label}
               </Link>
             </Button>
-            )
-          })}
+          ))}
         </div>
       </div>
     </section>
