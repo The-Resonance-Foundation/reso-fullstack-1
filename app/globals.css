@@ -383,6 +383,15 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 242, 226, 0.07);
 }
 
+/* Native <select> popup lists take their colors from the element itself; the
+   translucent glass field background made options unreadable on Windows.
+   Paint options explicitly. */
+.portal-aurora select option,
+.portal-aurora select optgroup {
+  background-color: #241b14;
+  color: #f4ede3;
+}
+
 .portal-aurora .field-control {
   background: rgba(255, 242, 226, 0.05);
   border: 1px solid rgba(255, 240, 222, 0.12);

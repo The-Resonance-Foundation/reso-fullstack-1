@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { BrandMark } from "@/components/portal/aurora-background"
+import { Music } from "lucide-react"
 import { PortalNav, type PortalNavFlags } from "@/components/portal/portal-nav"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { routes } from "@/lib/routes"
@@ -27,7 +27,9 @@ export function PortalSidebar({ flags, roleChips, badges }: PortalSidebarProps) 
         href={routes.portal.dashboard}
         className="flex shrink-0 items-center gap-3 px-4 pb-3 pt-5"
       >
-        <BrandMark size={40} />
+        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[13px] bg-primary text-primary-foreground shadow-[0_8px_20px_rgba(214,116,28,.35)]">
+          <Music className="h-5 w-5" aria-hidden />
+        </span>
         <span className="leading-tight">
           <span className="block font-serif text-[16px] font-bold tracking-[.01em] text-sidebar-foreground">
             Resonance

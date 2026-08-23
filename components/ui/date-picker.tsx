@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -39,6 +39,13 @@ export function Calendar({ value, onSelect, minDate, allowedWeekdays }: Calendar
     const base = value ?? minDate ?? today
     return new Date(base.getFullYear(), base.getMonth(), 1)
   })
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  // The calendar expands inline (often inside a scrollable dialog) — make
+  // sure it is actually on screen when it appears.
+  useEffect(() => {
+    rootRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" })
+  }, [])
 
   const cells = useMemo(() => {
     const firstDow = view.getDay()
@@ -54,7 +61,7 @@ export function Calendar({ value, onSelect, minDate, allowedWeekdays }: Calendar
   const min = minDate ? startOfDay(minDate) : null
 
   return (
-    <div key={view.toISOString()} className="animate-pop-in w-[266px] select-none">
+    <div ref={rootRef} key={view.toISOString()} className="animate-pop-in w-[266px] select-none">
       <div className="flex items-center justify-between px-1 pb-2">
         <button
           type="button"

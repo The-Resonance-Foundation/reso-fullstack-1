@@ -2,9 +2,8 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { ChevronDown, ExternalLink, LogOut, Menu } from "lucide-react"
+import { ChevronDown, ExternalLink, LogOut, Menu, Music } from "lucide-react"
 import { logout } from "@/app/actions/auth"
-import { BrandMark } from "@/components/portal/aurora-background"
 import { NotificationBell } from "@/components/portal/notification-bell"
 import { PortalNav, type PortalNavFlags } from "@/components/portal/portal-nav"
 import { PortalSearch } from "@/components/portal/portal-search"
@@ -75,7 +74,9 @@ export function PortalHeader({
         <SheetContent side="left" className="dark portal-aurora w-72 border-border bg-[#181209] p-0">
           <SheetHeader className="border-b border-border px-4 py-3.5 text-left">
             <SheetTitle className="flex items-center gap-2.5 text-sm">
-              <BrandMark size={32} />
+              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Music className="h-4 w-4" aria-hidden />
+              </span>
               <span className="leading-tight">
                 <span className="block font-serif text-sm font-bold text-foreground">
                   Resonance

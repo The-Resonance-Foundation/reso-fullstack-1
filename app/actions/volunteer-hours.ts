@@ -3,8 +3,10 @@
 import {
   canApproveVolunteerHours,
   canLogVolunteerHours,
+  getUserRoles,
   verifySession,
 } from "@/lib/auth/dal"
+import { isBoard } from "@/types/enums"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import { revalidateVolunteerPaths } from "@/lib/portal/revalidate-volunteer"
@@ -256,8 +258,13 @@ export async function approveVolunteerHours(
     return { message: "Approve one volunteer and chapter at a time." }
   }
 
+  // Board directors sit at the top of the review chain, so they may approve
+  // their own hours; everyone else needs a second pair of eyes.
   if (rows.some((r) => r.user_id === user.id)) {
-    return { message: "You cannot approve your own hours." }
+    const roleNames = (await getUserRoles()).map((r) => r.role)
+    if (!isBoard(roleNames)) {
+      return { message: "You cannot approve your own hours." }
+    }
   }
 
   for (const row of rows) {

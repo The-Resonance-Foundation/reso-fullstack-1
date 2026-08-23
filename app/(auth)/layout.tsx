@@ -1,5 +1,6 @@
 import Link from "next/link"
-import { AuroraBackground, BrandMark } from "@/components/portal/aurora-background"
+import { Music } from "lucide-react"
+import { AuroraBackground } from "@/components/portal/aurora-background"
 import { routes } from "@/lib/routes"
 
 export default function AuthLayout({
@@ -13,7 +14,9 @@ export default function AuthLayout({
       <AuroraBackground />
       <header className="relative z-10 px-5 py-4">
         <Link href={routes.home} className="inline-flex items-center gap-2.5">
-          <BrandMark size={34} />
+          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[11px] bg-primary text-primary-foreground">
+            <Music className="h-4.5 w-4.5" aria-hidden />
+          </span>
           <span className="font-serif text-[15px] font-bold tracking-[.01em]">
             The Resonance Foundation
           </span>
