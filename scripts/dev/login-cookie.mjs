@@ -1,7 +1,10 @@
 // Signs in a test user via @supabase/ssr (same client the app uses) and
 // prints the auth cookies in "name=value; name=value" form for curl.
 // Usage: node login-cookie.mjs <email> [password]
+// When auth CAPTCHA is enabled (blocks the password grant), falls back to an
+// admin-generated magic link verified via verifyOtp, which is not gated.
 import { createServerClient } from "@supabase/ssr"
+import { createClient } from "@supabase/supabase-js"
 import { readFileSync } from "node:fs"
 
 import { fileURLToPath } from "node:url"
@@ -40,8 +43,32 @@ const supabase = createServerClient(
 
 const { error } = await supabase.auth.signInWithPassword({ email, password })
 if (error) {
-  console.error("login failed:", error.message)
-  process.exit(1)
+  if (/captcha/i.test(error.message)) {
+    const admin = createClient(
+      env.NEXT_PUBLIC_SUPABASE_URL,
+      env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    })
+    if (linkErr) {
+      console.error("magiclink fallback failed:", linkErr.message)
+      process.exit(1)
+    }
+    const { error: verifyErr } = await supabase.auth.verifyOtp({
+      type: "email",
+      token_hash: link.properties.hashed_token,
+    })
+    if (verifyErr) {
+      console.error("magiclink verify failed:", verifyErr.message)
+      process.exit(1)
+    }
+  } else {
+    console.error("login failed:", error.message)
+    process.exit(1)
+  }
 }
 
 console.log(

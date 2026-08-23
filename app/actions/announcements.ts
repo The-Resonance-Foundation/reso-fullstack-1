@@ -36,7 +36,7 @@ export async function publishAnnouncement(
   }
 
   const supabase = await getServerClientOrThrow()
-  const { data: announcement, error } = await supabase
+  const { error } = await supabase
     .from("announcements")
     .insert({
       chapter_id: chapterId,

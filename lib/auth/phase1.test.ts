@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { roleForApplicant } from "@/lib/auth/applicant-roles"
 import {
   isDuplicateSignup,
@@ -98,10 +98,9 @@ describe("validation schemas", () => {
 
 describe("getAuthBaseUrl", () => {
   it("defaults to localhost in development", () => {
-    const original = process.env.NODE_ENV
-    process.env.NODE_ENV = "development"
+    vi.stubEnv("NODE_ENV", "development")
     delete process.env.NEXT_PUBLIC_SITE_URL
     expect(getAuthBaseUrl()).toBe("http://localhost:3000")
-    process.env.NODE_ENV = original
+    vi.unstubAllEnvs()
   })
 })

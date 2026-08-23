@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { OFFICER_POSITIONS, SKILL_LEVELS } from "@/types/enums"
+import { OFFICER_POSITIONS } from "@/types/enums"
 
 const sharedFields = {
   chapterId: z.uuid({ error: "Please select a chapter." }),

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { login } from "@/app/actions/auth"
 import { ResendConfirmationForm } from "@/components/auth/resend-confirmation-form"
+import { TurnstileWidget } from "@/components/auth/turnstile-widget"
 import { Button } from "@/components/ui/button"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { Input } from "@/components/ui/input"
@@ -53,6 +54,8 @@ export function LoginForm() {
       {state?.needsConfirmation && state.email ? (
         <ResendConfirmationForm email={state.email} />
       ) : null}
+
+      <TurnstileWidget resetSignal={state} />
 
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Signing in..." : "Log In"}

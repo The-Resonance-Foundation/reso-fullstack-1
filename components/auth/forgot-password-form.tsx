@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 import Link from "next/link"
 import { requestPasswordReset } from "@/app/actions/auth"
+import { TurnstileWidget } from "@/components/auth/turnstile-widget"
 import { Button } from "@/components/ui/button"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { Input } from "@/components/ui/input"
@@ -39,6 +40,8 @@ export function ForgotPasswordForm() {
       {state?.message ? (
         <p className="text-sm text-destructive">{state.message}</p>
       ) : null}
+
+      <TurnstileWidget resetSignal={state} />
 
       <Button type="submit" className="w-full" disabled={pending}>
         {pending ? "Sending..." : "Send reset link"}

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation"
 import { activateAcceptedApplicants } from "@/lib/auth/activate-applicants"
+import { verifyCaptchaToken } from "@/lib/auth/verify-captcha"
 import { deliverPasswordResetEmail } from "@/lib/auth/send-password-reset"
 import { deliverSignupConfirmationEmail } from "@/lib/auth/send-signup-confirmation"
 import { isDuplicateSignup } from "@/lib/auth/signup-utils"
@@ -17,6 +18,10 @@ import {
   type SetPasswordFormState,
 } from "@/lib/validations/auth"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
+
+function captchaTokenFrom(formData: FormData) {
+  return String(formData.get("captchaToken") ?? "").trim() || undefined
+}
 
 function safeRedirectPath(next: string | null) {
   if (!next || !next.startsWith("/") || next.startsWith("//")) {
@@ -54,6 +59,7 @@ export async function login(
   const { data, error } = await supabase.auth.signInWithPassword({
     email: validated.data.email,
     password: validated.data.password,
+    options: { captchaToken: captchaTokenFrom(formData) },
   })
 
   if (error) {
@@ -86,6 +92,11 @@ export async function requestPasswordReset(
 
   if (!validated.success) {
     return { errors: validated.error.flatten().fieldErrors }
+  }
+
+  const captchaOk = await verifyCaptchaToken(captchaTokenFrom(formData))
+  if (!captchaOk) {
+    return { message: "CAPTCHA verification failed. Please try again." }
   }
 
   const email = validated.data.email
@@ -156,6 +167,7 @@ export async function signupParent(
     email: validated.data.email,
     password: validated.data.password,
     options: {
+      captchaToken: captchaTokenFrom(formData),
       data: {
         full_name: validated.data.fullName,
         phone: validated.data.phone,
@@ -232,6 +244,7 @@ export async function signupStaff(
     email: validated.data.email,
     password: validated.data.password,
     options: {
+      captchaToken: captchaTokenFrom(formData),
       data: {
         full_name: validated.data.fullName,
         phone: validated.data.phone,

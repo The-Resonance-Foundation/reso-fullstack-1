@@ -7,6 +7,7 @@ import {
   ResendConfirmationForm,
   SignupSuccessPanel,
 } from "@/components/auth/resend-confirmation-form"
+import { TurnstileWidget } from "@/components/auth/turnstile-widget"
 import { Button } from "@/components/ui/button"
 import { NativeSelect } from "@/components/forms/native-select"
 import { FormFieldError } from "@/components/forms/form-field-error"
@@ -113,6 +114,8 @@ export function SignupForm({ variant, chapters = [] }: SignupFormProps) {
       {state?.message ? (
         <p className="text-sm text-destructive">{state.message}</p>
       ) : null}
+
+      <TurnstileWidget resetSignal={state} />
 
       <Button
         type="submit"
