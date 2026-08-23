@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import { Menu, Music, Volume2, VolumeX } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,25 +18,36 @@ type SiteHeaderProps = {
   isAuthenticated?: boolean
 }
 
+// The sound engine (NocturneEffects) owns the audio; the header only shows
+// and flips the persisted preference. localStorage is the store, and the
+// same "noc-sound" event that reaches the engine invalidates the snapshot.
+function subscribeMuted(onChange: () => void) {
+  window.addEventListener("noc-sound", onChange)
+  window.addEventListener("storage", onChange)
+  return () => {
+    window.removeEventListener("noc-sound", onChange)
+    window.removeEventListener("storage", onChange)
+  }
+}
+
+function readMutedSnapshot() {
+  try {
+    return localStorage.getItem("reso-muted") === "1"
+  } catch {
+    return false
+  }
+}
+
 export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
-  const [muted, setMuted] = useState(false)
+  const muted = useSyncExternalStore(subscribeMuted, readMutedSnapshot, () => false)
   const { navigation } = siteConfig
 
   const accountHref = isAuthenticated ? routes.portal.dashboard : routes.auth.login
   const accountLabel = isAuthenticated ? "Dashboard" : "Log In"
 
-  // The sound engine (NocturneEffects) owns the audio; the header only shows
-  // and flips the persisted preference.
-  useEffect(() => {
-    try {
-      setMuted(localStorage.getItem("reso-muted") === "1")
-    } catch {}
-  }, [])
-
   const toggleSound = () => {
     const next = !muted
-    setMuted(next)
     try {
       localStorage.setItem("reso-muted", next ? "1" : "0")
     } catch {}
