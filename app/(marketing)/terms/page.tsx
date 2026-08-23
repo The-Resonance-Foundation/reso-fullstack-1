@@ -26,14 +26,6 @@ export default function TermsPage() {
       <div className="space-y-3">
         <h1 className="font-serif text-3xl font-bold sm:text-4xl">Terms of Service</h1>
         <p className="text-sm text-muted-foreground">Last updated: {LAST_UPDATED}</p>
-        <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-foreground/80">
-          These terms are a working draft prepared by The Resonance Foundation and are
-          pending review by legal counsel. Questions are welcome at{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
       </div>
 
       <Section title="Acceptance of these terms">
@@ -50,10 +42,10 @@ export default function TermsPage() {
 
       <Section title="Who may create an account">
         <p>
-          Accounts may only be created by adults (18 or older): parents or guardians
-          enrolling their students, and tutors, chapter officers, and volunteers
-          joining the program. Students participate through their parent or
-          guardian&rsquo;s account and do not hold accounts themselves.
+          Accounts are for parents or guardians enrolling their students, and for
+          tutors, chapter officers, and volunteers joining the program. Students
+          participate through their parent or guardian&rsquo;s account and do not
+          hold accounts themselves.
         </p>
         <p>
           You are responsible for the accuracy of the information you provide and for

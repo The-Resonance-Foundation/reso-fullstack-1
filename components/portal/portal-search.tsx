@@ -101,7 +101,7 @@ export function PortalSearch({ flags }: { flags: PortalNavFlags }) {
       >
         <Search className="h-4 w-4 flex-none opacity-70" aria-hidden />
         <span className="min-w-0 flex-1 truncate">Jump to a page…</span>
-        <kbd className="flex-none rounded-md border border-border bg-[rgba(0,0,0,0.2)] px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-foreground/60">
+        <kbd className="flex-none rounded-md border border-border bg-[rgba(0,0,0,0.2)] px-1.5 py-0.5 text-[10.5px] font-semibold tracking-wide text-foreground/75">
           ⌘K
         </kbd>
       </button>
@@ -129,7 +129,7 @@ export function PortalSearch({ flags }: { flags: PortalNavFlags }) {
               }}
               onKeyDown={onInputKey}
               placeholder="Where do you want to go?"
-              className="min-w-0 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground/70"
+              className="min-w-0 flex-1 bg-transparent text-[14px] text-foreground outline-none placeholder:text-muted-foreground"
             />
           </div>
           <div className="max-h-[320px] overflow-y-auto p-2">
@@ -157,7 +157,7 @@ export function PortalSearch({ flags }: { flags: PortalNavFlags }) {
                       <Icon className="h-4 w-4" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1 truncate font-medium">{item.label}</span>
-                    <span className="flex-none text-[11px] uppercase tracking-wider text-muted-foreground/70">
+                    <span className="flex-none text-[11px] uppercase tracking-wider text-muted-foreground">
                       {item.group}
                     </span>
                     {i === cursor ? (

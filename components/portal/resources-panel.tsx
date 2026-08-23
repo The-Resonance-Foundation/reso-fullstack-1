@@ -5,6 +5,7 @@ import { useActionState } from "react"
 import { toast } from "sonner"
 import {
   Download,
+  Eye,
   ExternalLink,
   FileText,
   FolderOpen,
@@ -357,12 +358,24 @@ function buildResourceColumns(canDelete: boolean): ColumnDef<Resource>[] {
         return (
           <div className="flex justify-end gap-2">
             {isUpload ? (
-              <Button asChild size="sm" variant="outline">
-                <a href={`/api/resources/${resource.id}/download`}>
-                  <Download className="h-3.5 w-3.5" aria-hidden />
-                  Download
-                </a>
-              </Button>
+              <>
+                <Button asChild size="sm" variant="outline">
+                  <a
+                    href={`/api/resources/${resource.id}/download`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Eye className="h-3.5 w-3.5" aria-hidden />
+                    Preview
+                  </a>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <a href={`/api/resources/${resource.id}/download?download=1`}>
+                    <Download className="h-3.5 w-3.5" aria-hidden />
+                    Download
+                  </a>
+                </Button>
+              </>
             ) : resource.url ? (
               <Button asChild size="sm" variant="outline">
                 <a href={resource.url} target="_blank" rel="noreferrer">

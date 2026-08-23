@@ -1,11 +1,11 @@
 import "server-only"
 
 import { cache } from "react"
-import { verifySession } from "@/lib/auth/dal"
+import { getActiveRoleNames, verifySession } from "@/lib/auth/dal"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import type { AuditLog, Donation, DonationTotals } from "@/types/database"
-import type { AuditAction, DonationStatus } from "@/types/enums"
+import { isBoard, type AuditAction, type DonationStatus } from "@/types/enums"
 
 type DonationFilters = {
   status?: DonationStatus
@@ -128,6 +128,17 @@ export const getAuditLogsForAdmin = cache(
       .select("*")
       .order("created_at", { ascending: false })
       .range(offset, offset + limit - 1)
+
+    // Donation entries are corporate-level finance — board eyes only.
+    // Program administrators see the chapter-level trail (roles, notes).
+    const roleNames = await getActiveRoleNames()
+    if (!isBoard(roleNames)) {
+      query = query.not(
+        "action",
+        "in",
+        "(donation_received,donation_refunded,donation_reversed,donation_manual)"
+      )
+    }
 
     if (filters.action) query = query.eq("action", filters.action)
     if (filters.from) query = query.gte("created_at", filters.from)

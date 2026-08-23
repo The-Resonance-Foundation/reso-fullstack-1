@@ -208,7 +208,7 @@ export function PortalNav({ flags, instanceId, onNavigate, badges }: PortalNavPr
     <nav aria-label="Portal navigation" className="flex flex-col gap-4">
       {groups.map((group) => (
         <div key={group.label}>
-          <p className="mb-1.5 px-3 text-[10.5px] font-bold uppercase tracking-[.14em] text-foreground/40">
+          <p className="mb-1.5 px-3 text-[10.5px] font-bold uppercase tracking-[.14em] text-foreground/55">
             {group.label}
           </p>
           <ul className="space-y-0.5">
@@ -242,7 +242,7 @@ export function PortalNav({ flags, instanceId, onNavigate, badges }: PortalNavPr
                       aria-hidden
                       className={cn(
                         "h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110",
-                        active ? "text-[#251403]" : "text-[#C7B9A9]/70"
+                        active ? "text-[#251403]" : "text-[#C7B9A9]/85"
                       )}
                     />
                     <span className="min-w-0 flex-1 truncate">{item.label}</span>

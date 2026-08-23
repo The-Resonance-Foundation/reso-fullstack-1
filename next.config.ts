@@ -2,7 +2,11 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Certificate fonts/logo are read from disk at runtime — make sure they are
+  // traced into the serverless bundle on Vercel.
+  outputFileTracingIncludes: {
+    "/**": ["./lib/pdf/assets/**/*"],
+  },
 };
 
 // Source-map upload only runs when SENTRY_AUTH_TOKEN is present at build time;

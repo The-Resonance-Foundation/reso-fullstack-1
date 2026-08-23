@@ -147,6 +147,17 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Tailwind's preflight resets buttons to cursor: default — every interactive
+   control should invite the click. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+select:not(:disabled),
+summary,
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled) {
+  cursor: pointer;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-playfair), Georgia, serif;
 }
@@ -235,7 +246,7 @@ h1, h2, h3, h4, h5, h6 {
   --secondary: rgba(255, 242, 226, 0.07);
   --secondary-foreground: #ecdfd0;
   --muted: rgba(255, 242, 226, 0.055);
-  --muted-foreground: #a89a89;
+  --muted-foreground: #b9aa99;
   --accent: rgba(255, 242, 226, 0.08);
   --accent-foreground: #f4ede3;
   --border: rgba(255, 240, 222, 0.12);

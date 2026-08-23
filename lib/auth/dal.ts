@@ -12,6 +12,7 @@ import {
   canViewDonations as roleCanViewDonations,
   canWriteAuditLogs as roleCanWriteAuditLogs,
   isBoard,
+  isCorporateOfficer,
   isOrgAdmin,
   type AppRole,
 } from "@/types/enums"
@@ -372,13 +373,22 @@ export const canManageEvents = cache(async (chapterId?: string) => {
   const roleNames = roles.map((r) => r.role)
   const chapterIds = roles.map((r) => r.chapter_id)
 
-  if (isOrgAdmin(roleNames)) return true
+  // No chapter = an organization-wide (corporate-level) event. Board, program
+  // administrators, and corporate officers own those.
   if (!chapterId) {
-    return roleNames.some((role) =>
-      ["chapter_officer", "chapter_president"].includes(role)
-    )
+    return isOrgAdmin(roleNames) || isCorporateOfficer(roleNames)
   }
   return canManageChapter(roleNames, chapterId, chapterIds)
+})
+
+/** Whether the member can manage events at any scope (UI gating only). */
+export const canManageAnyEvents = cache(async () => {
+  const roleNames = await getActiveRoleNames()
+  return (
+    isOrgAdmin(roleNames) ||
+    isCorporateOfficer(roleNames) ||
+    roleNames.some((role) => ["chapter_officer", "chapter_president"].includes(role))
+  )
 })
 
 export const canAccessPortalFeatures = cache(async () => {

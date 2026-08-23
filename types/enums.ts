@@ -71,10 +71,14 @@ export const CHAPTER_OFFICER_ROLES: AppRole[] = [
   "chapter_president",
 ]
 
+/**
+ * Roles with organization-wide chapter access (reviews, rosters, approvals).
+ * Corporate officers are deliberately NOT here: they operate at the corporate
+ * level only (org-wide events) and see nothing inside individual chapters.
+ */
 export const ORG_ADMIN_ROLES: AppRole[] = [
   "board_of_director",
   "program_administrator",
-  "corporate_officer",
 ]
 
 export function isOrgAdmin(roles: AppRole[]) {
@@ -203,16 +207,13 @@ export function isCorporateOfficer(roles: AppRole[]) {
   return roles.includes("corporate_officer")
 }
 
+/** Donations are corporate-level finance: the board alone sees and records them. */
 export function canViewDonations(roles: AppRole[]) {
-  return (
-    isBoard(roles) ||
-    isProgramAdmin(roles) ||
-    isCorporateOfficer(roles)
-  )
+  return isBoard(roles)
 }
 
 export function canManageDonations(roles: AppRole[]) {
-  return isBoard(roles) || isCorporateOfficer(roles)
+  return isBoard(roles)
 }
 
 export function canViewAuditLogs(roles: AppRole[]) {

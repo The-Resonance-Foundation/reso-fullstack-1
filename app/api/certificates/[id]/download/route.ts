@@ -4,10 +4,12 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params
+  // ?preview=1 renders the PDF inline instead of downloading it.
+  const preview = new URL(request.url).searchParams.get("preview") === "1"
   await verifySession()
   const supabase = await getServerClientOrThrow()
 
@@ -31,10 +33,11 @@ export async function GET(
   }
 
   const buffer = Buffer.from(await data.arrayBuffer())
+  const disposition = preview ? "inline" : "attachment"
   return new NextResponse(buffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${certificate.title.replace(/\s+/g, "-")}.pdf"`,
+      "Content-Disposition": `${disposition}; filename="${certificate.title.replace(/\s+/g, "-")}.pdf"`,
     },
   })
 }

@@ -1,4 +1,4 @@
-import { Award, Download } from "lucide-react"
+import { Award, Download, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -39,12 +39,24 @@ export function CertificatesGrid({ certificates }: { certificates: Certificate[]
               <Award className="h-5 w-5 text-primary" aria-hidden />
             </span>
             {cert.storage_path ? (
-              <Button asChild size="sm" variant="outline">
-                <a href={`/api/certificates/${cert.id}/download`}>
-                  <Download className="h-3.5 w-3.5" aria-hidden />
-                  Download
-                </a>
-              </Button>
+              <div className="flex gap-1.5">
+                <Button asChild size="sm" variant="outline">
+                  <a
+                    href={`/api/certificates/${cert.id}/download?preview=1`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Eye className="h-3.5 w-3.5" aria-hidden />
+                    Preview
+                  </a>
+                </Button>
+                <Button asChild size="sm" variant="outline">
+                  <a href={`/api/certificates/${cert.id}/download`}>
+                    <Download className="h-3.5 w-3.5" aria-hidden />
+                    Download
+                  </a>
+                </Button>
+              </div>
             ) : (
               <Badge variant="outline" className="text-muted-foreground">
                 PDF pending

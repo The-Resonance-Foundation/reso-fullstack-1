@@ -20,15 +20,15 @@ export default async function EventDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [hasRole, canManage] = await Promise.all([
-    canAccessPortalFeatures(),
-    canManageEvents(),
-  ])
-
+  const hasRole = await canAccessPortalFeatures()
   if (!hasRole) redirect("/dashboard")
 
   const event = await getEventWithMeta(id)
   if (!event) notFound()
+
+  // Scope management to this event: chapter events need that chapter's
+  // leadership; org-wide events belong to board/program admins/corporate.
+  const canManage = await canManageEvents(event.chapter_id ?? undefined)
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4">

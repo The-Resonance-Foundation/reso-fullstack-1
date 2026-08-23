@@ -120,7 +120,7 @@ export function SignupForm({ variant, chapters = [] }: SignupFormProps) {
             className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
           />
           <span>
-            I am 18 or older and agree to the{" "}
+            I agree to the{" "}
             <Link href={routes.terms} className="text-primary hover:underline" target="_blank">
               Terms of Service
             </Link>{" "}

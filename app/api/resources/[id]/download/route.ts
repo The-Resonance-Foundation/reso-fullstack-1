@@ -7,10 +7,12 @@ import { getServerClientOrThrow } from "@/lib/supabase/server"
 const SIGNED_URL_TTL_SECONDS = 60
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params
+  // Default is an inline preview; ?download=1 forces a file download.
+  const forceDownload = new URL(request.url).searchParams.get("download") === "1"
   await verifySession()
 
   // User-scoped client — RLS decides whether this resource row is visible to
@@ -31,7 +33,11 @@ export async function GET(
   const admin = createAdminClient()
   const { data, error } = await admin.storage
     .from("resources")
-    .createSignedUrl(resource.storage_path, SIGNED_URL_TTL_SECONDS)
+    .createSignedUrl(
+      resource.storage_path,
+      SIGNED_URL_TTL_SECONDS,
+      forceDownload ? { download: true } : undefined
+    )
 
   if (error || !data?.signedUrl) {
     return NextResponse.json({ error: "File not found." }, { status: 404 })

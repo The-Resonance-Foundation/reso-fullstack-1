@@ -26,14 +26,6 @@ export default function PrivacyPolicyPage() {
       <div className="space-y-3">
         <h1 className="font-serif text-3xl font-bold sm:text-4xl">Privacy Policy</h1>
         <p className="text-sm text-muted-foreground">Last updated: {LAST_UPDATED}</p>
-        <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm text-foreground/80">
-          This policy is a working draft prepared by The Resonance Foundation and is
-          pending review by legal counsel. Questions are welcome at{" "}
-          <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline">
-            {CONTACT_EMAIL}
-          </a>
-          .
-        </p>
       </div>
 
       <Section title="Who we are">
@@ -84,11 +76,10 @@ export default function PrivacyPolicyPage() {
 
       <Section title="Children's privacy">
         <p>
-          Our services are designed for parents, guardians, and adult volunteers.
-          Accounts may only be created by adults. We do not knowingly collect personal
-          information directly from children under 13; information about students is
-          provided by their parent or guardian, who consents to its use for program
-          purposes at enrollment.
+          Our services are designed for parents, guardians, and program volunteers.
+          We do not knowingly collect personal information directly from children
+          under 13; information about students is provided by their parent or
+          guardian, who consents to its use for program purposes at enrollment.
         </p>
         <p>
           A parent or guardian may review the information we hold about their student,

@@ -6,10 +6,16 @@ import {
   type EventListItem,
 } from "@/components/portal/events-panel"
 import { PageHeader } from "@/components/portal/page-header"
-import { canManageEvents, canAccessPortalFeatures, getAllChapters, verifySession } from "@/lib/auth/dal"
+import {
+  canAccessPortalFeatures,
+  canManageAnyEvents,
+  getAllChapters,
+  getUserRoles,
+  verifySession,
+} from "@/lib/auth/dal"
 import { getEventsForManager, getEventsForUser } from "@/lib/data/phase23"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
-import type { RsvpStatus } from "@/types/enums"
+import { isOrgAdmin, type RsvpStatus } from "@/types/enums"
 
 export const metadata: Metadata = {
   title: "Events",
@@ -17,16 +23,24 @@ export const metadata: Metadata = {
 }
 
 export default async function EventsPage() {
-  const [hasRole, canManage] = await Promise.all([
+  const [hasRole, canManage, roles] = await Promise.all([
     canAccessPortalFeatures(),
-    canManageEvents(),
+    canManageAnyEvents(),
+    getUserRoles(),
   ])
 
   if (!hasRole) redirect("/dashboard")
 
+  const roleNames = roles.map((r) => r.role)
+  // Corporate officers work at the corporate level only: they create
+  // org-wide events (no chapter option) and see the member view of the list.
+  const chapterScoped =
+    isOrgAdmin(roleNames) ||
+    roleNames.some((role) => ["chapter_officer", "chapter_president"].includes(role))
+
   const [events, chapters] = await Promise.all([
-    canManage ? getEventsForManager() : getEventsForUser(),
-    canManage ? getAllChapters() : Promise.resolve([]),
+    chapterScoped ? getEventsForManager() : getEventsForUser(),
+    chapterScoped ? getAllChapters() : Promise.resolve([]),
   ])
 
   // Enrich the list with RSVP aggregates (going count + the viewer's own
@@ -76,7 +90,7 @@ export default async function EventsPage() {
         actions={canManage ? <CreateEventDialog chapters={chapters} /> : null}
       />
 
-      <EventsList events={eventItems} canManage={canManage} />
+      <EventsList events={eventItems} canManage={chapterScoped} />
     </div>
   )
 }

@@ -52,7 +52,7 @@ export default async function AdminAuditLogsPage({
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <PageHeader
         title="Audit logs"
-        description="Append-only record of donations and program administrator notes. Chapter officers cannot access this page."
+        description="Append-only record of sensitive actions. Donation entries are visible to the board only; program administrators see the chapter-level trail."
         actions={canWrite ? <AuditNoteDialog /> : null}
       />
 

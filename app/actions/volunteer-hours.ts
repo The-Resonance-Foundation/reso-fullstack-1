@@ -61,6 +61,24 @@ async function issueCertificateForHours(
     .eq("id", chapterId)
     .maybeSingle()
 
+  // The approver signs the certificate with their highest-ranking role.
+  const [{ data: approverProfile }, { data: approverRoles }] = await Promise.all([
+    admin.from("profiles").select("full_name").eq("id", approverId).maybeSingle(),
+    admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", approverId)
+      .eq("status", "active"),
+  ])
+  const approverRoleNames = (approverRoles ?? []).map((r) => r.role)
+  const approverTitle = approverRoleNames.includes("board_of_director")
+    ? "Board of Directors"
+    : approverRoleNames.includes("program_administrator")
+      ? "Program Administrator"
+      : approverRoleNames.includes("chapter_president")
+        ? "Chapter President"
+        : "Chapter Officer"
+
   const totalHours = sumVolunteerHours(hours)
   const { start, end } = volunteerHourDateRange(hours)
   if (!start || !end) return { error: "Invalid date range." }
@@ -92,6 +110,8 @@ async function issueCertificateForHours(
     periodStart: start,
     periodEnd: end,
     certificateId: certificate.id,
+    approverName: approverProfile?.full_name ?? undefined,
+    approverTitle,
   })
 
   const storagePath = `${userId}/${certificate.id}.pdf`
