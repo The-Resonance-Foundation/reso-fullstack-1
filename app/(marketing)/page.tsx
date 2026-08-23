@@ -25,8 +25,11 @@ export default function HomePage() {
   const [g1, g2, g3] = homePerformanceGallery
   return (
     <>
-      {/* Hero — text over the resonance field */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-[150px] pt-[120px] text-center">
+      {/* Hero — text over the resonance field; tapping open space plays a note */}
+      <section
+        id="noc-hero"
+        className="relative flex min-h-screen cursor-crosshair flex-col items-center justify-center px-6 pb-[150px] pt-[120px] text-center"
+      >
         <div className="mb-6 flex items-center gap-4">
           <span className="h-px w-8 bg-gradient-to-r from-transparent to-primary sm:w-12" />
           <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-[var(--noc-accent-300)] sm:text-[13px]">
@@ -57,6 +60,11 @@ export default function HomePage() {
           <Button asChild size="lg" variant="outline" className="px-8 text-[15px]">
             <Link href={routes.about}>Learn More</Link>
           </Button>
+        </div>
+        {/* Tap hint */}
+        <div className="absolute bottom-9 left-9 hidden items-center gap-2.5 text-[11.5px] uppercase tracking-[0.16em] text-[var(--noc-accent-600)] md:flex">
+          <span aria-hidden>♪</span>
+          <span>Tap anywhere &mdash; every ripple is a note</span>
         </div>
         {/* Scroll cue */}
         <div className="absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2.5 md:flex">

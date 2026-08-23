@@ -431,8 +431,8 @@ export const canManageChapters = cache(async () => {
 /**
  * Assignment rules:
  * - Board: any role.
- * - Program administrators: anything except chapter_president and
- *   board_of_director (both board-only), including corporate_officer.
+ * - Program administrators: anything except chapter_president,
+ *   corporate_officer, and board_of_director (all board-only appointments).
  * - Chapter presidents/officers: chapter-scoped roles in their own chapter,
  *   except chapter_president (board-only).
  */
@@ -441,7 +441,11 @@ export const canAssignRole = cache(
     const roles = await getUserRoles()
     const roleNames = roles.map((r) => r.role)
     if (isBoard(roleNames)) return true
-    if (role === "chapter_president" || role === "board_of_director") return false
+    if (
+      ["chapter_president", "corporate_officer", "board_of_director"].includes(role)
+    ) {
+      return false
+    }
     if (roleNames.includes("program_administrator")) return true
     if (!chapterId) return false
     const chapterIds = roles.map((r) => r.chapter_id)

@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { Menu } from "lucide-react"
+import { Menu, Music, Volume2, VolumeX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
@@ -20,10 +20,28 @@ type SiteHeaderProps = {
 
 export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
+  const [muted, setMuted] = useState(false)
   const { navigation } = siteConfig
 
   const accountHref = isAuthenticated ? routes.portal.dashboard : routes.auth.login
   const accountLabel = isAuthenticated ? "Dashboard" : "Log In"
+
+  // The sound engine (NocturneEffects) owns the audio; the header only shows
+  // and flips the persisted preference.
+  useEffect(() => {
+    try {
+      setMuted(localStorage.getItem("reso-muted") === "1")
+    } catch {}
+  }, [])
+
+  const toggleSound = () => {
+    const next = !muted
+    setMuted(next)
+    try {
+      localStorage.setItem("reso-muted", next ? "1" : "0")
+    } catch {}
+    window.dispatchEvent(new CustomEvent("noc-sound", { detail: { muted: next } }))
+  }
 
   return (
     <header
@@ -33,11 +51,9 @@ export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
       className="fixed inset-x-0 top-0.5 z-50 border-b border-transparent transition-[background,border-color,backdrop-filter] duration-300"
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:h-[70px]">
-        <Link href={routes.home} className="group flex items-center gap-3">
-          <span className="relative inline-flex h-[26px] w-[26px] items-center justify-center">
-            <span className="absolute inset-0 rounded-full border border-primary opacity-90" />
-            <span className="absolute inset-[5px] rounded-full border border-[var(--noc-accent-600)]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+        <Link href={routes.home} className="group flex items-center gap-2.5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+            <Music className="h-5 w-5 text-primary" aria-hidden />
           </span>
           <span className="text-sm font-medium leading-tight tracking-[0.01em] text-foreground transition-colors group-hover:text-[var(--noc-accent-200)] sm:text-base md:text-[16.5px]">
             The Resonance Foundation
@@ -57,6 +73,19 @@ export function SiteHeader({ isAuthenticated = false }: SiteHeaderProps) {
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
+          <button
+            type="button"
+            onClick={toggleSound}
+            title="Sound on/off"
+            className="mr-1 inline-flex items-center gap-2 rounded-full border border-border px-3.5 py-2 text-[11px] uppercase tracking-[0.12em] text-[var(--noc-accent-300)] transition-colors hover:border-primary hover:text-[var(--noc-accent-200)]"
+          >
+            {muted ? (
+              <VolumeX className="h-4 w-4" aria-hidden />
+            ) : (
+              <Volume2 className="h-4 w-4" aria-hidden />
+            )}
+            <span>{muted ? "Sound off" : "Sound on"}</span>
+          </button>
           <Button asChild variant="ghost" size="sm">
             <Link href={accountHref}>{accountLabel}</Link>
           </Button>

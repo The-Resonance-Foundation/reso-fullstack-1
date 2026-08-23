@@ -36,10 +36,12 @@ export type AssignerScope = "board" | "org_admin" | "chapter"
 function assignableRolesFor(scope: AssignerScope): AppRole[] {
   if (scope === "board") return [...APP_ROLES]
   if (scope === "org_admin") {
-    // Program administrators may grant anything except presidencies and board
-    // seats — those are board-only appointments.
+    // Program administrators may grant anything except presidencies,
+    // corporate officerships, and board seats — those are board-only
+    // appointments.
     return APP_ROLES.filter(
-      (role) => role !== "chapter_president" && role !== "board_of_director"
+      (role) =>
+        !["chapter_president", "corporate_officer", "board_of_director"].includes(role)
     )
   }
   // Chapter leadership: chapter-scoped, non-presidential roles only.

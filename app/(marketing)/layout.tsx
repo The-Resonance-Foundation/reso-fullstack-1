@@ -14,8 +14,8 @@ export default async function MarketingLayout({
     // Marketing pages run the Nocturne theme (deep indigo, blurple accent)
     // regardless of the portal theme toggle.
     <div className="marketing-nocturne relative flex min-h-screen flex-col overflow-x-clip bg-background text-foreground">
-      {/* Resonance wave field — fixed backdrop, pointer-reactive */}
-      <canvas
+      {/* Resonance wave field — the WebGL renderer mounts its canvas here */}
+      <div
         id="noc-field"
         className="pointer-events-none fixed inset-0 z-0"
         aria-hidden

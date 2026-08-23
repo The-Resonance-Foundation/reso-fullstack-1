@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Heart, Mail } from "lucide-react"
+import { Heart, Mail, Music } from "lucide-react"
 import { FacebookIcon, InstagramIcon } from "@/components/icons/social"
 import { siteConfig } from "@/lib/config/site"
 import { routes } from "@/lib/routes"
@@ -13,11 +13,9 @@ export function SiteFooter() {
       <div className="container mx-auto px-4 py-14">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href={routes.home} className="flex items-center gap-3">
-              <span className="relative inline-flex h-[26px] w-[26px] items-center justify-center">
-                <span className="absolute inset-0 rounded-full border border-primary opacity-90" />
-                <span className="absolute inset-[5px] rounded-full border border-[var(--noc-accent-600)]" />
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <Link href={routes.home} className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                <Music className="h-5 w-5 text-primary" aria-hidden />
               </span>
               <span className="text-base font-medium">The Resonance Foundation</span>
             </Link>

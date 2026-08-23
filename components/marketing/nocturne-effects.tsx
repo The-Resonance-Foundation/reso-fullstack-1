@@ -1,25 +1,37 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
+import type { ResonanceField } from "@/lib/marketing/resonance-field"
+import { ResonanceAudio } from "@/lib/marketing/resonance-audio"
 
 /**
- * Nocturne animation engine (from the "Resonance Site" Claude Design project):
+ * Nocturne animation + sound engine (from the "Resonance Site" Claude Design
+ * project):
+ * - #noc-field      WebGL resonance wave field (three.js, additive-blended
+ *                   point grid) — tapping the hero drops a ripple that plays a
+ *                   note; fast scrolling stirs the water
  * - #noc-progress   scroll progress bar
  * - #navBar         glass treatment past 50px of scroll
  * - #heroT          3D fold + fade of the hero title
  * - #noc-marquee    scroll-linked marquee strip
- * - #noc-field      pointer-reactive resonance wave field (2D canvas port of
- *                   the design's WebGL shader — same wave math, no three.js)
  * - [data-reveal]   IntersectionObserver rise-in (0.9s, cubic-bezier(0.2,0.7,0.2,1))
  * - [data-count]    easeOutExpo count-up (1500ms, prefix/suffix/comma)
  * - [data-plx]      scroll parallax on media (pre-scaled 1.14 in markup)
  * - [data-tilt]     pointer tilt (perspective 800px, rotateX -7 / rotateY 8)
+ * - Audio: ambient pad + ripple plinks + nav hover notes + button clicks,
+ *   toggled by the header's sound button ("noc-sound" event, localStorage)
  *
+ * The field, audio, and render loop mount once and survive client-side
+ * navigation; only the per-page element scan re-runs on route changes.
  * Everything respects prefers-reduced-motion (engine stays off entirely).
  */
 
 const EASE = "cubic-bezier(0.2,0.7,0.2,1)"
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches
+}
 
 function setupScrollFX(io: { current: IntersectionObserver | null }) {
   const vh = window.innerHeight
@@ -100,111 +112,37 @@ function runCount(el: HTMLElement) {
   requestAnimationFrame(step)
 }
 
-/* 2D-canvas port of the design's resonance field: a perspective grid of dots
-   whose height follows the shader's wave function, plus click ripples. */
-type Ripple = { x: number; z: number; t0: number; amp: number }
+type Plx = { el: HTMLElement; f: number; center: number }
 
-function createField(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext("2d")
-  if (!ctx) return null
-
-  const COLS = 110
-  const ROWS = 62
-  const W = 30
-  const D = 17.5
-  const ripples: Ripple[] = []
-  let time = 0
-  let w = 0
-  let h = 0
-
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5)
-    w = window.innerWidth
-    h = window.innerHeight
-    canvas.width = Math.round(w * dpr)
-    canvas.height = Math.round(h * dpr)
-    ctx!.setTransform(dpr, 0, 0, dpr, 0, 0)
-  }
-  resize()
-
-  // camera at (0, 3.4, 7.6) looking at origin — approximated projection
-  function project(x: number, y: number, z: number, mx: number, my: number) {
-    const camX = mx * 1.6
-    const camY = 3.4 - my * 1.2
-    const camZ = 7.6
-    const dx = x - camX
-    const dy = y - camY
-    const dz = camZ - z
-    if (dz <= 0.5) return null
-    const f = (h * 1.15) / dz
-    return { sx: w / 2 + dx * f, sy: h * 0.42 - dy * f, f }
-  }
-
-  return {
-    resize,
-    ripple(x: number, z: number, amp: number) {
-      ripples.push({ x, z, t0: time, amp })
-      if (ripples.length > 10) ripples.shift()
-    },
-    pointerRipple(clientX: number, clientY: number) {
-      // map screen position roughly onto the plane
-      const x = (clientX / w - 0.5) * W * 0.8
-      const z = (clientY / h - 0.5) * D * 0.8
-      this.ripple(x, z, 1.1)
-    },
-    update(dt: number, opts: { mouseX: number; mouseY: number; alpha: number; amp: number }) {
-      time += dt
-      const { mouseX, mouseY, alpha, amp } = opts
-      ctx!.clearRect(0, 0, w, h)
-      if (alpha <= 0.01) return
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const px = (c / (COLS - 1) - 0.5) * W
-          const pz = (r / (ROWS - 1) - 0.5) * D
-          const d0 = Math.hypot(px, pz)
-          let hgt =
-            (0.3 * Math.sin(d0 * 0.9 - time * 1.15) * Math.exp(-d0 * 0.05) +
-              0.1 * Math.sin(px * 0.42 + time * 0.7) * Math.cos(pz * 0.36 - time * 0.5)) *
-            amp
-          let glow = 0
-          for (const s of ripples) {
-            const age = time - s.t0
-            if (age > 0 && age < 7) {
-              const d = Math.hypot(px - s.x, pz - s.z)
-              const env = Math.exp(-Math.abs(d - age * 3.1) * 0.55) * Math.exp(-age * 0.55) * s.amp
-              hgt += env * Math.sin(d * 2.6 - age * 7.5)
-              glow += env
-            }
-          }
-          const p = project(px, hgt, pz, mouseX, mouseY)
-          if (!p) continue
-          const vA = Math.min(1, Math.abs(hgt) * 2.2 + glow * 0.8)
-          const size = Math.max(0.6, (1.1 + vA * 2.6) * (p.f / 620))
-          // deep #343a69 → mid #9184d9 → hot #e6e5ed, alpha follows amplitude
-          const k1 = Math.min(1, Math.max(0, (vA - 0.05) / 0.45))
-          const k2 = Math.min(1, Math.max(0, (vA - 0.55) / 0.45))
-          const cR = Math.round(52 + (145 - 52) * k1 + (230 - 145) * k2)
-          const cG = Math.round(47 + (132 - 47) * k1 + (229 - 132) * k2)
-          const cB = Math.round(105 + (217 - 105) * k1 + (237 - 217) * k2)
-          ctx!.fillStyle = `rgba(${cR},${cG},${cB},${((0.13 + vA * 0.87) * alpha).toFixed(3)})`
-          ctx!.fillRect(p.sx - size / 2, p.sy - size / 2, size, size)
-        }
-      }
-    },
-  }
+function measureParallax(plxRef: { current: Plx[] }) {
+  const plx: Plx[] = []
+  document.querySelectorAll<HTMLElement>("[data-plx]").forEach((el) => {
+    const r = el.getBoundingClientRect()
+    plx.push({
+      el,
+      f: parseFloat(el.getAttribute("data-plx") || "0"),
+      center: r.top + window.scrollY + r.height / 2,
+    })
+  })
+  plxRef.current = plx
 }
+
+// Pentatonic-ish scales from the design — hero taps map screen position to a
+// note; nav hovers walk the second scale.
+const TAP_SCALE = [220, 261.63, 293.66, 329.63, 392, 440, 523.25]
+const HOVER_SCALE = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33]
 
 export function NocturneEffects() {
   const pathname = usePathname()
+  const ioRef = useRef<IntersectionObserver | null>(null)
+  const plxRef = useRef<Plx[]>([])
 
+  // Engine: field, audio, listeners, render loop — mounts once.
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Leave content fully visible and static.
-      return
-    }
+    if (prefersReducedMotion()) return
 
-    const io = { current: null as IntersectionObserver | null }
     let raf = 0
+    let disposed = false
     let sy = window.scrollY
     let lastY = window.scrollY
     let sVel = 0
@@ -212,31 +150,18 @@ export function NocturneEffects() {
     let my = 0
     let lastT = performance.now()
     let lastBurst = 0
-    let plx: { el: HTMLElement; f: number; center: number }[] = []
+    let field: ResonanceField | null = null
+    const audio = new ResonanceAudio()
 
-    const canvas = document.getElementById("noc-field") as HTMLCanvasElement | null
-    const field = canvas ? createField(canvas) : null
-
-    const measureParallax = () => {
-      plx = []
-      document.querySelectorAll<HTMLElement>("[data-plx]").forEach((el) => {
-        const r = el.getBoundingClientRect()
-        plx.push({
-          el,
-          f: parseFloat(el.getAttribute("data-plx") || "0"),
-          center: r.top + window.scrollY + r.height / 2,
+    const host = document.getElementById("noc-field")
+    if (host && !host.hasChildNodes()) {
+      import("@/lib/marketing/resonance-field")
+        .then((m) => {
+          if (disposed) return
+          field = m.createField(host)
         })
-      })
+        .catch((err) => console.warn("resonance field unavailable", err))
     }
-
-    const setup = () => {
-      setupScrollFX(io)
-      measureParallax()
-    }
-    setup()
-    // late-mounting content (images settling, streamed segments)
-    const t1 = setTimeout(setup, 400)
-    const t2 = setTimeout(setup, 1500)
 
     const onMove = (e: PointerEvent) => {
       mx = e.clientX / window.innerWidth - 0.5
@@ -244,17 +169,53 @@ export function NocturneEffects() {
     }
     const onResize = () => {
       field?.resize()
-      measureParallax()
+      measureParallax(plxRef)
     }
-    const onTap = (e: PointerEvent) => {
-      if (!field) return
+    // First gesture unlocks the AudioContext (autoplay policy); a tap on the
+    // hero also drops a ripple whose position picks the note.
+    const onPointerDown = (e: PointerEvent) => {
+      audio.init()
       const target = e.target as HTMLElement
+      if (!target.closest("#noc-hero")) return
       if (target.closest("a,button,input,select,textarea,label")) return
-      field.pointerRipple(e.clientX, e.clientY)
+      if (!field) return
+      const pos = field.pointerRipple(e.clientX, e.clientY)
+      if (pos !== null) {
+        const idx = Math.max(
+          0,
+          Math.min(TAP_SCALE.length - 1, Math.floor(pos * TAP_SCALE.length))
+        )
+        audio.plink(TAP_SCALE[idx])
+      }
+    }
+    // Nav hover notes — each primary nav link hums its own pitch.
+    const onMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const link = target.closest<HTMLElement>("#navBar nav a")
+      if (!link) return
+      const related = e.relatedTarget as HTMLElement | null
+      if (related && related.closest("#navBar nav a") === link) return
+      const links = Array.from(document.querySelectorAll("#navBar nav a"))
+      const idx = links.indexOf(link)
+      if (idx >= 0) audio.plink(HOVER_SCALE[idx % HOVER_SCALE.length], 0.22, 1.1)
+    }
+    // Button clicks get the low click; nav links too (page-change click).
+    const onClickDelegate = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('a[class*="btn-"],button[class*="btn-"],#navBar a')) {
+        audio.click()
+      }
+    }
+    const onSoundToggle = (e: Event) => {
+      const detail = (e as CustomEvent<{ muted: boolean }>).detail
+      audio.setMuted(detail.muted)
     }
     addEventListener("pointermove", onMove)
     addEventListener("resize", onResize)
-    addEventListener("pointerdown", onTap)
+    addEventListener("pointerdown", onPointerDown)
+    document.addEventListener("mouseover", onMouseOver)
+    document.addEventListener("click", onClickDelegate, true)
+    window.addEventListener("noc-sound", onSoundToggle)
 
     const loop = (t: number) => {
       raf = requestAnimationFrame(loop)
@@ -289,7 +250,7 @@ export function NocturneEffects() {
         ht.style.transform = `rotateX(${(k * 24).toFixed(2)}deg) translateY(${(sy * 0.32).toFixed(1)}px) scale(${(1 - k * 0.08).toFixed(3)})`
         ht.style.opacity = String(Math.max(0, 1 - k * 1.15))
       }
-      for (const p of plx) {
+      for (const p of plxRef.current) {
         const off = (p.center - sy - window.innerHeight / 2) * -p.f
         p.el.style.transform = `translateY(${off.toFixed(1)}px) scale(1.14)`
       }
@@ -305,22 +266,53 @@ export function NocturneEffects() {
         })
         if (av > 55 && t - lastBurst > 320) {
           lastBurst = t
-          field.ripple((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 8, 0.5 + Math.min(0.9, av * 0.006))
+          field.ripple(
+            (Math.random() - 0.5) * 16,
+            (Math.random() - 0.5) * 8,
+            0.5 + Math.min(0.9, av * 0.006)
+          )
         }
       }
     }
     raf = requestAnimationFrame(loop)
 
     return () => {
+      disposed = true
       cancelAnimationFrame(raf)
-      clearTimeout(t1)
-      clearTimeout(t2)
       removeEventListener("pointermove", onMove)
       removeEventListener("resize", onResize)
-      removeEventListener("pointerdown", onTap)
-      io.current?.disconnect()
+      removeEventListener("pointerdown", onPointerDown)
+      document.removeEventListener("mouseover", onMouseOver)
+      document.removeEventListener("click", onClickDelegate, true)
+      window.removeEventListener("noc-sound", onSoundToggle)
+      field?.dispose()
+      field = null
+    }
+  }, [])
+
+  // Per-page element scan — re-runs on client-side navigation.
+  useEffect(() => {
+    if (prefersReducedMotion()) return
+    const setup = () => {
+      setupScrollFX(ioRef)
+      measureParallax(plxRef)
+    }
+    setup()
+    // late-mounting content (images settling, streamed segments)
+    const t1 = setTimeout(setup, 400)
+    const t2 = setTimeout(setup, 1500)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
     }
   }, [pathname])
+
+  useEffect(() => {
+    return () => {
+      ioRef.current?.disconnect()
+      ioRef.current = null
+    }
+  }, [])
 
   return null
 }
