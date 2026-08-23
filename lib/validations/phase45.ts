@@ -25,6 +25,11 @@ export const messageSchema = z.object({
   body: z.string().trim().min(1).max(4000),
 })
 
+export const startConversationSchema = z.object({
+  recipientId: z.uuid({ error: "Please choose a recipient." }),
+  body: z.string().trim().min(1, { error: "Write a message to start the conversation." }).max(4000),
+})
+
 export const announcementSchema = z.object({
   chapterId: z.string().optional(),
   title: z.string().min(2).trim(),

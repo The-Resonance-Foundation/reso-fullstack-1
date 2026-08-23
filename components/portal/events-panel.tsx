@@ -581,6 +581,38 @@ function EventManagerSection({ event }: { event: EventWithMeta }) {
   )
 }
 
+function EventRsvpSection({ event }: { event: EventWithMeta }) {
+  // Captured once on mount so the past/upcoming judgment is stable across
+  // re-renders (react-hooks/purity).
+  const [now] = useState(() => Date.now())
+  const hasEnded = new Date(event.ends_at).getTime() < now
+
+  if (event.status !== "published" || hasEnded) {
+    const reason =
+      event.status === "cancelled"
+        ? "This event was cancelled."
+        : hasEnded || event.status === "completed"
+          ? "This event has ended — RSVPs are closed."
+          : "RSVPs open when the event is published."
+    return (
+      <div className="animate-fade-up space-y-2">
+        <p className="text-sm font-medium">Your RSVP</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <RsvpBadge status={event.userRsvp?.status ?? null} />
+          <p className="text-sm text-muted-foreground">{reason}</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="animate-fade-up space-y-2">
+      <p className="text-sm font-medium">Your RSVP</p>
+      <RsvpSegmentedControl eventId={event.id} currentStatus={event.userRsvp?.status ?? null} />
+    </div>
+  )
+}
+
 export function EventDetailPanel({
   event,
   canManage,
@@ -639,10 +671,7 @@ export function EventDetailPanel({
         </div>
       ) : null}
 
-      <div className="animate-fade-up space-y-2">
-        <p className="text-sm font-medium">Your RSVP</p>
-        <RsvpSegmentedControl eventId={event.id} currentStatus={event.userRsvp?.status ?? null} />
-      </div>
+      <EventRsvpSection event={event} />
 
       {canManage ? <EventManagerSection event={event} /> : null}
     </div>

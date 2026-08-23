@@ -28,11 +28,14 @@ export default function LoginPage() {
           <LoginForm />
         </Suspense>
         <div className="flex flex-col gap-2 border-t border-border pt-4">
+          <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            New here?
+          </p>
           <Button asChild variant="outline">
-            <Link href={routes.enroll}>Enroll</Link>
+            <Link href={routes.enrollParent}>Enroll as a Parent</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href={routes.join}>Join as Tutor / Officer / Volunteer</Link>
+            <Link href={routes.join}>Join the Team</Link>
           </Button>
         </div>
         <p className="text-center text-sm text-muted-foreground">

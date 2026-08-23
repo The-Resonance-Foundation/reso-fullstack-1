@@ -91,8 +91,19 @@ describe("validation schemas", () => {
       email: "parent@example.com",
       password: "password123",
       chapterId: "f31ac17b-8f3c-4c1f-9ecb-ef5d3ccc87db",
+      consent: "on",
     })
     expect(result.success).toBe(true)
+  })
+
+  it("rejects parent signup without terms consent", () => {
+    const result = parentSignupSchema.safeParse({
+      fullName: "Parent Name",
+      email: "parent@example.com",
+      password: "password123",
+      chapterId: "f31ac17b-8f3c-4c1f-9ecb-ef5d3ccc87db",
+    })
+    expect(result.success).toBe(false)
   })
 })
 

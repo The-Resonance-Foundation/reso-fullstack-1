@@ -7,6 +7,7 @@ import type {
   ChapterStatus,
   ConsentType,
   EventStatus,
+  LessonRequestStatus,
   LessonStatus,
   ResourceStorageType,
   RoleStatus,
@@ -152,6 +153,28 @@ export interface TutorAvailability {
   end_time: string
   created_at: string
   chapters?: Pick<Chapter, "name" | "slug"> | null
+}
+
+export interface LessonRequest {
+  id: string
+  chapter_id: string
+  student_id: string
+  parent_user_id: string
+  tutor_user_id: string
+  availability_id: string | null
+  requested_start: string
+  requested_end: string
+  note: string | null
+  status: LessonRequestStatus
+  decided_by: string | null
+  decided_at: string | null
+  lesson_id: string | null
+  created_at: string
+  updated_at: string
+  students?: Pick<Student, "first_name" | "last_name"> | null
+  /** Attached by the data layer for display. */
+  tutor_name?: string | null
+  parent_name?: string | null
 }
 
 export interface Lesson {
@@ -300,9 +323,12 @@ export interface Certificate {
 export interface Conversation {
   id: string
   chapter_id: string
-  student_id: string
-  tutor_user_id: string
+  /** Null for direct conversations. */
+  student_id: string | null
+  /** Null for direct conversations. */
+  tutor_user_id: string | null
   conversation_type: ConversationType
+  created_by?: string | null
   created_at: string
   updated_at: string
   students?: Pick<Student, "first_name" | "last_name"> | null
@@ -352,6 +378,8 @@ export type ConversationWithPreview = Conversation & {
   last_message?: Pick<Message, "body" | "created_at" | "sender_id"> | null
   tutor_name?: string | null
   parent_name?: string | null
+  /** For direct conversations: the other member's display name. */
+  direct_other_name?: string | null
 }
 
 export interface Donation {

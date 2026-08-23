@@ -30,8 +30,8 @@ export function ConversationList({
     return (
       <p className="text-sm text-muted-foreground">
         {audit
-          ? "No tutor–student conversations in your audit scope."
-          : "No conversations yet. Threads are created when a tutor is assigned to a student."}
+          ? "No conversations in your audit scope."
+          : "No conversations yet. Use New message to reach your chapter team — tutor chats also open automatically when a tutor is assigned."}
       </p>
     )
   }
@@ -39,14 +39,24 @@ export function ConversationList({
   return (
     <ul className="space-y-2">
       {conversations.map((c, index) => {
+        const isDirect = c.conversation_type === "direct"
         const studentName =
           [c.students?.first_name, c.students?.last_name].filter(Boolean).join(" ") ||
           "Student"
         const tutorName = c.tutor_name ?? "Tutor"
+        const otherName = c.direct_other_name ?? "Member"
         const viewerIsTutor = currentUserId != null && c.tutor_user_id === currentUserId
         // Show the other party: tutors (and auditors) see the student,
-        // parents see the tutor.
-        const avatarName = !currentUserId || viewerIsTutor ? studentName : tutorName
+        // parents see the tutor; direct threads show the other member.
+        const avatarName = isDirect
+          ? otherName
+          : !currentUserId || viewerIsTutor
+            ? studentName
+            : tutorName
+        const rowTitle = isDirect ? otherName : `${studentName} · Tutor chat`
+        const rowSubtitle = isDirect
+          ? `Direct message · ${c.chapters?.name ?? "Chapter"}`
+          : `${tutorName} · ${c.chapters?.name ?? "Chapter"}`
         const lastIsOwn =
           currentUserId != null && c.last_message?.sender_id === currentUserId
         return (
@@ -68,9 +78,7 @@ export function ConversationList({
               </Avatar>
               <span className="min-w-0 flex-1">
                 <span className="flex items-baseline justify-between gap-2">
-                  <span className="truncate text-sm font-medium">
-                    {studentName} · Tutor chat
-                  </span>
+                  <span className="truncate text-sm font-medium">{rowTitle}</span>
                   {c.last_message ? (
                     <span
                       className="shrink-0 text-xs text-muted-foreground"
@@ -81,7 +89,7 @@ export function ConversationList({
                   ) : null}
                 </span>
                 <span className="block truncate text-xs text-muted-foreground">
-                  {tutorName} · {c.chapters?.name ?? "Chapter"}
+                  {rowSubtitle}
                 </span>
                 {c.last_message ? (
                   <span className="mt-1 block truncate text-sm text-muted-foreground">

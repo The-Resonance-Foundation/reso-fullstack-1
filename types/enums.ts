@@ -93,6 +93,14 @@ export function canManageChapter(roles: AppRole[], chapterId: string, roleChapte
   )
 }
 
+export const LESSON_REQUEST_STATUSES = [
+  "pending",
+  "approved",
+  "declined",
+  "cancelled",
+] as const
+export type LessonRequestStatus = (typeof LESSON_REQUEST_STATUSES)[number]
+
 export const LESSON_STATUSES = [
   "scheduled",
   "completed",
@@ -147,8 +155,19 @@ export type VolunteerHourStatus = (typeof VOLUNTEER_HOUR_STATUSES)[number]
 export const CERTIFICATE_TYPES = ["volunteer_service"] as const
 export type CertificateType = (typeof CERTIFICATE_TYPES)[number]
 
-export const CONVERSATION_TYPES = ["tutor_student"] as const
+export const CONVERSATION_TYPES = ["tutor_student", "direct"] as const
 export type ConversationType = (typeof CONVERSATION_TYPES)[number]
+
+/** Roles that count as "staff" for direct messaging (everyone but parents). */
+export const STAFF_MESSAGING_ROLES: AppRole[] = [
+  "tutor",
+  "volunteer",
+  "chapter_officer",
+  "chapter_president",
+  "corporate_officer",
+  "program_administrator",
+  "board_of_director",
+]
 
 export const NOTIFICATION_TYPES = [
   "message",

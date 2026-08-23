@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { FamilyReviewPanel } from "@/components/portal/family-review-panel"
+import { ExportCsvButton } from "@/components/portal/export-csv-button"
 import { PageHeader } from "@/components/portal/page-header"
 import { canReviewApplicants, getFamiliesForReviewer } from "@/lib/auth/dal"
 
@@ -20,6 +21,7 @@ export default async function AdminFamiliesPage() {
       <PageHeader
         title="Families & enrollments"
         description="Registered parents in your chapter and the students linked to each household. Parents appear here after signup; students appear once the parent adds them in the portal."
+        actions={<ExportCsvButton dataset="families" />}
       />
       <FamilyReviewPanel families={families} />
     </div>

@@ -155,6 +155,14 @@ export async function submitRsvp(
     return { message: "Event not found." }
   }
 
+  if (event.status !== "published") {
+    return { message: "RSVPs are closed for this event." }
+  }
+
+  if (new Date(event.ends_at).getTime() < Date.now()) {
+    return { message: "This event has already ended." }
+  }
+
   if (validated.data.status === "going") {
     const currentGoing =
       event.userRsvp?.status === "going"

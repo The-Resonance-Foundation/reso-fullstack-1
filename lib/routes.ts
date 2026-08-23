@@ -9,6 +9,8 @@ export const routes = {
   enroll: "/enroll",
   enrollParent: "/enroll/parent",
   join: "/join",
+  privacy: "/privacy",
+  terms: "/terms",
   auth: {
     login: "/login",
     signup: "/signup",

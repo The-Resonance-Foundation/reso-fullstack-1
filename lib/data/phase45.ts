@@ -119,12 +119,42 @@ export const getConversationsForUser = cache(
     const rows = (conversations ?? []) as ConversationWithPreview[]
     if (!rows.length) return []
     const admin = createAdminClient()
-    const tutorIds = [...new Set(rows.map((r) => r.tutor_user_id))]
-    const { data: profiles } = await admin
-      .from("profiles")
-      .select("id, full_name")
-      .in("id", tutorIds)
+    const tutorIds = [
+      ...new Set(rows.map((r) => r.tutor_user_id).filter(Boolean)),
+    ] as string[]
+    const { data: profiles } = tutorIds.length
+      ? await admin.from("profiles").select("id, full_name").in("id", tutorIds)
+      : { data: [] }
     const tutorById = new Map((profiles ?? []).map((p) => [p.id, p.full_name]))
+
+    // Direct threads: resolve the other member's name for list display.
+    const directIds = rows
+      .filter((r) => r.conversation_type === "direct")
+      .map((r) => r.id)
+    const otherNameByConversationId = new Map<string, string>()
+    if (directIds.length) {
+      const { data: members } = await admin
+        .from("conversation_members")
+        .select("conversation_id, user_id")
+        .in("conversation_id", directIds)
+      const otherByConvo = new Map<string, string>()
+      for (const m of members ?? []) {
+        if (m.user_id !== user.id) otherByConvo.set(m.conversation_id, m.user_id)
+      }
+      const otherIds = [...new Set(otherByConvo.values())]
+      if (otherIds.length) {
+        const { data: otherProfiles } = await admin
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", otherIds)
+        const nameById = new Map(
+          (otherProfiles ?? []).map((p) => [p.id, p.full_name])
+        )
+        for (const [convoId, otherId] of otherByConvo) {
+          otherNameByConversationId.set(convoId, nameById.get(otherId) ?? "Member")
+        }
+      }
+    }
 
     const { data: lastMessages, error: lastMessageError } = await supabase.rpc(
       "get_conversation_last_messages",
@@ -142,7 +172,10 @@ export const getConversationsForUser = cache(
 
     return rows.map((row) => ({
       ...row,
-      tutor_name: tutorById.get(row.tutor_user_id) ?? "Tutor",
+      tutor_name: row.tutor_user_id
+        ? (tutorById.get(row.tutor_user_id) ?? "Tutor")
+        : null,
+      direct_other_name: otherNameByConversationId.get(row.id) ?? null,
       last_message: lastMessageByConversationId.get(row.id) ?? null,
     }))
   }

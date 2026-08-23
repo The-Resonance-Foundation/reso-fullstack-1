@@ -106,6 +106,14 @@ export function SiteFooter() {
       <div className="border-t border-background/10">
         <div className="container mx-auto flex flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-background/60 md:flex-row">
           <p>&copy; {year} The Resonance Foundation. All rights reserved.</p>
+          <p className="flex items-center gap-3">
+            <Link href={routes.privacy} className="transition-colors hover:text-background">
+              Privacy
+            </Link>
+            <Link href={routes.terms} className="transition-colors hover:text-background">
+              Terms
+            </Link>
+          </p>
           <p className="flex items-center gap-1">
             Made with <Heart className="h-3.5 w-3.5 fill-red-400 text-red-400" aria-hidden /> by
             student musicians

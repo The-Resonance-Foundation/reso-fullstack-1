@@ -151,6 +151,7 @@ export async function signupParent(
     password: formData.get("password"),
     phone: formData.get("phone") || undefined,
     chapterId: formData.get("chapterId"),
+    consent: formData.get("consent"),
   })
 
   if (!validated.success) {
@@ -233,6 +234,7 @@ export async function signupStaff(
     email: formData.get("email"),
     password: formData.get("password"),
     phone: formData.get("phone") || undefined,
+    consent: formData.get("consent"),
   })
 
   if (!validated.success) {

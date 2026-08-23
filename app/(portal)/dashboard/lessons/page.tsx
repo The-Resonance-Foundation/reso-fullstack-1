@@ -3,6 +3,11 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { CalendarClock } from "lucide-react"
 import { LessonsView, ScheduleLessonDialog } from "@/components/portal/lessons-panel"
+import { ExportCsvButton } from "@/components/portal/export-csv-button"
+import {
+  ParentLessonRequestsSection,
+  TutorLessonRequestQueue,
+} from "@/components/portal/lesson-requests-panel"
 import { PageHeader } from "@/components/portal/page-header"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
@@ -12,6 +17,11 @@ import {
   isParentAccount,
   isTutorAccount,
 } from "@/lib/auth/dal"
+import {
+  getLessonRequestsForParent,
+  getLessonRequestsForTutor,
+  getParentRequestContext,
+} from "@/lib/data/lesson-requests"
 import {
   getAssignedStudentsForTutor,
   getLessonsForUser,
@@ -39,11 +49,17 @@ export default async function LessonsPage() {
 
   const perspective = isParent && !isTutor ? "parent" : isTutor ? "tutor" : "officer"
 
-  const [lessons, assignedStudents, familyStudents] = await Promise.all([
-    getLessonsForUser(),
-    isTutor ? getAssignedStudentsForTutor() : Promise.resolve([]),
-    isParent ? getStudentsForParent() : Promise.resolve([]),
-  ])
+  const [lessons, assignedStudents, familyStudents, parentRequests, parentContext, tutorRequests] =
+    await Promise.all([
+      getLessonsForUser(),
+      isTutor ? getAssignedStudentsForTutor() : Promise.resolve([]),
+      isParent ? getStudentsForParent() : Promise.resolve([]),
+      isParent ? getLessonRequestsForParent() : Promise.resolve([]),
+      isParent
+        ? getParentRequestContext()
+        : Promise.resolve({ students: [] } as Awaited<ReturnType<typeof getParentRequestContext>>),
+      isTutor ? getLessonRequestsForTutor() : Promise.resolve([]),
+    ])
 
   const description =
     perspective === "parent"
@@ -58,11 +74,19 @@ export default async function LessonsPage() {
         title="Lessons"
         description={description}
         actions={
-          perspective === "tutor" ? (
-            <ScheduleLessonDialog students={assignedStudents} />
-          ) : undefined
+          <div className="flex items-center gap-2">
+            {canManage ? <ExportCsvButton dataset="lessons" /> : null}
+            {perspective === "tutor" ? (
+              <ScheduleLessonDialog students={assignedStudents} />
+            ) : null}
+          </div>
         }
       />
+
+      {isTutor ? <TutorLessonRequestQueue requests={tutorRequests} /> : null}
+      {isParent ? (
+        <ParentLessonRequestsSection requests={parentRequests} context={parentContext} />
+      ) : null}
 
       {perspective === "parent" && familyStudents.length === 0 ? (
         <EmptyState

@@ -15,7 +15,7 @@ type PageProps = {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { conversationId } = await params
   const { conversation } = await getConversationWithMessages(conversationId)
-  if (!conversation?.students) {
+  if (conversation?.conversation_type !== "tutor_student" || !conversation.students) {
     return { title: "Conversation" }
   }
   return {
@@ -52,6 +52,7 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
   }
 
   const readOnly = auditMode
+  const isDirect = conversation.conversation_type === "direct"
   const studentName = conversation.students
     ? `${conversation.students.first_name} ${conversation.students.last_name}`
     : "Student"
@@ -65,7 +66,11 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
       memberNames[message.sender_id] = message.profiles.full_name
     }
   }
-  if (conversationEntry?.tutor_name && !memberNames[conversation.tutor_user_id]) {
+  if (
+    conversation.tutor_user_id &&
+    conversationEntry?.tutor_name &&
+    !memberNames[conversation.tutor_user_id]
+  ) {
     memberNames[conversation.tutor_user_id] = conversationEntry.tutor_name
   }
   if (profile?.full_name && !memberNames[user.id]) {
@@ -73,7 +78,14 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
   }
 
   const tutorName =
-    memberNames[conversation.tutor_user_id] ?? conversationEntry?.tutor_name ?? "Tutor"
+    (conversation.tutor_user_id ? memberNames[conversation.tutor_user_id] : null) ??
+    conversationEntry?.tutor_name ??
+    "Tutor"
+  const otherName =
+    conversationEntry?.direct_other_name ??
+    Object.entries(memberNames).find(([id]) => id !== user.id)?.[1] ??
+    "Member"
+  const chapterName = conversation.chapters?.name ?? "Chapter"
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -82,8 +94,15 @@ export default async function MessageThreadPage({ params, searchParams }: PagePr
         initialMessages={messages}
         currentUserId={user.id}
         memberNames={memberNames}
-        title={`${studentName} · Tutor chat`}
-        subtitle={`${tutorName} · ${conversation.chapters?.name ?? "Chapter"}`}
+        title={isDirect ? otherName : `${studentName} · Tutor chat`}
+        subtitle={
+          isDirect ? `Direct message · ${chapterName}` : `${tutorName} · ${chapterName}`
+        }
+        infoBanner={
+          isDirect
+            ? "Portal messages may be reviewed by organization leadership."
+            : undefined
+        }
         readOnly={readOnly}
         showDeleted={isAuditView}
         backHref={readOnly ? routes.portal.messagesAudit : routes.portal.messages}

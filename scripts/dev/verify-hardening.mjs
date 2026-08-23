@@ -45,11 +45,37 @@ const parentClient = createClient(
   env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   { auth: { autoRefreshToken: false, persistSession: false } }
 )
-const { data: parentAuth, error: loginErr } = await parentClient.auth.signInWithPassword({
-  email: "test-parent@resonance.test",
-  password: "TestPortal!2026",
-})
-check("parent login", !loginErr, loginErr?.message)
+// CAPTCHA blocks the password grant, so fall back to an admin magic link
+// verified via verifyOtp (not CAPTCHA-gated) when needed.
+let parentAuth
+{
+  const { data, error: loginErr } = await parentClient.auth.signInWithPassword({
+    email: "test-parent@resonance.test",
+    password: "TestPortal!2026",
+  })
+  if (!loginErr) {
+    parentAuth = data
+    check("parent login", true)
+  } else if (/captcha/i.test(loginErr.message)) {
+    const { data: link, error: linkErr } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email: "test-parent@resonance.test",
+    })
+    if (linkErr) {
+      check("parent login (magiclink fallback)", false, linkErr.message)
+      process.exit(1)
+    }
+    const { data: verified, error: verifyErr } = await parentClient.auth.verifyOtp({
+      type: "email",
+      token_hash: link.properties.hashed_token,
+    })
+    parentAuth = verified
+    check("parent login (magiclink fallback)", !verifyErr, verifyErr?.message)
+  } else {
+    check("parent login", false, loginErr.message)
+    process.exit(1)
+  }
+}
 
 const { data: chapters } = await admin.from("chapters").select("id").limit(1)
 const chapterId = chapters[0].id

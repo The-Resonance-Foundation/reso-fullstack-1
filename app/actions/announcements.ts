@@ -2,6 +2,7 @@
 
 import { verifySession, getUserRoles } from "@/lib/auth/dal"
 import { canManageChapter, isBoard } from "@/types/enums"
+import { emailAnnouncementNotification } from "@/lib/email/portal-notifications"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import { revalidateMessagingPaths } from "@/lib/portal/revalidate-messaging"
@@ -70,6 +71,28 @@ export async function publishAnnouncement(
         link_path: "/dashboard/announcements",
       }))
     )
+  }
+
+  if (userIds.length) {
+    const { data: profileRows } = await admin
+      .from("profiles")
+      .select("email")
+      .in("id", userIds)
+    let scopeName = "Resonance Foundation"
+    if (chapterId) {
+      const { data: chapter } = await admin
+        .from("chapters")
+        .select("name")
+        .eq("id", chapterId)
+        .maybeSingle()
+      if (chapter?.name) scopeName = `${chapter.name} chapter`
+    }
+    await emailAnnouncementNotification({
+      emails: (profileRows ?? []).map((p) => p.email),
+      title: validated.data.title,
+      body: validated.data.body,
+      scopeName,
+    })
   }
 
   revalidateMessagingPaths()

@@ -32,6 +32,8 @@ type MessageThreadProps = {
   memberNames: Record<string, string>
   title: string
   subtitle: string
+  /** Info banner under the header; null hides it. Defaults to the tutor-chat notice. */
+  infoBanner?: string | null
   /** Hides the composer and shows the audit banner (matches ?audit=1). */
   readOnly?: boolean
   /** True only for a genuinely-authorized audit view — deleted rows are present. */
@@ -83,6 +85,7 @@ export function MessageThread({
   memberNames,
   title,
   subtitle,
+  infoBanner = "Parents can read all messages in this conversation.",
   readOnly = false,
   showDeleted = false,
   backHref,
@@ -313,12 +316,12 @@ export function MessageThread({
               <Eye className="h-3.5 w-3.5 shrink-0" aria-hidden />
               Audit view — read only. Messages cannot be sent from here.
             </div>
-          ) : (
+          ) : infoBanner ? (
             <div className="flex items-center gap-2 border-t border-border bg-muted px-4 py-2 text-xs text-muted-foreground">
               <Info className="h-3.5 w-3.5 shrink-0" aria-hidden />
-              Parents can read all messages in this conversation.
+              {infoBanner}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Messages */}

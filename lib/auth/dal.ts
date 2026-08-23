@@ -741,25 +741,9 @@ export const getParentChapterOptions = cache(async (): Promise<Chapter[]> => {
 export const getDashboardContext = cache(async () => {
   const user = await verifySession()
 
-  const [profile, initialRoles] = await Promise.all([getProfile(), getUserRoles()])
-  let roles = initialRoles
-
-  // Legacy sweep: users whose application was "accepted" before instant
-  // provisioning existed get activated here. Only relevant for accounts with
-  // no active roles yet — everyone else skips this write path entirely.
-  if (roles.length === 0) {
-    const { activateAcceptedApplicants } = await import("@/lib/auth/activate-applicants")
-    const activated = await activateAcceptedApplicants(user.id)
-    if (activated) {
-      const supabase = await getServerClientOrThrow()
-      const { data } = await supabase
-        .from("user_roles")
-        .select("*, chapters(name, slug)")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-      roles = (data ?? []) as UserRoleWithChapter[]
-    }
-  }
+  // The legacy accepted-applicant sweep runs at login (app/actions/auth.ts),
+  // not here — a dashboard render should never carry a write side-effect.
+  const [profile, roles] = await Promise.all([getProfile(), getUserRoles()])
 
   const roleNames = roles.map((r) => r.role)
 

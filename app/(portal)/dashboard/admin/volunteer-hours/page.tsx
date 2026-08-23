@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { Clock, ClipboardList, Users } from "lucide-react"
+import { ExportCsvButton } from "@/components/portal/export-csv-button"
 import { PageHeader } from "@/components/portal/page-header"
 import { StatCard } from "@/components/portal/dashboard/stat-card"
 import { VolunteerApprovalQueue } from "@/components/portal/volunteer-approval-queue"
@@ -31,6 +32,7 @@ export default async function AdminVolunteerHoursPage() {
       <PageHeader
         title="Volunteer hour approvals"
         description="Approve or reject pending hours. Approved batches generate a certificate and PDF for the volunteer."
+        actions={<ExportCsvButton dataset="volunteer-hours" />}
       />
 
       <section aria-label="Queue overview" className="grid gap-4 sm:grid-cols-3">

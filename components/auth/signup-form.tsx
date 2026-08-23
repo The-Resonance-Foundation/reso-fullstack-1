@@ -111,6 +111,29 @@ export function SignupForm({ variant, chapters = [] }: SignupFormProps) {
         </p>
       )}
 
+      <div className="space-y-2">
+        <label className="flex items-start gap-2 text-sm text-muted-foreground">
+          <input
+            type="checkbox"
+            name="consent"
+            required
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
+          />
+          <span>
+            I am 18 or older and agree to the{" "}
+            <Link href={routes.terms} className="text-primary hover:underline" target="_blank">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href={routes.privacy} className="text-primary hover:underline" target="_blank">
+              Privacy Policy
+            </Link>
+            .
+          </span>
+        </label>
+        <FormFieldError errors={state?.errors?.consent} />
+      </div>
+
       {state?.message ? (
         <p className="text-sm text-destructive">{state.message}</p>
       ) : null}

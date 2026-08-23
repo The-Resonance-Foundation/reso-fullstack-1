@@ -9,6 +9,11 @@ export const forgotPasswordSchema = z.object({
   email: z.email({ error: "Please enter a valid email." }).trim(),
 })
 
+/** Checkbox posts "on" when checked; anything else means no agreement. */
+const consentField = z.literal("on", {
+  error: "Please agree to the Terms of Service and Privacy Policy.",
+})
+
 export const signupSchema = z.object({
   fullName: z
     .string()
@@ -20,6 +25,7 @@ export const signupSchema = z.object({
     .min(8, { error: "Password must be at least 8 characters." }),
   phone: z.string().trim().optional(),
   chapterId: z.uuid({ error: "Please select a chapter." }),
+  consent: consentField,
 })
 
 export const setPasswordSchema = z
@@ -57,6 +63,7 @@ export const staffSignupSchema = z.object({
     .string()
     .min(8, { error: "Password must be at least 8 characters." }),
   phone: z.string().trim().optional(),
+  consent: consentField,
 })
 
 export type SignupType = "parent" | "staff"

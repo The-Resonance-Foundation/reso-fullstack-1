@@ -12,6 +12,7 @@ type DonationFilters = {
   from?: string
   to?: string
   limit?: number
+  offset?: number
 }
 
 type AuditLogFilters = {
@@ -19,6 +20,7 @@ type AuditLogFilters = {
   from?: string
   to?: string
   limit?: number
+  offset?: number
 }
 
 async function attachRecorderNames<T extends { recorded_by: string | null }>(
@@ -67,11 +69,12 @@ export const getDonationsForAdmin = cache(
     const supabase = await getServerClientOrThrow()
     const limit = filters.limit ?? 50
 
+    const offset = filters.offset ?? 0
     let query = supabase
       .from("donations")
       .select("*")
       .order("donated_at", { ascending: false })
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
     if (filters.status) query = query.eq("status", filters.status)
     if (filters.from) query = query.gte("donated_at", filters.from)
@@ -119,11 +122,12 @@ export const getAuditLogsForAdmin = cache(
     const supabase = await getServerClientOrThrow()
     const limit = filters.limit ?? 50
 
+    const offset = filters.offset ?? 0
     let query = supabase
       .from("audit_logs")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(limit)
+      .range(offset, offset + limit - 1)
 
     if (filters.action) query = query.eq("action", filters.action)
     if (filters.from) query = query.gte("created_at", filters.from)
