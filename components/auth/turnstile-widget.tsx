@@ -16,6 +16,11 @@ declare global {
   }
 }
 
+/** Widget resets attempted after a client-side Turnstile error (e.g. 300010
+ * on some mobile browsers) before giving up and showing Cloudflare's own
+ * error UI. */
+const MAX_ERROR_RETRIES = 3
+
 function loadScript(onReady: () => void) {
   if (window.turnstile) {
     onReady()
@@ -44,6 +49,7 @@ function loadScript(onReady: () => void) {
 export function TurnstileWidget({ resetSignal }: { resetSignal?: unknown }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef = useRef<string | null>(null)
+  const errorRetriesRef = useRef(0)
 
   useEffect(() => {
     if (!SITE_KEY) return
@@ -55,6 +61,28 @@ export function TurnstileWidget({ resetSignal }: { resetSignal?: unknown }) {
         sitekey: SITE_KEY,
         theme: "dark",
         "response-field-name": "captchaToken",
+        retry: "auto",
+        "refresh-expired": "auto",
+        // Client-side widget errors (like 300010 on some mobile browsers) are
+        // usually transient: reset a few times so the visitor still gets a
+        // token instead of a dead form. Returning true marks the error as
+        // handled so Turnstile doesn't throw it to the global error handler.
+        "error-callback": () => {
+          if (cancelled || widgetIdRef.current === null) return true
+          if (errorRetriesRef.current >= MAX_ERROR_RETRIES) return false
+          errorRetriesRef.current += 1
+          const id = widgetIdRef.current
+          setTimeout(() => {
+            if (!cancelled && widgetIdRef.current === id) {
+              try {
+                window.turnstile?.reset(id)
+              } catch {
+                // widget already gone — nothing to recover
+              }
+            }
+          }, 1500 * errorRetriesRef.current)
+          return true
+        },
       })
     })
     return () => {
