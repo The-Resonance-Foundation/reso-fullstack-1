@@ -1,8 +1,9 @@
 // Sound design for the marketing site — ported from the "Resonance Site"
-// Claude Design project: a soft ambient pad, plucked "plink" notes for hero
-// ripples and nav hovers, and a low click for buttons. Muting is persisted in
-// localStorage ("reso-muted"); audio starts on the first pointer gesture
-// (browser autoplay policy).
+// Claude Design project: plucked "plink" notes for hero ripples and nav
+// hovers, and a low click for buttons. (The design's ambient background pad
+// was removed on request — interactions make sound, nothing hums.) Muting is
+// persisted in localStorage ("reso-muted"); audio starts on the first pointer
+// gesture (browser autoplay policy).
 
 const STORAGE_KEY = "reso-muted"
 
@@ -60,42 +61,9 @@ export class ResonanceAudio {
       fb.connect(dl)
       dl.connect(wet)
       wet.connect(this.master)
-      this.startPad()
     } catch {
       // audio unavailable — the site stays silent
     }
-  }
-
-  private startPad() {
-    const A = this.actx
-    if (!A || !this.master) return
-    const padGain = A.createGain()
-    padGain.gain.value = 0
-    const lp = A.createBiquadFilter()
-    lp.type = "lowpass"
-    lp.frequency.value = 620
-    lp.Q.value = 0.6
-    const lfo = A.createOscillator()
-    lfo.frequency.value = 0.07
-    const lfoG = A.createGain()
-    lfoG.gain.value = 220
-    lfo.connect(lfoG)
-    lfoG.connect(lp.frequency)
-    lfo.start()
-    ;[110, 164.81, 220, 246.94].forEach((f, i) => {
-      const o = A.createOscillator()
-      o.type = "triangle"
-      o.frequency.value = f
-      o.detune.value = i % 2 ? 4 : -3
-      const g = A.createGain()
-      g.gain.value = 0.028
-      o.connect(g)
-      g.connect(lp)
-      o.start()
-    })
-    lp.connect(padGain)
-    padGain.connect(this.master)
-    padGain.gain.linearRampToValueAtTime(1, A.currentTime + 3.5)
   }
 
   setMuted(muted: boolean) {
