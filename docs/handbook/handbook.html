@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Resonance Foundation Member Portal Handbook</title>
+<style>
+  @font-face { font-family: "Space Grotesk"; src: url("../../lib/pdf/assets/SpaceGrotesk-Medium.ttf"); font-weight: 500; }
+  @font-face { font-family: "Space Grotesk"; src: url("../../lib/pdf/assets/SpaceGrotesk-SemiBold.ttf"); font-weight: 600; }
+  @font-face { font-family: "Poppins"; src: url("../../lib/pdf/assets/Poppins-Regular.ttf"); font-weight: 400; }
+  @font-face { font-family: "Poppins"; src: url("../../lib/pdf/assets/Poppins-Medium.ttf"); font-weight: 500; }
+  @font-face { font-family: "Poppins"; src: url("../../lib/pdf/assets/Poppins-Bold.ttf"); font-weight: 700; }
+  @font-face { font-family: "Mrs Saint Delafield"; src: url("../../lib/pdf/assets/MrsSaintDelafield-Regular.ttf"); font-weight: 400; }
+
+  :root {
+    --navy: #2A397B;
+    --navy-deep: #1F2B60;
+    --ink: #33384E;
+    --muted: #6E7387;
+    --faint: #A9ADBE;
+    --cream: #FDFCF9;
+    --wash: #F3F1EA;
+    --line: #D8D5C9;
+    --navy-tint: #EEF0F7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--cream); }
+  body {
+    font-family: "Poppins", sans-serif;
+    font-weight: 400;
+    color: var(--ink);
+    font-size: 10.2pt;
+    line-height: 1.62;
+  }
+
+  @page { size: Letter; margin: 0.5in 0 0.6in 0; }
+
+  .page { page-break-after: always; padding: 0.35in 0.95in 0.5in; position: relative; }
+  .chapter { page-break-before: always; padding: 0.35in 0.95in 0.5in; position: relative; }
+
+  /* ---------- type ---------- */
+  h1, h2, h3 { font-family: "Space Grotesk", sans-serif; color: var(--navy); }
+  h2 { font-size: 21pt; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; margin: 6pt 0 4pt; }
+  h3 { font-size: 12.5pt; font-weight: 600; margin: 18pt 0 5pt; }
+  p { margin: 0 0 9pt; }
+  strong { font-weight: 700; color: var(--navy-deep); }
+  .kicker {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600;
+    font-size: 8.2pt; letter-spacing: 0.34em; text-transform: uppercase;
+    color: var(--navy); opacity: 0.75;
+  }
+  .lede { font-size: 10.8pt; color: var(--muted); margin: 4pt 0 14pt; max-width: 5.6in; }
+
+  .chapter-head { margin-bottom: 16pt; }
+  .chapter-head .rule {
+    height: 2.5pt; width: 42pt; background: var(--navy); margin: 10pt 0 0;
+  }
+  .chapter-num {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600;
+    font-size: 30pt; color: transparent;
+    -webkit-text-stroke: 1px rgba(42, 57, 123, 0.45);
+    line-height: 1; margin-bottom: 6pt;
+  }
+
+  ul, ol { margin: 0 0 10pt 16pt; }
+  li { margin-bottom: 4pt; }
+  li::marker { color: var(--navy); font-weight: 700; }
+
+  /* ---------- components ---------- */
+  .callout {
+    background: var(--navy-tint);
+    border-left: 3pt solid var(--navy);
+    padding: 9pt 12pt 7pt;
+    margin: 10pt 0 12pt;
+    border-radius: 0 4pt 4pt 0;
+    page-break-inside: avoid;
+  }
+  .callout .tag {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600;
+    font-size: 7.4pt; letter-spacing: 0.26em; text-transform: uppercase;
+    color: var(--navy); display: block; margin-bottom: 3pt;
+  }
+  .callout p { margin-bottom: 4pt; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  table {
+    width: 100%; border-collapse: collapse; margin: 10pt 0 14pt;
+    font-size: 9.2pt; page-break-inside: avoid;
+  }
+  th {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600;
+    font-size: 7.8pt; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--cream); background: var(--navy);
+    text-align: left; padding: 6pt 9pt;
+  }
+  td {
+    padding: 6pt 9pt; border-bottom: 0.75pt solid var(--line);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: rgba(243, 241, 234, 0.55); }
+  td.role { font-weight: 700; color: var(--navy-deep); white-space: nowrap; }
+
+  .steps { counter-reset: step; margin: 4pt 0 12pt; list-style: none; padding-left: 0; }
+  .steps li {
+    counter-increment: step; position: relative;
+    padding-left: 30pt; margin-bottom: 7pt;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 1pt;
+    width: 17pt; height: 17pt; border-radius: 50%;
+    border: 1.25pt solid var(--navy); color: var(--navy);
+    font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 9pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .divider { display: flex; align-items: center; gap: 10pt; margin: 16pt 0; }
+  .divider .line { flex: 1; height: 0.75pt; background: var(--line); }
+  .divider .diamond {
+    width: 5.5pt; height: 5.5pt; background: var(--navy);
+    transform: rotate(45deg); flex: none;
+  }
+
+  .pathline {
+    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 8.6pt;
+    letter-spacing: 0.06em; color: var(--navy);
+    background: var(--wash); border: 0.75pt solid var(--line);
+    border-radius: 3pt; padding: 1.5pt 6pt; white-space: nowrap;
+  }
+
+  /* ---------- cover ---------- */
+  .cover {
+    height: 9.85in; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    position: relative; padding: 1in;
+  }
+  .corner { position: absolute; width: 34pt; height: 34pt; }
+  .corner.tl { top: 0.08in; left: 0.55in; border-top: 2pt solid var(--navy); border-left: 2pt solid var(--navy); }
+  .corner.tr { top: 0.08in; right: 0.55in; border-top: 2pt solid var(--navy); border-right: 2pt solid var(--navy); }
+  .corner.bl { bottom: 0.45in; left: 0.55in; border-bottom: 2pt solid var(--navy); border-left: 2pt solid var(--navy); }
+  .corner.br { bottom: 0.45in; right: 0.55in; border-bottom: 2pt solid var(--navy); border-right: 2pt solid var(--navy); }
+  .serial {
+    position: absolute; top: 0.14in; right: 0.95in;
+    display: flex; align-items: center; gap: 7pt;
+  }
+  .serial .bars { display: flex; gap: 1.6pt; align-items: center; }
+  .serial .bars i { display: block; width: 1.7pt; background: var(--navy); }
+  .serial .no {
+    font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 7.6pt;
+    letter-spacing: 0.28em; color: var(--navy); opacity: 0.8;
+  }
+  .cover .logo { width: 132pt; margin-bottom: 26pt; }
+  .cover .doc-kicker {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 10pt;
+    letter-spacing: 0.42em; text-transform: uppercase; color: var(--navy);
+    margin-bottom: 16pt;
+  }
+  .soundwave { display: flex; align-items: center; gap: 2.4pt; height: 30pt; margin: 0 0 18pt; }
+  .soundwave i { display: block; width: 2.2pt; background: var(--navy); border-radius: 1pt; }
+  .cover h1 {
+    font-size: 40pt; font-weight: 600; letter-spacing: -0.015em; line-height: 1.06;
+    color: var(--navy); max-width: 6.2in;
+  }
+  .cover .subtitle {
+    font-size: 12pt; color: var(--muted); margin-top: 16pt; max-width: 4.9in; line-height: 1.6;
+  }
+  .cover .edition {
+    position: absolute; bottom: 0.7in; left: 0; right: 0;
+    font-family: "Space Grotesk", sans-serif; font-weight: 500;
+    font-size: 8.4pt; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ---------- contents ---------- */
+  .toc { margin-top: 16pt; }
+  .toc-row {
+    display: flex; align-items: baseline; gap: 10pt;
+    padding: 6.5pt 0; border-bottom: 0.75pt solid var(--line);
+  }
+  .toc-row .n {
+    font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 10pt;
+    color: var(--navy); width: 22pt; flex: none;
+  }
+  .toc-row .t { font-family: "Space Grotesk", sans-serif; font-weight: 500; font-size: 10.6pt; color: var(--navy-deep); }
+  .toc-row .d { font-size: 8.6pt; color: var(--muted); margin-left: auto; text-align: right; max-width: 2.9in; }
+
+  .closing {
+    height: 9.85in; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; position: relative;
+  }
+  .closing .script {
+    font-family: "Mrs Saint Delafield", cursive; font-size: 34pt; color: var(--navy);
+    transform: rotate(-3deg); margin: 22pt 0 8pt;
+  }
+  .two-col { columns: 2; column-gap: 22pt; }
+  .avoid-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="cover">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div class="serial">
+    <span class="bars">
+      <i style="height:7pt"></i><i style="height:11pt"></i><i style="height:5pt"></i><i style="height:12pt"></i><i style="height:8pt"></i><i style="height:4pt"></i><i style="height:10pt"></i>
+    </span>
+    <span class="no">NO. RF-2026-HDBK</span>
+  </div>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="The Resonance Foundation">
+  <div class="doc-kicker">Member Portal Handbook</div>
+  <div class="soundwave" id="wave"></div>
+  <h1>Everything You Need to Know About Your Portal</h1>
+  <p class="subtitle">A friendly, complete guide to the Resonance Foundation member portal, written for parents, students, tutors, volunteers, and the people who run the show.</p>
+  <div class="edition">First Edition &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<!-- ============================ CONTENTS ============================ -->
+<section class="page">
+  <div class="chapter-head">
+    <div class="kicker">Handbook</div>
+    <h2>Contents</h2>
+    <div class="rule"></div>
+  </div>
+  <div class="toc">
+    <div class="toc-row"><span class="n">01</span><span class="t">Welcome</span><span class="d">What the portal is and who it is for</span></div>
+    <div class="toc-row"><span class="n">02</span><span class="t">Getting Started</span><span class="d">Creating an account, signing in, staying secure</span></div>
+    <div class="toc-row"><span class="n">03</span><span class="t">Finding Your Way Around</span><span class="d">The dashboard, sidebar, notifications, and search</span></div>
+    <div class="toc-row"><span class="n">04</span><span class="t">Roles at a Glance</span><span class="d">Every role in the Foundation, explained simply</span></div>
+    <div class="toc-row"><span class="n">05</span><span class="t">For Parents and Families</span><span class="d">Students, lessons, practice, and assignments</span></div>
+    <div class="toc-row"><span class="n">06</span><span class="t">For Tutors</span><span class="d">Availability, your students, and teaching tools</span></div>
+    <div class="toc-row"><span class="n">07</span><span class="t">For Volunteers and Performers</span><span class="d">How organization wide volunteering works</span></div>
+    <div class="toc-row"><span class="n">08</span><span class="t">Volunteer Hours and Certificates</span><span class="d">Logging service, approvals, and your certificate</span></div>
+    <div class="toc-row"><span class="n">09</span><span class="t">Events and the Calendar</span><span class="d">Finding events and letting us know you are coming</span></div>
+    <div class="toc-row"><span class="n">10</span><span class="t">Announcements and Resources</span><span class="d">Staying informed and finding shared files</span></div>
+    <div class="toc-row"><span class="n">11</span><span class="t">Messaging</span><span class="d">Talking to tutors, families, and staff</span></div>
+    <div class="toc-row"><span class="n">12</span><span class="t">Running a Chapter</span><span class="d">Tools for chapter officers and presidents</span></div>
+    <div class="toc-row"><span class="n">13</span><span class="t">Organization Administration</span><span class="d">Program administrators, corporate officers, and the board</span></div>
+    <div class="toc-row"><span class="n">14</span><span class="t">Your Account and Privacy</span><span class="d">Passwords, security, and how we handle your data</span></div>
+    <div class="toc-row"><span class="n">15</span><span class="t">Quick Answers</span><span class="d">Short answers to the questions we hear most</span></div>
+  </div>
+</section>
+
+<!-- ============================ 01 WELCOME ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">01</div>
+    <div class="kicker">Chapter One</div>
+    <h2>Welcome</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">The Resonance Foundation is a student led nonprofit that brings completely free music education to young people. The member portal is the home base for everyone involved in that mission.</p>
+
+  <p>Whether you are a parent signing your child up for their first flute lesson, a high school tutor sharing what you know, a volunteer helping at a community performance, or a board member keeping the whole organization running, the portal is where your Resonance life happens. It is where lessons get scheduled, volunteer hours get counted, certificates get issued, events get planned, and people stay in touch.</p>
+
+  <p>This handbook walks through everything the portal can do. You do not need to read it cover to cover. Skim the contents page, find the chapter that matches your role, and keep the rest around for the day you need it. We wrote it in plain language on purpose. If anything here still feels confusing, that is our fault, not yours, and we would love to hear about it so we can make it better.</p>
+
+  <h3>Where to find the portal</h3>
+  <p>The portal lives at <strong>theresonancefoundation.org</strong>. The public website is what visitors see. Once you sign in, you land in your personal dashboard, which looks and feels quite different: a warm, dark workspace designed to be calm and easy on the eyes.</p>
+
+  <div class="callout">
+    <span class="tag">Good to know</span>
+    <p>Every lesson The Resonance Foundation offers is free. There are no fees, no tiers, and no paid plans anywhere in the portal. If a page ever seems to ask you for payment for a lesson, something is wrong and you should let us know right away.</p>
+  </div>
+
+  <h3>A quick word on how access works</h3>
+  <p>What you see in the portal depends on your role. A parent sees family tools. A tutor sees teaching tools. A chapter president sees the tools for running their chapter. Nobody sees more than they need, and sensitive things like donation records are visible only to the Board of Directors. Chapter four explains every role in detail.</p>
+</section>
+
+<!-- ============================ 02 GETTING STARTED ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">02</div>
+    <div class="kicker">Chapter Two</div>
+    <h2>Getting Started</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Creating an account takes a couple of minutes. The path is slightly different depending on whether you are joining as a family or as a tutor, volunteer, or officer.</p>
+
+  <h3>If you are a parent</h3>
+  <ol class="steps">
+    <li>Go to the website and choose <span class="pathline">Enroll</span>. This is the path for families who want lessons.</li>
+    <li>Create a parent account with your name, email address, and a password. You will be asked to accept the Terms of Service and Privacy Policy.</li>
+    <li>Check your inbox and confirm your email address. The confirmation link brings you back to the portal.</li>
+    <li>Sign in and add your students. For each child you can share their name, instrument, and experience level.</li>
+    <li>Your chapter reviews new student registrations. Once a student is approved, you can start requesting lessons.</li>
+  </ol>
+
+  <h3>If you are joining as a tutor, volunteer, performer, or officer</h3>
+  <ol class="steps">
+    <li>Go to the website and choose <span class="pathline">Join Our Team</span>. Pick the application that fits you.</li>
+    <li>Fill out the application. Tutors share their instruments and experience. Volunteers and performers tell us how they would like to help.</li>
+    <li>Create your account (or sign in if you already have one) so we can attach the application to you.</li>
+    <li>A reviewer looks over your application. For tutors and officers this is your chapter leadership. You will get an email when a decision is made.</li>
+    <li>Once accepted, your new role appears automatically the next time you open the portal, along with all the tools that come with it.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="tag">One account, many hats</span>
+    <p>You only ever need one account, even if you wear several hats. A parent who also tutors, or a tutor who also volunteers, sees all of their tools in one place. Roles stack, they do not conflict.</p>
+  </div>
+
+  <h3>Signing in</h3>
+  <p>Use the <span class="pathline">Log In</span> button on the website. You will occasionally see a small security check on the sign in and sign up pages. It is there to keep automated bots out and takes just a moment. Passwords must be at least eight characters, and we encourage something longer that only you would guess.</p>
+
+  <h3>Forgot your password?</h3>
+  <p>On the login page, choose the forgot password link, enter your email, and we will send you a reset link. If the email does not arrive within a few minutes, check your spam folder, and make sure you entered the same address you signed up with.</p>
+</section>
+
+<!-- ============================ 03 FINDING YOUR WAY ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">03</div>
+    <div class="kicker">Chapter Three</div>
+    <h2>Finding Your Way Around</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">The portal is organized around a sidebar on the left and your content in the middle. Once you know the sidebar, you know the whole portal.</p>
+
+  <h3>The dashboard</h3>
+  <p>Your dashboard is the first thing you see after signing in. It greets you by name and surfaces what matters right now: recent activity, anything waiting on you, and shortcuts into the areas you use most. Different roles see different dashboards, so yours will always feel relevant.</p>
+
+  <h3>The sidebar</h3>
+  <p>The sidebar groups everything into sections. Which sections you see depends on your roles:</p>
+  <ul>
+    <li><strong>Overview</strong> is for everyone: Dashboard, Messages, Announcements, Calendar, Events, and Resources.</li>
+    <li><strong>My Family</strong> appears for parents: My Students, Lessons, Practice Log, and Assignments.</li>
+    <li><strong>Teaching</strong> appears for tutors: My Students, Lessons, Assignments, and Availability.</li>
+    <li><strong>Volunteering</strong> appears for anyone who can log service hours: Log Hours and Certificates.</li>
+    <li><strong>Review</strong> appears for chapter leadership and administrators: Families, Applicants, Tutors, and Volunteers.</li>
+    <li><strong>Administration</strong> holds the management tools: Tutor Assignments, Publish Announcements, Chapter Docs, Volunteer Approvals, Chapters, Roles, Message Audit, Donations, and Audit Logs. Each item only shows for the people allowed to use it.</li>
+  </ul>
+
+  <h3>Little numbers on the sidebar</h3>
+  <p>Some sidebar items show a small count badge. That is pending work waiting for you: applications to review, students to approve, or volunteer hours to look at. When the badge disappears, your queue is clear.</p>
+
+  <h3>Notifications</h3>
+  <p>The bell in the top bar collects your notifications: a message arrived, your hours were approved, your student was accepted, and so on. Important updates are also sent to your email so you never miss something because you were away from the portal.</p>
+
+  <h3>Search</h3>
+  <p>Press <strong>Ctrl K</strong> (or Command K on a Mac) anywhere in the portal to open the quick search palette. Start typing the name of a page and jump straight to it. It is the fastest way to move around once you get the habit.</p>
+
+  <div class="callout">
+    <span class="tag">Tip</span>
+    <p>Your name and roles are shown at the bottom of the sidebar. If you ever wonder why you can or cannot see something, that list is the answer. Roles are granted by chapter leadership and administrators, so if something seems missing, reach out to them.</p>
+  </div>
+</section>
+
+<!-- ============================ 04 ROLES ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">04</div>
+    <div class="kicker">Chapter Four</div>
+    <h2>Roles at a Glance</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Everyone in the portal has one or more roles. Your roles decide what you can see and do. Here is the whole cast.</p>
+
+  <table>
+    <tr><th style="width:1.35in">Role</th><th>Who they are and what they can do</th></tr>
+    <tr><td class="role">Parent</td><td>A family account. Registers and manages their own students, requests lessons from tutor availability, tracks practice and assignments, messages staff, and RSVPs to events.</td></tr>
+    <tr><td class="role">Tutor</td><td>A student teacher attached to a chapter. Sets availability, teaches assigned students, manages lessons and assignments, and logs volunteer hours for their chapter.</td></tr>
+    <tr><td class="role">Volunteer / Performer</td><td>Serves the whole organization rather than a single chapter. RSVPs to events and logs volunteer hours at the organization level.</td></tr>
+    <tr><td class="role">Chapter Officer</td><td>Helps run one chapter. Reviews applicants and families, manages tutors and their assignments, publishes chapter announcements, and maintains chapter docs and events.</td></tr>
+    <tr><td class="role">Chapter President</td><td>Leads one chapter. Everything an officer can do, plus approving that chapter's volunteer hours and auditing chapter message threads.</td></tr>
+    <tr><td class="role">Program Administrator</td><td>Oversees chapter operations across every chapter: applicants, families, tutors, assignments, events, and chapter level volunteer hour approvals. Does not handle donations or corporate appointments.</td></tr>
+    <tr><td class="role">Corporate Officer</td><td>Works at the organization level only. Manages organization wide events. Does not see individual chapter data or donations.</td></tr>
+    <tr><td class="role">Board of Directors</td><td>Full oversight. Everything above, plus donations, all audit logs, chapter creation, every role appointment and removal, and approval of all volunteer hours including organization level hours.</td></tr>
+  </table>
+
+  <h3>Who grants roles</h3>
+  <ul>
+    <li>The <strong>Board</strong> can grant and remove any role, and is the only body that can appoint or remove chapter presidents, corporate officers, board members, or any officer of any kind.</li>
+    <li><strong>Program administrators</strong> can grant parent, tutor, volunteer, and chapter officer roles. They can remove parents, tutors, and volunteers. They cannot appoint or remove presidents, corporate officers, or board members.</li>
+    <li><strong>Chapter presidents and officers</strong> can grant parent, tutor, and chapter officer roles within their own chapter, and can remove tutors and parents there. Removing any officer, in any chapter, is board only.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="tag">Why so careful?</span>
+    <p>Leadership roles shape the whole organization, so appointing and removing them sits with the Board alone. It keeps chapters stable and makes every leadership change deliberate.</p>
+  </div>
+</section>
+
+<!-- ============================ 05 PARENTS ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">05</div>
+    <div class="kicker">Chapter Five</div>
+    <h2>For Parents and Families</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">The family side of the portal is built around one idea: getting your child from signed up to playing music with as little friction as possible.</p>
+
+  <h3>Adding your students</h3>
+  <p>Head to <span class="pathline">My Students</span> and add each child you would like enrolled. You will share their name, the instrument they want to learn (or explore), and their current level, from total beginner to seasoned player. New students start in a pending state while your chapter reviews the registration. You will get a notification, and an email, when they are approved.</p>
+
+  <h3>Requesting lessons</h3>
+  <p>Once a student is approved, the <span class="pathline">Lessons</span> page is where scheduling happens:</p>
+  <ol class="steps">
+    <li>Browse tutor availability. Tutors post the time windows they can teach.</li>
+    <li>Pick a slot that fits your family's schedule and send a lesson request for your student.</li>
+    <li>The tutor reviews the request. When they accept, the lesson lands on both of your calendars.</li>
+    <li>If a time stops working, you can cancel a pending request, or message the tutor to rearrange.</li>
+  </ol>
+
+  <h3>Practice log</h3>
+  <p>The <span class="pathline">Practice Log</span> is a simple, encouraging way for students to track practice between lessons. Log the date, how long they played, and what they worked on. Tutors can see the log, which helps them tailor the next lesson. There is also a printable practice log template in Resources if your student prefers paper on the music stand.</p>
+
+  <h3>Assignments</h3>
+  <p>Tutors can leave assignments after a lesson: pieces to learn, scales to drill, or listening homework. They show up under <span class="pathline">Assignments</span> so nothing gets lost between sessions.</p>
+
+  <h3>Talking to tutors and staff</h3>
+  <p>Use <span class="pathline">Messages</span> to reach your student's tutor or chapter staff directly. Chapter eleven covers messaging in detail.</p>
+
+  <div class="callout">
+    <span class="tag">Remember</span>
+    <p>Every lesson is free. Group and individual lessons both cost nothing, always. All we ask is that students show up, practice when they can, and enjoy the music.</p>
+  </div>
+</section>
+
+<!-- ============================ 06 TUTORS ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">06</div>
+    <div class="kicker">Chapter Six</div>
+    <h2>For Tutors</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Tutors are the heart of the Foundation. The portal handles the paperwork so you can focus on teaching.</p>
+
+  <h3>Set your availability first</h3>
+  <p>The <span class="pathline">Availability</span> page is where everything begins. Post the windows when you can teach, and keep them current. Parents can only request lessons inside the times you publish, so an accurate availability page means requests you can actually say yes to.</p>
+
+  <h3>Lesson requests</h3>
+  <p>When a family requests one of your slots, it appears in your queue and you get a notification. Accept it and the lesson is created for both sides. If you cannot make it work, decline with a short note so the family can pick another time. Being prompt here matters a lot to families, so try not to leave requests sitting.</p>
+
+  <h3>Your students</h3>
+  <p><span class="pathline">My Students</span> lists everyone assigned to you, along with their instrument, level, practice logs, and history. Use it before each lesson to remember where you left off.</p>
+
+  <h3>Lessons and assignments</h3>
+  <p>After each lesson, take a minute to log what you covered and leave the next assignment. It feels like a small habit, but it builds a running record that makes every future lesson better, and it gives parents a window into their child's progress.</p>
+
+  <h3>Your teaching counts as service</h3>
+  <p>Tutoring with the Foundation counts as volunteer service. Log your hours under <span class="pathline">Log Hours</span>, choosing your chapter and the teaching category. Once your chapter president or an administrator approves them, you receive an official certificate you can use for school requirements and college applications. Chapter eight has the full story.</p>
+
+  <div class="callout">
+    <span class="tag">New tutors</span>
+    <p>No teaching experience is required to join, and no one expects you to be perfect. Lean on your chapter leadership, ask questions in Messages, and remember that showing up consistently is most of the job.</p>
+  </div>
+</section>
+
+<!-- ============================ 07 VOLUNTEERS ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">07</div>
+    <div class="kicker">Chapter Seven</div>
+    <h2>For Volunteers and Performers</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Volunteers and performers belong to the whole organization, not to a single chapter. Wherever help is needed, that is where you fit.</p>
+
+  <h3>What organization wide means</h3>
+  <p>When your volunteer or performer application is accepted, your role is attached to the Foundation itself rather than to one chapter. In practice this means two things. First, you can pitch in anywhere: a performance across town, an event run by headquarters, a fundraiser, wherever hands are needed. Second, your volunteer hours are logged at the organization level, and they are reviewed by the Board of Directors.</p>
+
+  <h3>Events and RSVPs</h3>
+  <p>The <span class="pathline">Events</span> page lists upcoming performances and gatherings. When you plan to attend or help, RSVP so organizers know who is coming. If your plans change, update your RSVP so the headcount stays honest. RSVPs close automatically once an event has passed.</p>
+
+  <h3>Logging your service</h3>
+  <p>After you volunteer or perform, go to <span class="pathline">Log Hours</span>, choose <strong>Corporate (organization-wide)</strong>, pick the category that fits (event support, performing, or admin work), enter the hours and date, and add a short description of what you did. The Board reviews organization level hours, and once approved you receive a certificate. The next chapter covers the whole journey.</p>
+
+  <div class="callout">
+    <span class="tag">Performers</span>
+    <p>Performing at community events absolutely counts as volunteer service. Log your performance time, including reasonable setup and rehearsal on site, under the event support or performance category.</p>
+  </div>
+</section>
+
+<!-- ============================ 08 HOURS & CERTIFICATES ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">08</div>
+    <div class="kicker">Chapter Eight</div>
+    <h2>Volunteer Hours and Certificates</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Service hours are how the Foundation says thank you in a way schools and colleges recognize. Here is exactly how an hour travels from your keyboard to a signed certificate.</p>
+
+  <h3>Logging hours</h3>
+  <ol class="steps">
+    <li>Open <span class="pathline">Log Hours</span> from the Volunteering section of the sidebar.</li>
+    <li>Choose where the service happened. Tutors pick their chapter. Organization wide volunteers and performers pick Corporate.</li>
+    <li>Pick a category: teaching, event support, or admin work.</li>
+    <li>Enter the hours (up to 24 per entry), the date the activity happened, and a short description. The date cannot be in the future.</li>
+    <li>Submit. The entry sits in a pending state until a reviewer looks at it.</li>
+  </ol>
+  <p>While an entry is still pending you can edit it or delete it yourself. Once it is approved or rejected, it is locked in.</p>
+
+  <h3>Who approves what</h3>
+  <table>
+    <tr><th>Hours logged for...</th><th>Approved by</th></tr>
+    <tr><td>A chapter</td><td>That chapter's president, a program administrator, or the Board</td></tr>
+    <tr><td>The organization (corporate)</td><td>The Board of Directors only</td></tr>
+  </table>
+  <p>Nobody can approve their own hours, with one sensible exception: board members sit at the top of the review chain, so there is no one above them to sign off. Reviewers can also reject an entry, always with a reason, and you are free to fix the details and log it again.</p>
+
+  <h3>Your certificate</h3>
+  <p>The moment your hours are approved, the portal generates an official Certificate of Volunteer Service as a PDF. It carries the Foundation's seal and logo, your name, your total approved hours, the period of service, the date, and the signature and title of the person who approved it. Each certificate has its own serial number so schools can trust it is genuine.</p>
+  <p>Find every certificate you have earned under <span class="pathline">Certificates</span>. You can preview a certificate right in your browser or download the PDF to print or attach to an application.</p>
+
+  <div class="callout">
+    <span class="tag">For school requirements</span>
+    <p>Most schools accept our certificates as documentation of community service as issued. If your school needs a custom form signed instead, message your chapter president or email the administrator and we will take care of it.</p>
+  </div>
+</section>
+
+<!-- ============================ 09 EVENTS ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">09</div>
+    <div class="kicker">Chapter Nine</div>
+    <h2>Events and the Calendar</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">From mall performances to senior center concerts, events are where the Foundation meets its community. The portal keeps everyone pointed at the same dates.</p>
+
+  <h3>Finding events</h3>
+  <p>The <span class="pathline">Events</span> page lists what is coming up, with the details you need: what, when, where, and who it is for. The <span class="pathline">Calendar</span> shows the same information laid out by month, alongside your lessons, so you can see your whole Resonance schedule in one view.</p>
+
+  <h3>RSVP</h3>
+  <p>When you plan to attend, tap RSVP on the event. Organizers rely on those numbers for chairs, programs, and pizza math, so an honest RSVP is a genuinely helpful act. You can change your response any time until the event begins. Once an event has passed, RSVPs close automatically.</p>
+
+  <h3>Who creates events</h3>
+  <ul>
+    <li><strong>Chapter events</strong> are created and managed by that chapter's officers and president.</li>
+    <li><strong>Organization wide events</strong> are created and managed by corporate officers, program administrators, and the Board.</li>
+  </ul>
+  <p>Event organizers can also track attendance after the fact, which feeds into volunteer hour records for the people who helped.</p>
+
+  <div class="callout">
+    <span class="tag">Hosting an event?</span>
+    <p>If your community space would like to host a student performance, we would love to hear from you. Email <strong>info@theresonancefoundation.org</strong> and we will make it happen.</p>
+  </div>
+</section>
+
+<!-- ============================ 10 ANNOUNCEMENTS & RESOURCES ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">10</div>
+    <div class="kicker">Chapter Ten</div>
+    <h2>Announcements and Resources</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Two quiet pages that do a lot of work: one keeps you informed, the other keeps useful files at your fingertips.</p>
+
+  <h3>Announcements</h3>
+  <p>The <span class="pathline">Announcements</span> page is the Foundation's bulletin board. Chapter leadership posts chapter news, and administrators post organization wide updates. New announcements also arrive by email, so you will not miss one by skipping a login. If an announcement asks you to do something, it will usually link you straight to the right page.</p>
+
+  <h3>Resources</h3>
+  <p><span class="pathline">Resources</span> is the shared library: practice templates, guides, forms, and any other files the team publishes. Every resource has two buttons. <strong>Preview</strong> opens the file right in your browser for a quick look. <strong>Download</strong> saves a copy to your device. Chapter leadership and administrators can upload new resources for their people.</p>
+
+  <h3>Chapter docs</h3>
+  <p>Chapter leadership also has a <span class="pathline">Chapter Docs</span> area for internal documents: meeting notes, planning sheets, and the operational paperwork of running a chapter. These are visible to the chapter's leadership team rather than to every member.</p>
+</section>
+
+<!-- ============================ 11 MESSAGING ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">11</div>
+    <div class="kicker">Chapter Eleven</div>
+    <h2>Messaging</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Messages keep conversations about students, lessons, and events inside the portal, where they are organized, searchable, and safe.</p>
+
+  <h3>Who can message whom</h3>
+  <ul>
+    <li><strong>Parents</strong> can message their student's tutor and their chapter's staff.</li>
+    <li><strong>Tutors and staff</strong> can message the families they work with and each other.</li>
+    <li>Conversations are private to their participants, with one important exception described below.</li>
+  </ul>
+
+  <h3>Starting a conversation</h3>
+  <p>Open <span class="pathline">Messages</span>, choose who you want to reach, and write your first message. Replies land in the same thread, and both sides get notified in the portal and by email. There is no need to trade personal phone numbers or emails for Foundation business, and we encourage you not to.</p>
+
+  <h3>Safety and oversight</h3>
+  <p>Because many of our conversations involve minors, message threads can be reviewed when there is a concern. Chapter presidents can audit threads within their own chapter, and program administrators and the Board can audit threads across the organization. This is not casual snooping. Audits exist to keep students safe, and access to the audit tools is itself logged.</p>
+
+  <div class="callout">
+    <span class="tag">A simple rule of thumb</span>
+    <p>Write every message as if a parent, a principal, and a board member might read it, because they can. Kind, clear, and about the music. That is the whole policy.</p>
+  </div>
+</section>
+
+<!-- ============================ 12 RUNNING A CHAPTER ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">12</div>
+    <div class="kicker">Chapter Twelve</div>
+    <h2>Running a Chapter</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Chapter officers and presidents keep the local machine humming. Your tools live in the Review and Administration sections of the sidebar.</p>
+
+  <h3>Reviewing applicants</h3>
+  <p>New tutor, officer, and volunteer applications for your chapter appear under <span class="pathline">Applicants</span>, with a badge showing how many await you. Open an application to see the whole picture, then accept or decline. Accepting provisions the person's role automatically and they get the good news by email. Try to give every applicant an answer within a few days; a fast no is kinder than a slow maybe.</p>
+
+  <h3>Approving families</h3>
+  <p>New student registrations from your chapter's families appear under <span class="pathline">Families</span>. Approving a student unlocks lesson requests for that family. If something looks off, you can reach the parent through Messages before deciding.</p>
+
+  <h3>Managing tutors</h3>
+  <p><span class="pathline">Tutors</span> lists your chapter's teaching roster. Both presidents and officers can add tutors and, when someone moves on, remove them. Use <span class="pathline">Tutor Assignments</span> to pair tutors with students thoughtfully: matching instrument, level, and schedule is half the art of a good chapter.</p>
+
+  <h3>Chapter communication</h3>
+  <p>Publish chapter news through <span class="pathline">Publish Announcements</span>, keep internal documents in <span class="pathline">Chapter Docs</span>, and create chapter events from the Events page. Your members see all of it in their own portals.</p>
+
+  <h3>President only duties</h3>
+  <ul>
+    <li><strong>Volunteer hour approvals.</strong> Your chapter's pending hours appear under <span class="pathline">Volunteer Approvals</span>. Review them in batches, approve what is accurate, and certificates go out automatically with your signature and title.</li>
+    <li><strong>Message audit.</strong> When a safety concern arises, you can review message threads within your chapter.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="tag">The boundaries</span>
+    <p>Chapter leadership cannot appoint or remove presidents, remove any officer, see other chapters' data, view donations, or approve organization level volunteer hours. Those belong to the administrators and the Board. If you need one of those actions, ask up the chain.</p>
+  </div>
+</section>
+
+<!-- ============================ 13 ORG ADMIN ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">13</div>
+    <div class="kicker">Chapter Thirteen</div>
+    <h2>Organization Administration</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Above the chapters sit three roles with organization wide reach. Each one has a deliberately different shape.</p>
+
+  <h3>Program administrators</h3>
+  <p>Program administrators are the operations engine across every chapter. They see and manage all chapters' applicants, families, tutors, assignments, and events; they approve chapter level volunteer hours anywhere; they can publish announcements and manage resources; and they can review chapter level audit logs. They can grant parent, tutor, volunteer, and chapter officer roles, and remove parents, tutors, and volunteers.</p>
+  <p>Just as important is what they do not touch: donations, corporate level audit records, and every corporate appointment. Program administrators cannot appoint or remove chapter presidents, corporate officers, or board members, and they cannot approve organization level volunteer hours.</p>
+
+  <h3>Corporate officers</h3>
+  <p>Corporate officers work purely at the organization level. They create and manage organization wide events and handle corporate initiatives. They do not see chapter internals, donations, or audit logs. Appointing and removing corporate officers is done by the Board alone.</p>
+
+  <h3>The Board of Directors</h3>
+  <p>The Board holds the keys to everything:</p>
+  <ul>
+    <li>All chapter and organization data, tools, and reports.</li>
+    <li><strong>Donations.</strong> Only board members can view and record donations.</li>
+    <li><strong>Chapters.</strong> Creating a new chapter or editing one happens under <span class="pathline">Chapters</span>.</li>
+    <li><strong>Roles.</strong> The Board can grant or remove any role. It is the only body that can appoint or remove presidents, corporate officers, other board members, or remove any officer at all.</li>
+    <li><strong>Volunteer hours.</strong> The Board approves everything, and is the sole approver for organization level hours.</li>
+    <li><strong>Audit logs.</strong> The complete record of sensitive actions, including corporate entries, with data exports available as CSV files.</li>
+  </ul>
+
+  <h3>The Roles page</h3>
+  <p>Administrators manage access under <span class="pathline">Roles</span>. Pick a member, pick a role, pick a chapter when the role needs one, and assign. The page only ever offers you the roles you are actually allowed to grant, so you cannot accidentally overstep. Every assignment and removal is written to the audit log with who did it and when.</p>
+
+  <div class="callout">
+    <span class="tag">Everything is on the record</span>
+    <p>Role changes, donation entries, and other sensitive actions are logged automatically. Good governance should never depend on memory.</p>
+  </div>
+</section>
+
+<!-- ============================ 14 ACCOUNT & PRIVACY ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">14</div>
+    <div class="kicker">Chapter Fourteen</div>
+    <h2>Your Account and Privacy</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">We take care of your data the way we would want ours handled: collect little, protect it well, and be honest about all of it.</p>
+
+  <h3>Keeping your account safe</h3>
+  <ul>
+    <li>Use a password of at least eight characters that you do not use anywhere else. Longer is better.</li>
+    <li>Never share your password. No one from the Foundation will ever ask for it, not by email, not by message, not in person.</li>
+    <li>If you use a shared or family computer, sign out when you are done.</li>
+    <li>If something about your account ever looks wrong, change your password right away and tell us.</li>
+  </ul>
+
+  <h3>What we collect and why</h3>
+  <p>We collect what the program needs to run: names, email addresses, student instrument and level information, lesson records, volunteer hours, and messages sent through the portal. We use it to schedule lessons, issue certificates, and keep students safe. We do not sell your information, and lesson access never depends on payment because there is none.</p>
+
+  <h3>The fine print, in plain sight</h3>
+  <p>The full Privacy Policy and Terms of Service are linked in the website footer and are presented when you create your account. They are written to be readable, not to hide things. If a section is unclear, ask us and we will explain it in ordinary words.</p>
+
+  <h3>Questions, corrections, and deletions</h3>
+  <p>If you want to correct your information, close your account, or ask exactly what we hold about your family, email <strong>administrator@theresonancefoundation.org</strong>. A real person reads that inbox.</p>
+</section>
+
+<!-- ============================ 15 QUICK ANSWERS ============================ -->
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">15</div>
+    <div class="kicker">Chapter Fifteen</div>
+    <h2>Quick Answers</h2>
+    <div class="rule"></div>
+  </div>
+
+  <p class="lede">Short answers to the questions we hear most often. When in doubt, ask; we are friendly.</p>
+
+  <h3>Do lessons really cost nothing?</h3>
+  <p>Really. Group and individual lessons are both completely free, for every student, always.</p>
+
+  <h3>How long are lessons?</h3>
+  <p>Standard sessions run 45 minutes: time to warm up, learn, practice, and review.</p>
+
+  <h3>My child has never played an instrument. Is that okay?</h3>
+  <p>That is exactly who we are here for. Total beginners are welcome, and so are experienced players who want to grow.</p>
+
+  <h3>I applied but have not heard back. What now?</h3>
+  <p>Applications are reviewed by real people, usually within a few days. If a week passes quietly, message your chapter leadership or email us; sometimes a nudge helps.</p>
+
+  <h3>My volunteer hours are still pending. Should I worry?</h3>
+  <p>No. Reviewers usually clear their queues within days. If an entry sits pending for a while, a polite message to your reviewer is completely fine. Remember that organization level hours go to the Board, which meets on its own rhythm.</p>
+
+  <h3>I lost my certificate PDF. Can I get it again?</h3>
+  <p>Always. Every certificate stays available under Certificates, ready to preview or download as many times as you need.</p>
+
+  <h3>Can I be a parent and a tutor at the same time?</h3>
+  <p>Yes. Roles stack on one account, and the sidebar simply shows both sets of tools.</p>
+
+  <h3>Why can I not see a page this handbook mentions?</h3>
+  <p>Pages appear based on roles. If a tool you need is missing, the role that unlocks it has not been granted to you yet. Ask your chapter leadership or an administrator.</p>
+
+  <h3>Something looks broken. Who do I tell?</h3>
+  <p>Email <strong>administrator@theresonancefoundation.org</strong> with what you were doing and what happened. Screenshots are gold. We fix things fast.</p>
+
+  <div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+  <h3>Reaching us</h3>
+  <ul>
+    <li><strong>General questions:</strong> info@theresonancefoundation.org</li>
+    <li><strong>Portal and account help:</strong> administrator@theresonancefoundation.org</li>
+    <li><strong>Instagram:</strong> @theresonancefoundation._</li>
+  </ul>
+</section>
+
+<!-- ============================ CLOSING ============================ -->
+<section class="chapter closing">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="" style="width:96pt; margin-bottom: 8pt;">
+  <div class="kicker" style="margin-top:10pt">Thank you for being part of this</div>
+  <div class="script">Empowering Minds, Inspiring Change</div>
+  <p style="max-width:4.6in; color: var(--muted); margin-top: 10pt;">Every lesson taught, every hour volunteered, and every note played in a community hall moves this mission forward. We are glad you are here.</p>
+  <div class="edition" style="position:absolute; bottom:0.7in; left:0; right:0;">The Resonance Foundation &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<script>
+  // Cover soundwave: symmetric bars like the certificate's motif
+  const wave = document.getElementById("wave");
+  const H = [4,7,10,6,13,9,16,11,20,14,24,17,21,26,19,28,22,30,24,28,21,26,18,24,15,20,12,16,9,13,6,10,7,4];
+  const mirrored = H.concat([...H].reverse());
+  for (const h of mirrored) {
+    const i = document.createElement("i");
+    i.style.height = h + "pt";
+    wave.appendChild(i);
+  }
+</script>
+</body>
+</html>
