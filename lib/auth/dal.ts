@@ -636,16 +636,22 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
     ]),
   ]
 
-  if (userIds.length === 0) return []
+  // The board sees every account, including guests who signed up but hold no
+  // role yet, so brand-new members can be granted their first role.
+  let profiles: { id: string; full_name: string | null; email: string | null }[]
+  if (isBoard(roleNames)) {
+    const { data } = await admin.from("profiles").select("id, full_name, email")
+    profiles = data ?? []
+  } else {
+    if (userIds.length === 0) return []
+    const { data } = await admin
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", userIds)
+    profiles = data ?? []
+  }
 
-  const { data: profiles } = await admin
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", userIds)
-
-  const profileById = new Map(
-    (profiles ?? []).map((profile) => [profile.id, profile])
-  )
+  const profileById = new Map(profiles.map((profile) => [profile.id, profile]))
 
   const rolesByUser = new Map<string, AppRole[]>()
   for (const row of roleRows ?? []) {
@@ -654,7 +660,11 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
     rolesByUser.set(row.user_id, list)
   }
 
-  const members: PortalMember[] = userIds.map((userId) => {
+  const memberIds = isBoard(roleNames)
+    ? [...new Set([...profiles.map((p) => p.id), ...userIds])]
+    : userIds
+
+  const members: PortalMember[] = memberIds.map((userId) => {
     const profile = profileById.get(userId)
     return {
       userId,
