@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { getProfile, verifySession } from "@/lib/auth/dal"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { sendNewApplicationAlertEmails } from "@/lib/email/lifecycle"
 import {
   staffApplicationSchema,
   type StaffApplicationFormState,
@@ -67,6 +69,45 @@ export async function submitStaffApplication(
 
   if (error) {
     return { message: error.message }
+  }
+
+  // Alert the people who will review it: this chapter's leadership plus
+  // program administrators.
+  try {
+    const admin = createAdminClient()
+    const [{ data: reviewerRoles }, { data: chapterRow }] = await Promise.all([
+      admin
+        .from("user_roles")
+        .select("user_id, role, chapter_id")
+        .eq("status", "active")
+        .in("role", ["chapter_president", "chapter_officer", "program_administrator"]),
+      admin.from("chapters").select("name").eq("id", validated.data.chapterId).maybeSingle(),
+    ])
+    const reviewerIds = [
+      ...new Set(
+        (reviewerRoles ?? [])
+          .filter(
+            (r) =>
+              r.role === "program_administrator" ||
+              r.chapter_id === validated.data.chapterId
+          )
+          .map((r) => r.user_id)
+      ),
+    ].filter((id) => id !== user.id)
+    if (reviewerIds.length) {
+      const { data: reviewerProfiles } = await admin
+        .from("profiles")
+        .select("email")
+        .in("id", reviewerIds)
+      await sendNewApplicationAlertEmails({
+        reviewerEmails: (reviewerProfiles ?? []).map((p) => p.email),
+        applicantName: payload.full_name,
+        applicantType: payload.type,
+        chapterName: chapterRow?.name,
+      })
+    }
+  } catch (alertError) {
+    console.error("new-application reviewer alert", alertError)
   }
 
   revalidatePath("/dashboard")

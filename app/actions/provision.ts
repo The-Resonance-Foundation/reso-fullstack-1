@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { canReviewApplicants, verifySession } from "@/lib/auth/dal"
 import { provisionStaffApplicant } from "@/lib/auth/provision-helpers"
 import { sendApplicantRejectionEmail } from "@/lib/email/applicant-rejection"
+import { sendApplicantAcceptanceEmail } from "@/lib/email/lifecycle"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import type { Applicant } from "@/types/database"
 import type { ApplicantType } from "@/types/enums"
@@ -59,6 +60,16 @@ export async function acceptAndProvisionApplicant(
   if (!result.ok) {
     return { message: result.message }
   }
+
+  const { data: chapterRow } = record.chapter_id
+    ? await supabase.from("chapters").select("name").eq("id", record.chapter_id).maybeSingle()
+    : { data: null }
+  await sendApplicantAcceptanceEmail({
+    to: record.email,
+    fullName: record.full_name,
+    applicantType: record.type,
+    chapterName: chapterRow?.name,
+  })
 
   revalidatePath("/dashboard/applicants")
   revalidatePath("/dashboard")

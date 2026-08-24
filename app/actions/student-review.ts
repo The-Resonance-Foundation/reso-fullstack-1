@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { canReviewApplicants, verifySession } from "@/lib/auth/dal"
 import { sendStudentRejectionEmail } from "@/lib/email/student-rejection"
+import { sendStudentApprovalEmail } from "@/lib/email/lifecycle"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import type { Student } from "@/types/database"
 
@@ -50,6 +51,17 @@ export async function acceptStudent(
     .eq("id", studentId)
 
   if (error) return { message: error.message }
+
+  const admin = await import("@/lib/supabase/admin").then((m) => m.createAdminClient())
+  const [{ data: authUser }, { data: chapterRow }] = await Promise.all([
+    admin.auth.admin.getUserById(record.parent_user_id),
+    admin.from("chapters").select("name").eq("id", record.chapter_id).maybeSingle(),
+  ])
+  await sendStudentApprovalEmail({
+    to: authUser.user?.email ?? "",
+    studentName: `${record.first_name} ${record.last_name}`,
+    chapterName: chapterRow?.name,
+  })
 
   revalidatePath("/dashboard/admin/families")
   revalidatePath("/dashboard/students")

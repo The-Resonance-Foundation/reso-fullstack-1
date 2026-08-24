@@ -11,6 +11,7 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import { revalidateVolunteerPaths } from "@/lib/portal/revalidate-volunteer"
 import { generateVolunteerCertificatePdf } from "@/lib/pdf/volunteer-certificate"
+import { sendHoursApprovedEmail, sendHoursRejectedEmail } from "@/lib/email/lifecycle"
 import {
   sumVolunteerHours,
   volunteerHourDateRange,
@@ -55,7 +56,7 @@ async function issueCertificateForHours(
 
   const { data: profile } = await admin
     .from("profiles")
-    .select("full_name")
+    .select("full_name, email")
     .eq("id", userId)
     .maybeSingle()
 
@@ -141,6 +142,12 @@ async function issueCertificateForHours(
     title: "Volunteer hours approved",
     body: `${totalHours.toFixed(2)} hours approved. Your certificate is ready.`,
     link_path: "/dashboard/volunteer/certificates",
+  })
+
+  await sendHoursApprovedEmail({
+    to: profile?.email,
+    fullName: profile?.full_name ?? "Volunteer",
+    totalHours,
   })
 
   return { certificateId: certificate.id }
@@ -386,6 +393,21 @@ export async function rejectVolunteerHours(
     .eq("id", validated.data.hourId)
 
   if (error) return { message: error.message }
+
+  const admin = createAdminClient()
+  const { data: rejectedProfile } = await admin
+    .from("profiles")
+    .select("full_name, email")
+    .eq("id", row.user_id)
+    .maybeSingle()
+  await sendHoursRejectedEmail({
+    to: rejectedProfile?.email,
+    fullName: rejectedProfile?.full_name ?? "Volunteer",
+    hours: Number(row.hours),
+    activityDate: row.activity_date,
+    reason: validated.data.reason,
+  })
+
   revalidateVolunteerPaths()
   return { success: true, message: "Entry rejected." }
 }

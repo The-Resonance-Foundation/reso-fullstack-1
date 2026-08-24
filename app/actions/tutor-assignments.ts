@@ -8,6 +8,7 @@ import {
   tutorAssignmentSchema,
   type TutorAssignmentFormState,
 } from "@/lib/validations/phase23"
+import { sendTutorAssignmentEmails } from "@/lib/email/lifecycle"
 
 export async function assignTutorToStudent(
   _prev: TutorAssignmentFormState,
@@ -73,6 +74,36 @@ export async function assignTutorToStudent(
 
   if (error) {
     return { message: error.message }
+  }
+
+  // Tell both sides about the match (fire-and-forget).
+  const [{ data: studentRow }, { data: tutorProfile }, { data: assignChapter }] =
+    await Promise.all([
+      admin
+        .from("students")
+        .select("first_name, last_name, parent_user_id")
+        .eq("id", validated.data.studentId)
+        .maybeSingle(),
+      admin
+        .from("profiles")
+        .select("full_name, email")
+        .eq("id", validated.data.tutorUserId)
+        .maybeSingle(),
+      admin.from("chapters").select("name").eq("id", student.chapter_id).maybeSingle(),
+    ])
+  if (studentRow) {
+    const { data: parentProfile } = await admin
+      .from("profiles")
+      .select("email")
+      .eq("id", studentRow.parent_user_id)
+      .maybeSingle()
+    await sendTutorAssignmentEmails({
+      tutorEmail: tutorProfile?.email,
+      tutorName: tutorProfile?.full_name ?? "Tutor",
+      parentEmail: parentProfile?.email,
+      studentName: `${studentRow.first_name} ${studentRow.last_name}`,
+      chapterName: assignChapter?.name,
+    })
   }
 
   const { ensureTutorStudentConversation } = await import(

@@ -9,6 +9,8 @@ import {
   verifySession,
 } from "@/lib/auth/dal"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { sendRoleGrantedEmail } from "@/lib/email/lifecycle"
+import { ROLE_LABELS } from "@/types/roles"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import { APP_ROLES, CHAPTER_STATUSES, type AppRole } from "@/types/enums"
 
@@ -156,6 +158,19 @@ export async function assignUserRole(
     chapter_id: chapterId,
     summary: `Role ${role} assigned`,
     metadata: { user_id: userId, role, chapter_id: chapterId, change: "assigned" },
+  })
+
+  const [{ data: memberProfile }, { data: chapterRow }] = await Promise.all([
+    admin.from("profiles").select("full_name, email").eq("id", userId).maybeSingle(),
+    chapterId
+      ? admin.from("chapters").select("name").eq("id", chapterId).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ])
+  await sendRoleGrantedEmail({
+    to: memberProfile?.email,
+    fullName: memberProfile?.full_name ?? "there",
+    roleLabel: ROLE_LABELS[role],
+    chapterName: chapterRow?.name,
   })
 
   revalidatePath("/dashboard/admin/roles")
