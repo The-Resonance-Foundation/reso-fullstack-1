@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Parent and Family Guide</title>
+<link rel="stylesheet" href="role-guide.css">
+</head>
+<body>
+
+<section class="cover">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div class="serial">
+    <span class="bars"><i style="height:7pt"></i><i style="height:11pt"></i><i style="height:5pt"></i><i style="height:12pt"></i><i style="height:8pt"></i><i style="height:4pt"></i><i style="height:10pt"></i></span>
+    <span class="no">NO. RF-2026-FAM</span>
+  </div>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="The Resonance Foundation">
+  <div class="doc-kicker">Portal Guide</div>
+  <div class="soundwave" id="wave"></div>
+  <h1>The Parent and Family Guide</h1>
+  <p class="subtitle">Getting your child from signed up to playing music, with completely free lessons every step of the way.</p>
+  <div class="edition">Families &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<section class="page">
+  <div class="chapter-head">
+    <div class="chapter-num">01</div>
+    <div class="kicker">Getting Started</div>
+    <h2>Add Your Students</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">One parent login manages your whole household. Start by adding each child you would like enrolled.</p>
+  <ol class="steps">
+    <li>Sign in and open <span class="pathline">My Students</span> in the My Family section of the sidebar.</li>
+    <li>Click <strong>Add student</strong> and share their name, the instrument they want to learn, and their current level. Total beginners are very welcome.</li>
+    <li>New students start as <strong>Pending</strong> while your chapter reviews the registration. You will get an email and a portal notification the moment they are approved.</li>
+  </ol>
+  <figure class="shot">
+    <img src="shots/parent-students.jpg" alt="My students page">
+    <figcaption>Your household: one student active, one awaiting chapter review</figcaption>
+  </figure>
+  <div class="callout">
+    <span class="tag">Lessons are free</span>
+    <p>Every lesson is completely free. Group and individual lessons both cost nothing, always. If anything ever appears to ask you for payment for a lesson, something is wrong; please tell us.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">02</div>
+    <div class="kicker">Scheduling</div>
+    <h2>Request Lessons</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Once a student is approved and matched with a tutor, the <span class="pathline">Lessons</span> page is where scheduling happens.</p>
+  <figure class="shot">
+    <img src="shots/parent-lessons.jpg" alt="Lessons page">
+    <figcaption>The Lessons page: your schedule plus the Request a lesson button</figcaption>
+  </figure>
+  <ol class="steps">
+    <li>Click <strong>Request a lesson</strong>.</li>
+    <li>Pick your student, their tutor, one of the tutor's weekly availability slots, and the date you want.</li>
+    <li>Add a note if there is anything the tutor should know, and send the request.</li>
+    <li>The tutor confirms, and the lesson lands on your calendar. If a time stops working, cancel the pending request or message the tutor to rearrange.</li>
+  </ol>
+  <figure class="shot">
+    <img src="shots/parent-request-lesson.jpg" alt="Request a lesson dialog">
+    <figcaption>Requesting a lesson from the tutor's real availability</figcaption>
+  </figure>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">03</div>
+    <div class="kicker">Between Lessons</div>
+    <h2>Practice and Assignments</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Two small habits make lessons dramatically better: logging practice and checking assignments.</p>
+  <figure class="shot">
+    <img src="shots/parent-practice.jpg" alt="Practice log">
+    <figcaption>The practice log tracks minutes, trends, and streaks</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Practice Log</strong>: tap Log practice after your child plays and record the minutes and what they worked on. Their tutor sees it and shapes the next lesson around it, and students love watching their streak grow.</li>
+    <li><strong>Assignments</strong>: homework the tutor leaves after each lesson shows up here instantly, so nothing gets lost between sessions.</li>
+  </ul>
+
+  <h3>Everything else in your sidebar</h3>
+  <ul>
+    <li><strong>Messages</strong> reaches your child's tutor and chapter staff directly. Keep lesson coordination in the portal so there is always a record, and skip trading personal numbers.</li>
+    <li><strong>Calendar</strong> shows lessons and chapter events in one view.</li>
+    <li><strong>Events</strong> lists recitals and community performances. RSVP when your family plans to come; organizers count on it.</li>
+    <li><strong>Announcements and Resources</strong> carry chapter news and useful files like the practice log template. Important updates also arrive by email.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="tag">Safety</span>
+    <p>Portal messages involving students can be reviewed by chapter leadership when there is a concern. It is one of the ways we keep every conversation appropriate and every student safe.</p>
+  </div>
+
+  <div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <p class="contact-foot">Questions or something broken? Email <strong>administrator@theresonancefoundation.org</strong> and a real person will get back to you.</p>
+  <div class="script-close">Empowering Minds, Inspiring Change</div>
+</section>
+
+<script>
+  const wave = document.getElementById("wave");
+  const H = [4,7,10,6,13,9,16,11,20,14,24,17,21,26,19,28,22,30,24,28,21,26,18,24,15,20,12,16,9,13,6,10,7,4];
+  for (const h of H.concat([...H].reverse())) {
+    const i = document.createElement("i");
+    i.style.height = h * 0.85 + "pt";
+    wave.appendChild(i);
+  }
+</script>
+</body>
+</html>

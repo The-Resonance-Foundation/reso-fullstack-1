@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tutor Guide</title>
+<link rel="stylesheet" href="role-guide.css">
+</head>
+<body>
+
+<section class="cover">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div class="serial">
+    <span class="bars"><i style="height:7pt"></i><i style="height:11pt"></i><i style="height:5pt"></i><i style="height:12pt"></i><i style="height:8pt"></i><i style="height:4pt"></i><i style="height:10pt"></i></span>
+    <span class="no">NO. RF-2026-TU</span>
+  </div>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="The Resonance Foundation">
+  <div class="doc-kicker">Portal Guide</div>
+  <div class="soundwave" id="wave"></div>
+  <h1>The Tutor Guide</h1>
+  <p class="subtitle">Your availability, your students, your lessons, and the volunteer hours you earn by teaching.</p>
+  <div class="edition">Tutors &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<section class="page">
+  <div class="chapter-head">
+    <div class="chapter-num">01</div>
+    <div class="kicker">First Things First</div>
+    <h2>Set Your Availability</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Everything starts with the <span class="pathline">Availability</span> page. Families can only request lessons inside the windows you publish, so an accurate week means requests you can actually say yes to.</p>
+  <ol class="steps">
+    <li>Open <span class="pathline">Availability</span> in the Teaching section of the sidebar.</li>
+    <li>Click <strong>Add slot</strong> and pick the day, start time, and end time you can teach.</li>
+    <li>Add as many windows as you like, and remove one with its <strong>x</strong> whenever your schedule changes.</li>
+  </ol>
+  <figure class="shot">
+    <img src="shots/tutor-availability.jpg" alt="Availability page">
+    <figcaption>Your teaching week. Keep it honest and keep it current</figcaption>
+  </figure>
+  <div class="callout">
+    <span class="tag">Lesson requests</span>
+    <p>When a family requests one of your slots, you get a notification and the request appears in your queue. Accept it and the lesson is created for both sides, or decline with a short note so the family can pick another time. Answer quickly; families are waiting on you.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">02</div>
+    <div class="kicker">Teaching</div>
+    <h2>Your Students</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede"><span class="pathline">My Students</span> lists everyone assigned to you, with their instrument and level. Each student has a hub where all of your teaching tools live.</p>
+  <figure class="shot">
+    <img src="shots/tutor-students.jpg" alt="My students page">
+    <figcaption>Your roster. Open a student's hub to work with them</figcaption>
+  </figure>
+  <p>Open a hub and you can do everything for that student in one place:</p>
+  <ul>
+    <li><strong>Schedule lessons</strong> and log attendance or notes after each one. That running record makes every next lesson better.</li>
+    <li><strong>Assign homework</strong> with New assignment. The family sees it instantly, so nothing gets lost between sessions.</li>
+    <li><strong>Check practice</strong> in the read only practice view, which shows what the family logs at home.</li>
+    <li><strong>Share resources</strong> like sheet music or exercises directly with that student.</li>
+  </ul>
+  <figure class="shot">
+    <img src="shots/tutor-student-hub.jpg" alt="Student hub">
+    <figcaption>The student hub: lessons, assignments, practice, and resources together</figcaption>
+  </figure>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">03</div>
+    <div class="kicker">Your Service Counts</div>
+    <h2>Hours and Certificates</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Tutoring with the Foundation is volunteer service. Log it, get it approved, and receive an official certificate you can use for school requirements and college applications.</p>
+  <figure class="shot">
+    <img src="shots/tutor-log-hours.jpg" alt="Log hours form">
+    <figcaption>Log Hours: chapter, category, hours, date, and a short description</figcaption>
+  </figure>
+  <ol class="steps">
+    <li>Open <span class="pathline">Log Hours</span>, pick your chapter and the <strong>Teaching</strong> category (or event support or admin work when that fits better).</li>
+    <li>Enter the hours, the date it happened, and a sentence about what you did.</li>
+    <li>Submit. Your chapter president or a program administrator reviews it. While it is pending you can still edit or delete the entry.</li>
+    <li>The moment your hours are approved, an official certificate PDF is generated with your name, total hours, and the approver's signature. Find it any time under <span class="pathline">Certificates</span>, ready to preview or download.</li>
+  </ol>
+  <div class="callout">
+    <span class="tag">Good to know</span>
+    <p>If an entry is rejected, you get the reason and can log a corrected one. Nobody can approve their own hours, and certificates never expire or disappear from your account.</p>
+  </div>
+
+  <h3>The rest of your toolkit</h3>
+  <ul>
+    <li><strong>Messages</strong> reaches your students' families and your chapter leadership. Keep lesson coordination in the portal.</li>
+    <li><strong>Calendar</strong> shows your lessons and chapter events in one view.</li>
+    <li><strong>Events</strong> lists performances and gatherings; RSVP when you plan to come or help.</li>
+    <li><strong>Announcements and Resources</strong> keep you up to date, with everything also arriving by email.</li>
+  </ul>
+
+  <div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <p class="contact-foot">Questions or something broken? Email <strong>administrator@theresonancefoundation.org</strong> and a real person will get back to you.</p>
+  <div class="script-close">Empowering Minds, Inspiring Change</div>
+</section>
+
+<script>
+  const wave = document.getElementById("wave");
+  const H = [4,7,10,6,13,9,16,11,20,14,24,17,21,26,19,28,22,30,24,28,21,26,18,24,15,20,12,16,9,13,6,10,7,4];
+  for (const h of H.concat([...H].reverse())) {
+    const i = document.createElement("i");
+    i.style.height = h * 0.85 + "pt";
+    wave.appendChild(i);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Program Administrator Guide</title>
+<link rel="stylesheet" href="role-guide.css">
+</head>
+<body>
+
+<section class="cover">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div class="serial">
+    <span class="bars"><i style="height:7pt"></i><i style="height:11pt"></i><i style="height:5pt"></i><i style="height:12pt"></i><i style="height:8pt"></i><i style="height:4pt"></i><i style="height:10pt"></i></span>
+    <span class="no">NO. RF-2026-PA</span>
+  </div>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="The Resonance Foundation">
+  <div class="doc-kicker">Portal Guide</div>
+  <div class="soundwave" id="wave"></div>
+  <h1>The Program Administrator Guide</h1>
+  <p class="subtitle">Running chapter operations across the whole organization: applicants, families, tutors, events, and volunteer hours.</p>
+  <div class="edition">Program Administrators &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<section class="page">
+  <div class="chapter-head">
+    <div class="chapter-num">01</div>
+    <div class="kicker">Your Role</div>
+    <h2>What You Do Here</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Program administrators are the operations engine of the Foundation. Where a chapter president runs one chapter, you keep every chapter running.</p>
+  <p>Your sidebar has three working sections. <strong>Review</strong> holds the people pipeline: Families, Applicants, Tutors, and Volunteers. <strong>Administration</strong> holds the machinery: Tutor Assignments, Publish Announcements, Chapter Docs, Volunteer Approvals, and Roles. The small number badges are pending work waiting for you; when a badge clears, that queue is empty.</p>
+  <div class="callout">
+    <span class="tag">Your boundaries</span>
+    <p>Donations, corporate level audit records, and every corporate appointment belong to the Board. You cannot appoint or remove chapter presidents, corporate officers, or board members, you cannot remove any officer, and you cannot approve organization level volunteer hours. Everything else across the chapters is yours.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">02</div>
+    <div class="kicker">The People Pipeline</div>
+    <h2>Applicants and Families</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">New people arrive through two doors: staff applications and family signups. Both wait for your review.</p>
+
+  <h3>Reviewing applicants</h3>
+  <p>The <span class="pathline">Applicants</span> page lists tutor, officer, and volunteer applications from every chapter, filtered by stage. Open one to see the whole application, then choose <strong>Accept &amp; provision</strong> or <strong>Reject</strong>. Accepting grants the role immediately and emails the applicant the good news. Try to answer every application within a few days.</p>
+  <figure class="shot">
+    <img src="shots/pa-applicants.jpg" alt="Applicant pipeline">
+    <figcaption>The applicant pipeline, with one click accept and provision</figcaption>
+  </figure>
+
+  <h3>Approving students</h3>
+  <p><span class="pathline">Families</span> shows every registered household and their students. New students start pending; approving one unlocks lesson requests for that family. The Export CSV button gives you the full roster as a spreadsheet whenever you need it.</p>
+  <figure class="shot">
+    <img src="shots/pa-families.jpg" alt="Families and enrollments">
+    <figcaption>Families and enrollments. Accept or reject pending students inline</figcaption>
+  </figure>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">03</div>
+    <div class="kicker">Approvals</div>
+    <h2>Volunteer Hours</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Tutors and chapter members log service hours. You are one of the people who turns those pending entries into signed certificates.</p>
+  <figure class="shot">
+    <img src="shots/pa-approvals.jpg" alt="Volunteer hour approvals queue">
+    <figcaption>The pending queue: approve in batches or reject with a reason</figcaption>
+  </figure>
+  <ol class="steps">
+    <li>Open <span class="pathline">Volunteer Approvals</span>. The queue shows every pending chapter level entry across the organization.</li>
+    <li>Check the hours, date, and description. Select the entries that look right.</li>
+    <li>Click <strong>Approve selected</strong>. The portal issues an official certificate PDF to the volunteer automatically, signed with your name and title.</li>
+    <li>If something is off, use <strong>Reject</strong> and write a short reason. The member is notified and can log a corrected entry.</li>
+  </ol>
+  <div class="callout">
+    <span class="tag">Scope</span>
+    <p>You approve chapter level hours in any chapter. Organization level (corporate) hours are reviewed by the Board only, so they never appear in your queue. You also cannot approve hours you logged yourself.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">04</div>
+    <div class="kicker">Access Control</div>
+    <h2>Granting Roles</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">The <span class="pathline">Roles</span> page is where members get their access. Pick a member, pick a role, pick a chapter when the role needs one, and assign.</p>
+  <figure class="shot">
+    <img src="shots/pa-assign-role.jpg" alt="Assign a role dialog">
+    <figcaption>The assign role dialog. It only offers roles you are allowed to grant</figcaption>
+  </figure>
+  <p>You can grant <strong>parent</strong>, <strong>tutor</strong>, <strong>volunteer</strong>, and <strong>chapter officer</strong> roles, and you can remove parents, tutors, and volunteers. The dialog never shows you a role you cannot grant, so there is no way to overstep by accident. Every change is written to the audit log.</p>
+
+  <h3>Everything else you run</h3>
+  <ul>
+    <li><strong>Tutor Assignments</strong> pairs tutors with students in any chapter. Match instrument, level, and schedule.</li>
+    <li><strong>Publish Announcements</strong> posts chapter or organization wide news; members also get it by email.</li>
+    <li><strong>Chapter Docs</strong> holds each chapter's internal documents.</li>
+    <li><strong>Events</strong> lets you create and manage both chapter and organization wide events.</li>
+    <li><strong>Audit logs</strong> show you the chapter level record of sensitive actions.</li>
+  </ul>
+
+  <h3>Quick reference</h3>
+  <table>
+    <tr><th style="width:2.7in">You can</th><th>You cannot</th></tr>
+    <tr><td>Manage applicants, families, tutors, and assignments in every chapter</td><td>View or record donations (board only)</td></tr>
+    <tr><td>Approve chapter level volunteer hours anywhere</td><td>Approve corporate level hours (board only)</td></tr>
+    <tr><td>Grant parent, tutor, volunteer, and chapter officer roles</td><td>Appoint presidents, corporate officers, or board members</td></tr>
+    <tr><td>Remove parents, tutors, and volunteers</td><td>Remove any officer of any kind (board only)</td></tr>
+    <tr><td>Publish announcements, manage docs, events, and exports</td><td>See corporate level audit entries</td></tr>
+  </table>
+
+  <div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <p class="contact-foot">Questions or something broken? Email <strong>administrator@theresonancefoundation.org</strong> and a real person will get back to you.</p>
+  <div class="script-close">Empowering Minds, Inspiring Change</div>
+</section>
+
+<script>
+  const wave = document.getElementById("wave");
+  const H = [4,7,10,6,13,9,16,11,20,14,24,17,21,26,19,28,22,30,24,28,21,26,18,24,15,20,12,16,9,13,6,10,7,4];
+  for (const h of H.concat([...H].reverse())) {
+    const i = document.createElement("i");
+    i.style.height = h * 0.85 + "pt";
+    wave.appendChild(i);
+  }
+</script>
+</body>
+</html>

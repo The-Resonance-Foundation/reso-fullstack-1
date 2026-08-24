@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Corporate Officer Guide</title>
+<link rel="stylesheet" href="role-guide.css">
+</head>
+<body>
+
+<section class="cover">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div class="serial">
+    <span class="bars"><i style="height:7pt"></i><i style="height:11pt"></i><i style="height:5pt"></i><i style="height:12pt"></i><i style="height:8pt"></i><i style="height:4pt"></i><i style="height:10pt"></i></span>
+    <span class="no">NO. RF-2026-CO</span>
+  </div>
+  <img class="logo" src="../../lib/pdf/assets/resonance-logo-transparent.png" alt="The Resonance Foundation">
+  <div class="doc-kicker">Portal Guide</div>
+  <div class="soundwave" id="wave"></div>
+  <h1>The Corporate Officer Guide</h1>
+  <p class="subtitle">How to run organization wide events and stay connected in the Resonance Foundation member portal.</p>
+  <div class="edition">Corporate Officers &nbsp;&middot;&nbsp; theresonancefoundation.org</div>
+</section>
+
+<section class="page">
+  <div class="chapter-head">
+    <div class="chapter-num">01</div>
+    <div class="kicker">Your Role</div>
+    <h2>What You Do Here</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Corporate officers work at the organization level. Your job in the portal is organization wide events: creating them, keeping their details current, and watching who is coming.</p>
+  <p>Sign in at <strong>theresonancefoundation.org</strong> and you land on your dashboard. Your sidebar keeps things simple: Dashboard, Messages, Announcements, Calendar, Events, and Resources. The dashboard greets you with upcoming events and quick actions into the pages you use most.</p>
+  <figure class="shot">
+    <img src="shots/corp-dashboard.jpg" alt="Corporate officer dashboard">
+    <figcaption>Your dashboard: upcoming events and quick actions</figcaption>
+  </figure>
+  <div class="callout">
+    <span class="tag">Scope</span>
+    <p>You operate at the corporate level only. Chapter internals (students, families, applicants, tutors) and donation records are outside your view by design. If you need something from a chapter, message its leadership.</p>
+  </div>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">02</div>
+    <div class="kicker">Your Main Tool</div>
+    <h2>Managing Events</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">The <span class="pathline">Events</span> page is your workspace. It lists every upcoming event with its chapter tag, location, time, status, and your own RSVP state.</p>
+  <figure class="shot">
+    <img src="shots/corp-events.jpg" alt="Events page with org-wide and chapter events">
+    <figcaption>The Events page. Org-wide is yours; chapter events belong to chapter leadership</figcaption>
+  </figure>
+
+  <h3>Creating an organization wide event</h3>
+  <ol class="steps">
+    <li>Open <span class="pathline">Events</span> and click <strong>Create event</strong>.</li>
+    <li>Leave the chapter set to <strong>Organization-wide</strong>. That is your lane; chapter events are created by chapter officers and presidents.</li>
+    <li>Give it a clear title, a short description people will actually read, and the venue.</li>
+    <li>Pick the start and end date and time. Add a capacity if seats are limited.</li>
+    <li>Choose the status. <strong>Published</strong> goes live for everyone immediately; <strong>draft</strong> stays hidden while you finish planning.</li>
+  </ol>
+  <figure class="shot">
+    <img src="shots/corp-create-event.jpg" alt="Create event dialog">
+    <figcaption>The create event dialog, set to Organization-wide</figcaption>
+  </figure>
+
+  <h3>After it is live</h3>
+  <ul>
+    <li>Members RSVP from the same page, and the counts update live. Check them before booking chairs or printing programs.</li>
+    <li>You can edit details any time. RSVPs close on their own once the event has passed.</li>
+    <li>After the event, attendance tracking feeds volunteer hour records for the people who helped.</li>
+  </ul>
+</section>
+
+<section class="chapter">
+  <div class="chapter-head">
+    <div class="chapter-num">03</div>
+    <div class="kicker">Day To Day</div>
+    <h2>Staying Connected</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">Three quiet pages keep you in the loop between events.</p>
+  <ul>
+    <li><strong>Calendar</strong> lays out everything you can access by month or week, so you can spot conflicts before you schedule a showcase on top of a recital.</li>
+    <li><strong>Announcements</strong> is the organization bulletin board. New posts also reach your email.</li>
+    <li><strong>Messages</strong> connects you with staff and chapter leadership. Keep event coordination in here so there is always a record.</li>
+  </ul>
+  <figure class="shot">
+    <img src="shots/corp-calendar.jpg" alt="Calendar view">
+    <figcaption>The calendar, with lessons and events color coded</figcaption>
+  </figure>
+
+  <h3>Quick reference</h3>
+  <table>
+    <tr><th style="width:2.6in">You can</th><th>You cannot</th></tr>
+    <tr><td>Create, edit, and manage organization wide events</td><td>See chapter students, families, applicants, or tutors</td></tr>
+    <tr><td>Track RSVPs and attendance for your events</td><td>View or record donations (board only)</td></tr>
+    <tr><td>View announcements, calendar, and resources</td><td>Publish announcements or upload resources</td></tr>
+    <tr><td>Message staff and chapter leadership</td><td>Assign or remove anyone's role</td></tr>
+    <tr><td>RSVP to any event</td><td>Approve volunteer hours</td></tr>
+  </table>
+  <div class="callout">
+    <span class="tag">Appointments</span>
+    <p>Corporate officers are appointed and removed by the Board of Directors alone. If your team is changing, that conversation goes to the board.</p>
+  </div>
+
+  <div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+  <p class="contact-foot">Questions or something broken? Email <strong>administrator@theresonancefoundation.org</strong> and a real person will get back to you.</p>
+  <div class="script-close">Empowering Minds, Inspiring Change</div>
+</section>
+
+<script>
+  const wave = document.getElementById("wave");
+  const H = [4,7,10,6,13,9,16,11,20,14,24,17,21,26,19,28,22,30,24,28,21,26,18,24,15,20,12,16,9,13,6,10,7,4];
+  for (const h of H.concat([...H].reverse())) {
+    const i = document.createElement("i");
+    i.style.height = h * 0.85 + "pt";
+    wave.appendChild(i);
+  }
+</script>
+</body>
+</html>
