@@ -10,14 +10,14 @@ import type { ApplicantType } from "@/types/enums"
  * breaking the action that triggered it.
  */
 
-const SITE_URL =
+export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://theresonancefoundation.org"
 
-function deliverable(email: string | null | undefined): email is string {
+export function deliverable(email: string | null | undefined): email is string {
   return Boolean(email && !email.endsWith("@resonance.test"))
 }
 
-async function deliver(to: string | null | undefined, subject: string, html: string) {
+export async function deliver(to: string | null | undefined, subject: string, html: string) {
   if (!deliverable(to)) return
   try {
     const result = await sendEmail({ to, subject, html })
@@ -27,7 +27,7 @@ async function deliver(to: string | null | undefined, subject: string, html: str
   }
 }
 
-function button(href: string, label: string) {
+export function button(href: string, label: string) {
   return `<p><a href="${href}" style="display:inline-block;background:#2A397B;color:#FDFCF9;text-decoration:none;border-radius:8px;padding:10px 22px;font-weight:600">${label}</a></p>`
 }
 

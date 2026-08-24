@@ -4,6 +4,8 @@ import { canManageLessons, isTutorAccount, verifySession } from "@/lib/auth/dal"
 import { isValidLessonStatusTransition } from "@/lib/events/helpers"
 import { revalidateTutorStudentPaths } from "@/lib/portal/revalidate-tutor"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
+import { sendLessonCancelledEmails } from "@/lib/email/reminders"
 import type { Lesson } from "@/types/database"
 import {
   lessonLogSchema,
@@ -186,6 +188,34 @@ export async function updateLessonStatus(
 
   if (error) {
     return { message: error.message }
+  }
+
+  // A cancelled lesson affects two calendars — tell both sides.
+  if (validated.data.status === "cancelled" && record.status === "scheduled") {
+    try {
+      const admin = createAdminClient()
+      const { data: studentRow } = await admin
+        .from("students")
+        .select("first_name, last_name, parent_user_id")
+        .eq("id", record.student_id)
+        .maybeSingle()
+      if (studentRow) {
+        const { data: people } = await admin
+          .from("profiles")
+          .select("id, full_name, email")
+          .in("id", [record.tutor_user_id, studentRow.parent_user_id])
+        const byId = new Map((people ?? []).map((p) => [p.id, p]))
+        await sendLessonCancelledEmails({
+          tutorEmail: byId.get(record.tutor_user_id)?.email,
+          tutorName: byId.get(record.tutor_user_id)?.full_name ?? "Tutor",
+          parentEmail: byId.get(studentRow.parent_user_id)?.email,
+          studentName: `${studentRow.first_name} ${studentRow.last_name}`,
+          scheduledStart: record.scheduled_start,
+        })
+      }
+    } catch (cancelError) {
+      console.error("lesson cancellation email", cancelError)
+    }
   }
 
   revalidateTutorStudentPaths(record.student_id)
