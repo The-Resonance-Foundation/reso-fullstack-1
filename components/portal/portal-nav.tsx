@@ -241,11 +241,6 @@ export function PortalNav({ flags, instanceId, onNavigate, badges }: PortalNavPr
                   <Link
                     href={item.href}
                     onClick={onNavigate}
-                    // Portal pages are all dynamic, so without an explicit
-                    // prefetch a click pays a full server round trip before
-                    // anything appears. The sidebar is a small, fixed set of
-                    // destinations, so warming them is worth it.
-                    prefetch
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "group relative z-10 flex items-center gap-2.5 rounded-[11px] px-3 py-2 text-[13px] transition-[color,transform] duration-200",
