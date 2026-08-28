@@ -237,6 +237,11 @@ h1, h2, h3, h4, h5, h6 {
 
 .portal-aurora {
   color-scheme: dark;
+  /* Radix portals (dialogs, sheets) mount in <body>, outside the themed
+     shell, and re-apply this class — set the text color here so un-classed
+     children (labels, triggers) never inherit the marketing theme's dark
+     ink onto a dark surface. */
+  color: var(--foreground);
   --background: #14100d;
   --foreground: #f4ede3;
   --card: #221a13;
