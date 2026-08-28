@@ -223,9 +223,20 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/* Entrance timing is felt as page latency, since it plays once content has
+   already loaded. Short enough to read as polish, not as waiting. */
 .animate-fade-up {
-  animation: fade-up 0.55s cubic-bezier(0.22, 0.9, 0.35, 1) both;
-  animation-delay: calc(var(--stagger-index, 0) * 55ms);
+  animation: fade-up 0.3s cubic-bezier(0.22, 0.9, 0.35, 1) both;
+  animation-delay: calc(var(--stagger-index, 0) * 28ms);
+}
+
+/* Respect a reduced-motion preference: show content immediately. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-grow-bar {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
 }
 
 /* ===========================================================================
