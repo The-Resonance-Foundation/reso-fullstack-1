@@ -31,6 +31,18 @@ export const getSession = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createServerClient()
   if (!supabase) return null
 
+  // getClaims verifies the access token's ES256 signature locally against the
+  // project's cached JWKS, so identity costs no network round trip. It still
+  // refreshes an expired session first, and forging a token is not possible
+  // without the private key. Row access stays enforced by RLS regardless.
+  const { data, error } = await supabase.auth.getClaims()
+  const claims = data?.claims
+  if (!error && claims?.sub) {
+    return { id: claims.sub, email: typeof claims.email === "string" ? claims.email : undefined }
+  }
+
+  // Asymmetric keys unavailable or verification failed — fall back to asking
+  // the auth server directly rather than letting anyone through.
   const {
     data: { user },
   } = await supabase.auth.getUser()

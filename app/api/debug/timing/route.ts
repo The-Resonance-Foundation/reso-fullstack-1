@@ -32,8 +32,11 @@ export async function GET(request: Request) {
     const { data } = await supabase.auth.getUser()
     return data.user
   })
-  await time("auth.getUser (2nd, same client)", async () => {
-    await supabase.auth.getUser()
+  await time("auth.getClaims (1st)", async () => {
+    await supabase.auth.getClaims()
+  })
+  await time("auth.getClaims (2nd)", async () => {
+    await supabase.auth.getClaims()
   })
   await time("profiles select", async () => {
     await supabase.from("profiles").select("*").eq("id", user?.id ?? "").maybeSingle()

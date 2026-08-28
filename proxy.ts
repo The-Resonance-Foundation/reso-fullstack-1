@@ -33,9 +33,18 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Local ES256 verification against the cached JWKS: no auth-server round
+  // trip on every request. getClaims still refreshes an expired session (and
+  // the refreshed cookies ride out on the response), and this only gates
+  // redirects — pages re-verify through the DAL, and RLS guards the data.
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims()
+  let user: { id: string } | null = claimsData?.claims?.sub
+    ? { id: claimsData.claims.sub }
+    : null
+  if (claimsError) {
+    const { data } = await supabase.auth.getUser()
+    user = data.user ? { id: data.user.id } : null
+  }
 
   const { pathname } = request.nextUrl
   const isProtected = protectedPrefixes.some((prefix) =>
