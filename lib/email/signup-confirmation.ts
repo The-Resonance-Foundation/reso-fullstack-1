@@ -23,5 +23,7 @@ export async function sendSignupConfirmationEmail({
     to,
     subject: "Confirm your Resonance Foundation account",
     html,
+    // Sign-in link: account address only.
+    mirrorToPersonal: false,
   })
 }

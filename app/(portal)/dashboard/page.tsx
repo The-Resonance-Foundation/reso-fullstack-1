@@ -27,6 +27,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { GuestOverview } from "@/components/portal/guest-overview"
+import { NotificationEmailBanner } from "@/components/portal/notification-email-banner"
 import { UpcomingLessonsSummary } from "@/components/portal/lessons-panel"
 import { ActivityFeed } from "@/components/portal/dashboard/activity-feed"
 import {
@@ -197,6 +198,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
+      {/* Personal notification address: prompts until one is on file */}
+      <NotificationEmailBanner
+        notificationEmail={profile?.notification_email ?? null}
+        accountEmail={user.email ?? "your account email"}
+      />
+
       {/* Greeting */}
       <div className="animate-fade-up flex items-end justify-between gap-4">
         <div>

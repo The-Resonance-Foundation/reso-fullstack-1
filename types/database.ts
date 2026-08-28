@@ -69,6 +69,8 @@ export interface Profile {
   email: string | null
   /** Guest-written note shown to admins in the members list for onboarding. */
   onboarding_note: string | null
+  /** Personal address that also receives every portal email. */
+  notification_email: string | null
   created_at: string
   updated_at: string
 }
@@ -456,6 +458,7 @@ export interface Database {
           full_name: string
           phone?: string | null
           onboarding_note?: string | null
+          notification_email?: string | null
           created_at?: string
           updated_at?: string
         }

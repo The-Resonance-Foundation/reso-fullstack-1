@@ -60,6 +60,75 @@ export async function updateOnboardingNote(
   }
 }
 
+const notificationEmailSchema = z.object({
+  notificationEmail: z.email({ error: "Enter a valid email address." }).trim(),
+})
+
+/**
+ * A personal address that receives a copy of every portal email alongside
+ * the account address. Members sign in with an address they may rarely
+ * check; this makes sure notifications reach one they actually read.
+ */
+export async function updateNotificationEmail(
+  _prev: AccountActionState,
+  formData: FormData
+): Promise<AccountActionState> {
+  const user = await verifySession()
+
+  const validated = notificationEmailSchema.safeParse({
+    notificationEmail: formData.get("notificationEmail"),
+  })
+  if (!validated.success) {
+    return { errors: validated.error.flatten().fieldErrors }
+  }
+
+  const notificationEmail = validated.data.notificationEmail.toLowerCase()
+  if (notificationEmail === user.email?.toLowerCase()) {
+    return {
+      message:
+        "That is already your account email. Add a different address, or leave this blank.",
+    }
+  }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from("profiles")
+    .update({ notification_email: notificationEmail })
+    .eq("id", user.id)
+
+  if (error) {
+    return { message: error.message }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/admin/roles")
+
+  return {
+    success: true,
+    message: `Saved. Portal emails will also go to ${notificationEmail}.`,
+  }
+}
+
+/** Stop copying portal emails to the personal address. */
+export async function clearNotificationEmail(): Promise<AccountActionState> {
+  const user = await verifySession()
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from("profiles")
+    .update({ notification_email: null })
+    .eq("id", user.id)
+
+  if (error) {
+    return { message: error.message }
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/dashboard/admin/roles")
+
+  return { success: true, message: "Removed. Emails go to your account address only." }
+}
+
 const transferSchema = z.object({
   chapterId: z.uuid({ error: "Please select a chapter." }),
 })

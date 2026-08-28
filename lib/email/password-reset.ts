@@ -23,5 +23,7 @@ export async function sendPasswordResetEmail({
     to,
     subject: "Reset your Resonance Foundation password",
     html,
+    // Credential link: account address only.
+    mirrorToPersonal: false,
   })
 }

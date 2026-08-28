@@ -585,6 +585,8 @@ export type PortalMember = {
   currentRoles: AppRole[]
   /** Guest-written onboarding note, shown under their name for admins. */
   note: string | null
+  /** Personal address that also receives their portal emails. */
+  notificationEmail: string | null
 }
 
 export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
@@ -647,17 +649,17 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
     full_name: string | null
     email: string | null
     onboarding_note: string | null
+    notification_email: string | null
   }[]
+  const PROFILE_COLUMNS = "id, full_name, email, onboarding_note, notification_email"
   if (isBoard(roleNames)) {
-    const { data } = await admin
-      .from("profiles")
-      .select("id, full_name, email, onboarding_note")
+    const { data } = await admin.from("profiles").select(PROFILE_COLUMNS)
     profiles = data ?? []
   } else {
     if (userIds.length === 0) return []
     const { data } = await admin
       .from("profiles")
-      .select("id, full_name, email, onboarding_note")
+      .select(PROFILE_COLUMNS)
       .in("id", userIds)
     profiles = data ?? []
   }
@@ -683,6 +685,7 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
       email: profile?.email ?? "",
       currentRoles: rolesByUser.get(userId) ?? [],
       note: profile?.onboarding_note ?? null,
+      notificationEmail: profile?.notification_email ?? null,
     }
   })
 

@@ -1,12 +1,8 @@
 import "server-only"
 
 import { sendEmail } from "@/lib/email/applicant-rejection"
+import { expandRecipients, isDeliverable as deliverable } from "@/lib/email/recipients"
 import { getAuthBaseUrl } from "@/lib/config/url"
-
-/** Test accounts use a fake domain — never hand those to Resend. */
-function deliverable(email: string | null | undefined): email is string {
-  return Boolean(email && !email.toLowerCase().endsWith("@resonance.test"))
-}
 
 function escapeHtml(text: string) {
   return text
@@ -99,7 +95,8 @@ export async function emailAnnouncementNotification({
 }) {
   try {
     const link = `${getAuthBaseUrl()}/dashboard/announcements`
-    const bcc = emails.filter(deliverable)
+    // Personal notification addresses ride along in the same bcc batch.
+    const bcc = await expandRecipients(emails)
     if (!bcc.length) return
     await sendBccBatch({
       bcc,

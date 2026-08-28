@@ -1,5 +1,6 @@
 import "server-only"
 
+import { expandRecipients, isDeliverable } from "@/lib/email/recipients"
 import type { ApplicantType } from "@/types/enums"
 
 type SendResult = { sent: true } | { sent: false; reason: string }
@@ -8,10 +9,17 @@ export async function sendEmail({
   to,
   subject,
   html,
+  mirrorToPersonal = true,
 }: {
   to: string
   subject: string
   html: string
+  /**
+   * Notifications also go to the member's personal address. Set false for
+   * anything carrying a credential (password resets, magic links): a second
+   * inbox must not be able to take over the account.
+   */
+  mirrorToPersonal?: boolean
 }): Promise<SendResult> {
   const apiKey = process.env.RESEND_API_KEY
   const from =
@@ -21,13 +29,20 @@ export async function sendEmail({
     return { sent: false, reason: "RESEND_API_KEY is not configured" }
   }
 
+  const recipients = mirrorToPersonal
+    ? await expandRecipients([to])
+    : [to].filter(isDeliverable)
+  if (recipients.length === 0) {
+    return { sent: false, reason: "no deliverable recipient" }
+  }
+
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from, to, subject, html }),
+    body: JSON.stringify({ from, to: recipients, subject, html }),
   })
 
   if (!response.ok) {
