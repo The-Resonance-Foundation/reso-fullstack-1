@@ -20,6 +20,7 @@ export const routes = {
   },
   portal: {
     dashboard: "/dashboard",
+    applications: "/dashboard/applications",
     applicants: "/dashboard/applicants",
     students: "/dashboard/students",
     tutors: "/dashboard/tutors",

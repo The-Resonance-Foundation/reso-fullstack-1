@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { GuestApplicationHub } from "@/components/portal/guest-application-hub"
+import { GuestOverview } from "@/components/portal/guest-overview"
 import { UpcomingLessonsSummary } from "@/components/portal/lessons-panel"
 import { ActivityFeed } from "@/components/portal/dashboard/activity-feed"
 import {
@@ -48,7 +48,7 @@ import {
   getUpcomingEventsBrief,
   getVolunteerDashboardStats,
 } from "@/lib/data/dashboard"
-import { getDashboardContext, getStaffApplicationsForUser } from "@/lib/auth/dal"
+import { getDashboardContext } from "@/lib/auth/dal"
 import { getLessonsForUser } from "@/lib/data/phase23"
 import { formatCompact } from "@/lib/utils"
 import { routes } from "@/lib/routes"
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
 
   // Fetch only what this user's roles need, all in parallel.
   const [
-    guestData,
+    guestChapters,
     adminStats,
     donationTotals,
     donationSeries,
@@ -108,9 +108,7 @@ export default async function DashboardPage() {
     volunteerStats,
     upcomingEvents,
   ] = await Promise.all([
-    isGuest
-      ? Promise.all([getActiveChapters(), getStaffApplicationsForUser()])
-      : null,
+    isGuest ? getActiveChapters() : null,
     canReview ? getAdminDashboardStats() : null,
     canViewDonations ? getDonationTotalsForDashboard() : null,
     canViewDonations ? getDonationSeries(12) : null,
@@ -208,7 +206,7 @@ export default async function DashboardPage() {
           </h1>
           {isGuest ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              Signed in as {user.email ?? "member"} — finish your application below.
+              Signed in as {user.email ?? "member"}.
             </p>
           ) : null}
         </div>
@@ -220,24 +218,13 @@ export default async function DashboardPage() {
         ) : null}
       </div>
 
-      {/* Guest application hub */}
-      {isGuest && guestData ? (
-        <Card className="animate-fade-up border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-lg">Complete your application</CardTitle>
-            <CardDescription>
-              You have a portal account but no roles yet. Apply below — chapter
-              officers review applications quickly.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GuestApplicationHub
-              chapters={guestData[0]}
-              pendingApplications={guestData[1]}
-              activeRoles={roleNames}
-            />
-          </CardContent>
-        </Card>
+      {/* Guest welcome: note for admins + parent transfer, applications live
+          in their own tab */}
+      {isGuest && guestChapters ? (
+        <GuestOverview
+          chapters={guestChapters}
+          initialNote={profile?.onboarding_note ?? null}
+        />
       ) : null}
 
       {/* KPI tiles */}

@@ -67,6 +67,8 @@ export interface Profile {
   full_name: string
   phone: string | null
   email: string | null
+  /** Guest-written note shown to admins in the members list for onboarding. */
+  onboarding_note: string | null
   created_at: string
   updated_at: string
 }
@@ -110,7 +112,8 @@ export interface GuardianConsent {
 export interface Applicant {
   id: string
   type: ApplicantType
-  chapter_id: string
+  /** Null for corporate-level positions (corporate officer, program admin). */
+  chapter_id: string | null
   full_name: string
   email: string
   phone: string | null
@@ -452,6 +455,7 @@ export interface Database {
           id: string
           full_name: string
           phone?: string | null
+          onboarding_note?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -505,7 +509,7 @@ export interface Database {
         Insert: {
           id?: string
           type: ApplicantType
-          chapter_id: string
+          chapter_id: string | null
           full_name: string
           email: string
           phone?: string | null

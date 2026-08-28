@@ -66,6 +66,18 @@ export const OFFICER_POSITIONS = [
   "chapter_president",
 ] as const satisfies readonly AppRole[]
 
+/** Corporate-level positions that can be applied for — never tied to a chapter. */
+export const CORPORATE_POSITIONS = [
+  "corporate_officer",
+  "program_administrator",
+] as const satisfies readonly AppRole[]
+
+/** Every officer position an application can request. */
+export const REQUESTABLE_OFFICER_ROLES = [
+  ...OFFICER_POSITIONS,
+  ...CORPORATE_POSITIONS,
+] as const satisfies readonly AppRole[]
+
 export const CHAPTER_OFFICER_ROLES: AppRole[] = [
   "chapter_officer",
   "chapter_president",

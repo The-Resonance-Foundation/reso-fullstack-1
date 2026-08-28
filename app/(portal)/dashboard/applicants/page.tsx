@@ -2,7 +2,12 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { ApplicantPipeline } from "@/components/portal/applicant-pipeline"
 import { PageHeader } from "@/components/portal/page-header"
-import { canReviewApplicants, getApplicantsForReviewer } from "@/lib/auth/dal"
+import {
+  canReviewApplicants,
+  getActiveRoleNames,
+  getApplicantsForReviewer,
+} from "@/lib/auth/dal"
+import { isBoard } from "@/types/enums"
 
 export const metadata: Metadata = {
   title: "Applicants",
@@ -13,7 +18,10 @@ export default async function ApplicantsPage() {
   const allowed = await canReviewApplicants()
   if (!allowed) redirect("/dashboard")
 
-  const applicants = await getApplicantsForReviewer()
+  const [applicants, roleNames] = await Promise.all([
+    getApplicantsForReviewer(),
+    getActiveRoleNames(),
+  ])
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -21,7 +29,7 @@ export default async function ApplicantsPage() {
         title="Applicant pipeline"
         description="Review tutor, officer, and volunteer applications from members who already have portal accounts. Accepting grants the role and provisions access immediately; rejecting sends a notification email when Resend is configured."
       />
-      <ApplicantPipeline applicants={applicants} />
+      <ApplicantPipeline applicants={applicants} viewerIsBoard={isBoard(roleNames)} />
     </div>
   )
 }

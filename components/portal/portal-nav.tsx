@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { routes } from "@/lib/routes"
 
 export type PortalNavFlags = {
+  isGuest: boolean
   isParent: boolean
   isTutor: boolean
   hasPortalRole: boolean
@@ -64,6 +65,13 @@ export function buildPortalNav(flags: PortalNavFlags): NavGroup[] {
   const overview: NavItem[] = [
     { label: "Dashboard", href: routes.portal.dashboard, icon: LayoutDashboard, exact: true },
   ]
+  if (flags.isGuest) {
+    overview.push({
+      label: "Applications",
+      href: routes.portal.applications,
+      icon: UserPlus,
+    })
+  }
   if (flags.hasPortalRole) {
     overview.push(
       { label: "Messages", href: routes.portal.messages, icon: MessageSquare },

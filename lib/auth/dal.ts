@@ -83,12 +83,14 @@ export function formatRoleList(roles: AppRole[]) {
   return roles.map((role) => ROLE_LABELS[role]).join(", ")
 }
 
-export const canReviewApplicants = cache(async (chapterId?: string) => {
+export const canReviewApplicants = cache(async (chapterId?: string | null) => {
   const roles = await getUserRoles()
   const roleNames = roles.map((r) => r.role)
   const chapterIds = roles.map((r) => r.chapter_id)
 
   if (isOrgAdmin(roleNames)) return true
+  // Explicit null = a corporate-level application: org admins only.
+  if (chapterId === null) return false
   if (!chapterId) {
     return roleNames.some((role) =>
       ["chapter_officer", "chapter_president"].includes(role)
@@ -581,6 +583,8 @@ export type PortalMember = {
   fullName: string
   email: string
   currentRoles: AppRole[]
+  /** Guest-written onboarding note, shown under their name for admins. */
+  note: string | null
 }
 
 export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
@@ -638,15 +642,22 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
 
   // The board sees every account, including guests who signed up but hold no
   // role yet, so brand-new members can be granted their first role.
-  let profiles: { id: string; full_name: string | null; email: string | null }[]
+  let profiles: {
+    id: string
+    full_name: string | null
+    email: string | null
+    onboarding_note: string | null
+  }[]
   if (isBoard(roleNames)) {
-    const { data } = await admin.from("profiles").select("id, full_name, email")
+    const { data } = await admin
+      .from("profiles")
+      .select("id, full_name, email, onboarding_note")
     profiles = data ?? []
   } else {
     if (userIds.length === 0) return []
     const { data } = await admin
       .from("profiles")
-      .select("id, full_name, email")
+      .select("id, full_name, email, onboarding_note")
       .in("id", userIds)
     profiles = data ?? []
   }
@@ -671,6 +682,7 @@ export const getPortalMembers = cache(async (): Promise<PortalMember[]> => {
       fullName: profile?.full_name ?? profile?.email ?? "Member",
       email: profile?.email ?? "",
       currentRoles: rolesByUser.get(userId) ?? [],
+      note: profile?.onboarding_note ?? null,
     }
   })
 
@@ -777,7 +789,7 @@ export const getStaffApplicationsForUser = cache(async (): Promise<Applicant[]> 
   const supabase = await getServerClientOrThrow()
   const { data, error } = await supabase
     .from("applicants")
-    .select("*")
+    .select("*, chapters(name, slug)")
     .eq("converted_user_id", user.id)
     .in("type", ["tutor", "officer", "volunteer"])
     .order("created_at", { ascending: false })

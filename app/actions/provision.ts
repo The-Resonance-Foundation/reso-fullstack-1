@@ -1,13 +1,14 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { canReviewApplicants, verifySession } from "@/lib/auth/dal"
-import { provisionStaffApplicant } from "@/lib/auth/provision-helpers"
+import { canAssignRole, verifySession } from "@/lib/auth/dal"
+import { provisionStaffApplicant, roleForApplicant } from "@/lib/auth/provision-helpers"
 import { sendApplicantRejectionEmail } from "@/lib/email/applicant-rejection"
 import { sendApplicantAcceptanceEmail } from "@/lib/email/lifecycle"
 import { getServerClientOrThrow } from "@/lib/supabase/server"
 import type { Applicant } from "@/types/database"
 import type { ApplicantType } from "@/types/enums"
+import { ROLE_LABELS } from "@/types/roles"
 
 export type ProvisionState =
   | { message?: string; success?: boolean }
@@ -38,7 +39,9 @@ export async function acceptAndProvisionApplicant(
   }
 
   const record = applicant as Applicant
-  const allowed = await canReviewApplicants(record.chapter_id)
+  // Deciding an application is granting the role, so it takes the same
+  // authority: board-only for presidents and corporate officers, and so on.
+  const allowed = await canAssignRole(roleForApplicant(record), record.chapter_id)
   if (!allowed) {
     return { message: "You are not authorized to review this applicant." }
   }
@@ -68,6 +71,10 @@ export async function acceptAndProvisionApplicant(
     to: record.email,
     fullName: record.full_name,
     applicantType: record.type,
+    positionLabel:
+      record.type === "officer" && record.requested_role
+        ? ROLE_LABELS[record.requested_role]
+        : null,
     chapterName: chapterRow?.name,
   })
 
@@ -102,7 +109,7 @@ export async function rejectApplicant(
   }
 
   const record = applicant as Applicant & { chapters?: { name: string } | null }
-  const allowed = await canReviewApplicants(record.chapter_id)
+  const allowed = await canAssignRole(roleForApplicant(record), record.chapter_id)
   if (!allowed) {
     return { message: "You are not authorized to review this applicant." }
   }

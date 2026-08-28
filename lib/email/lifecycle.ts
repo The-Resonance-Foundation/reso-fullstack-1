@@ -10,8 +10,13 @@ import type { ApplicantType } from "@/types/enums"
  * breaking the action that triggered it.
  */
 
+// Emails always link to the real site: a missing or localhost
+// NEXT_PUBLIC_SITE_URL must never end up in someone's inbox.
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://theresonancefoundation.org"
+  !configuredSiteUrl || /localhost|127\.0\.0\.1/.test(configuredSiteUrl)
+    ? "https://theresonancefoundation.org"
+    : configuredSiteUrl
 
 export function deliverable(email: string | null | undefined): email is string {
   return Boolean(email && !email.endsWith("@resonance.test"))
@@ -42,20 +47,24 @@ export async function sendApplicantAcceptanceEmail({
   to,
   fullName,
   applicantType,
+  positionLabel,
   chapterName,
 }: {
   to: string
   fullName: string
   applicantType: ApplicantType
+  /** Specific position (e.g. "Chapter President") when finer than the type. */
+  positionLabel?: string | null
   chapterName?: string | null
 }) {
   const where = chapterName ? ` with the ${chapterName} chapter` : ""
+  const what = (positionLabel ?? TYPE_LABELS[applicantType]).toLowerCase()
   await deliver(
     to,
     "Welcome aboard - your Resonance Foundation application was accepted",
     `
     <p>Hi ${fullName},</p>
-    <p>Great news: your ${TYPE_LABELS[applicantType]} application${where} has been <strong>accepted</strong>.</p>
+    <p>Great news: your ${what} application${where} has been <strong>accepted</strong>.</p>
     <p>Your new role is already active. Sign in to the portal to get started - your tools are waiting in the sidebar.</p>
     ${button(`${SITE_URL}/login`, "Open the portal")}
     <p>Welcome to the team,<br/>The Resonance Foundation</p>
@@ -211,28 +220,32 @@ export async function sendTutorAssignmentEmails({
   ])
 }
 
-/** A new staff application arrived: alert the chapter's reviewers. */
+/** A new staff application arrived: alert the reviewers with authority. */
 export async function sendNewApplicationAlertEmails({
   reviewerEmails,
   applicantName,
   applicantType,
+  positionLabel,
   chapterName,
 }: {
   reviewerEmails: (string | null)[]
   applicantName: string
   applicantType: ApplicantType
+  /** Specific position (e.g. "Chapter President") when finer than the type. */
+  positionLabel?: string | null
   chapterName?: string | null
 }) {
   const where = chapterName ? ` for the ${chapterName} chapter` : ""
+  const what = (positionLabel ?? TYPE_LABELS[applicantType]).toLowerCase()
   const unique = [...new Set(reviewerEmails.filter(deliverable))]
   await Promise.all(
     unique.map((to) =>
       deliver(
         to,
-        `New ${TYPE_LABELS[applicantType]} application to review`,
+        `New ${what} application to review`,
         `
         <p>Hello,</p>
-        <p><strong>${applicantName}</strong> just applied as a ${TYPE_LABELS[applicantType]}${where} and is waiting for review.</p>
+        <p><strong>${applicantName}</strong> just applied as a ${what}${where} and is waiting for review.</p>
         ${button(`${SITE_URL}/dashboard/applicants`, "Review the application")}
         <p>The Resonance Foundation</p>
       `

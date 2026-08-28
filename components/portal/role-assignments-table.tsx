@@ -153,13 +153,18 @@ function buildMemberColumns(): ColumnDef<PortalMember>[] {
     {
       id: "member",
       header: "Member",
-      accessorFn: (row) => `${row.fullName} ${row.email}`,
+      accessorFn: (row) => `${row.fullName} ${row.email} ${row.note ?? ""}`,
       cell: ({ row }) => (
         <div className="min-w-0">
           <p className="truncate font-medium text-foreground">{row.original.fullName}</p>
           <p className="truncate text-xs text-muted-foreground">
             {row.original.email || "No email"}
           </p>
+          {row.original.note ? (
+            <p className="mt-1 max-w-md whitespace-normal text-xs italic text-[var(--acc-hi,#F8B269)]">
+              &ldquo;{row.original.note}&rdquo;
+            </p>
+          ) : null}
         </div>
       ),
     },

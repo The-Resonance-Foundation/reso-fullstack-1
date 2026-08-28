@@ -25,7 +25,16 @@ const DATE_FORMAT = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 })
 
-export function ApplicantPipeline({ applicants }: { applicants: Applicant[] }) {
+/** Positions only the board can grant — hide decide buttons from others. */
+const BOARD_ONLY_POSITIONS = ["chapter_president", "corporate_officer"]
+
+export function ApplicantPipeline({
+  applicants,
+  viewerIsBoard,
+}: {
+  applicants: Applicant[]
+  viewerIsBoard: boolean
+}) {
   const columns = useMemo<ColumnDef<Applicant>[]>(
     () => [
       {
@@ -58,9 +67,10 @@ export function ApplicantPipeline({ applicants }: { applicants: Applicant[] }) {
       },
       {
         id: "chapter",
-        accessorFn: (row) => row.chapters?.name ?? row.chapter_id,
+        accessorFn: (row) => row.chapters?.name ?? row.chapter_id ?? "Corporate",
         header: "Chapter",
-        cell: ({ row }) => row.original.chapters?.name ?? row.original.chapter_id,
+        cell: ({ row }) =>
+          row.original.chapters?.name ?? row.original.chapter_id ?? "Corporate",
       },
       {
         id: "stage",
@@ -77,16 +87,20 @@ export function ApplicantPipeline({ applicants }: { applicants: Applicant[] }) {
       {
         id: "actions",
         header: "",
-        cell: ({ row }) => (
-          <ApplicantActions
-            applicantId={row.original.id}
-            fullName={row.original.full_name}
-            stage={row.original.stage}
-          />
-        ),
+        cell: ({ row }) =>
+          viewerIsBoard ||
+          !BOARD_ONLY_POSITIONS.includes(row.original.requested_role ?? "") ? (
+            <ApplicantActions
+              applicantId={row.original.id}
+              fullName={row.original.full_name}
+              stage={row.original.stage}
+            />
+          ) : (
+            <span className="text-xs text-muted-foreground">Board decides</span>
+          ),
       },
     ],
-    []
+    [viewerIsBoard]
   )
 
   const groups = useMemo(

@@ -33,6 +33,7 @@ export default async function PortalLayout({
   const email = user.email ?? ""
 
   const flags: PortalNavFlags = {
+    isGuest: !hasPortalRole,
     isParent,
     isTutor,
     hasPortalRole,
