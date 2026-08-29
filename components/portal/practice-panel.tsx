@@ -5,10 +5,8 @@ import { toast } from "sonner"
 import { celebrate } from "@/lib/celebrate"
 import { CalendarDays, Flame, Timer, Trash2 } from "lucide-react"
 import { addPracticeLog, deletePracticeLog } from "@/app/actions/practice"
-import {
-  PracticeWeekChart,
-  type PracticeDayPoint,
-} from "@/components/portal/dashboard/dashboard-charts"
+import { PracticeWeekChart } from "@/components/portal/dashboard/lazy-charts"
+import type { PracticeDayPoint } from "@/components/portal/dashboard/dashboard-charts"
 import { StatCard } from "@/components/portal/dashboard/stat-card"
 import { FormFieldError } from "@/components/forms/form-field-error"
 import { Button } from "@/components/ui/button"

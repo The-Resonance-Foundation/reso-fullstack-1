@@ -34,7 +34,7 @@ import {
   DonationsTrendChart,
   LessonsPerWeekChart,
   PracticeWeekChart,
-} from "@/components/portal/dashboard/dashboard-charts"
+} from "@/components/portal/dashboard/lazy-charts"
 import { QuickActionsGrid, type QuickAction } from "@/components/portal/dashboard/quick-actions"
 import { StatCard } from "@/components/portal/dashboard/stat-card"
 import { getActiveChapters } from "@/lib/data/chapters"

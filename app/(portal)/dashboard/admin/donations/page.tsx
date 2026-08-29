@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { Coins, Receipt, TrendingUp } from "lucide-react"
-import { DonationsTrendChart } from "@/components/portal/dashboard/dashboard-charts"
+import { DonationsTrendChart } from "@/components/portal/dashboard/lazy-charts"
 import { StatCard } from "@/components/portal/dashboard/stat-card"
 import { redirect } from "next/navigation"
 import {
