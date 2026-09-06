@@ -1,21 +1,23 @@
 {
   "impactStats": [
-    { "value": "50+", "label": "Dedicated Tutors" },
-    { "value": "1,000+", "label": "Lives Impacted" },
-    { "value": "$1000s", "label": "Raised for Music Education" },
+    { "value": "150+", "label": "Dedicated Tutors" },
+    { "value": "50+", "label": "Volunteers" },
+    { "value": "12,000+", "label": "Lives Impacted" },
+    { "value": "$25,000+", "label": "Raised for Music Education" },
     { "value": "30+", "label": "Leadership Officers" }
   ],
   "homeStats": [
-    { "value": "50+", "label": "Dedicated Tutors" },
-    { "value": "1,000+", "label": "Lives Impacted" },
-    { "value": "$1000s", "label": "Raised for Music" },
+    { "value": "150+", "label": "Dedicated Tutors" },
+    { "value": "50+", "label": "Volunteers" },
+    { "value": "12,000+", "label": "Lives Impacted" },
+    { "value": "$25,000+", "label": "Raised for Music" },
     { "value": "30+", "label": "Leadership Officers" }
   ],
   "highlights": [
     { "value": "100%", "label": "Student-Led Initiative" }
   ],
   "donationRaised": {
-    "value": "$1000s",
+    "value": "$25,000+",
     "label": "For music education initiatives"
   }
 }

@@ -25,6 +25,16 @@ function parseStat(value: string) {
   }
 }
 
+/** Desktop columns per stat count, so the row always divides evenly. */
+const COLUMN_CLASS: Record<number, string> = {
+  1: "md:grid-cols-1",
+  2: "md:grid-cols-2",
+  3: "md:grid-cols-3",
+  4: "md:grid-cols-4",
+  5: "md:grid-cols-5",
+  6: "md:grid-cols-6",
+}
+
 export function StatsBar({ stats, variant = "primary", className }: StatsBarProps) {
   return (
     <section
@@ -35,7 +45,14 @@ export function StatsBar({ stats, variant = "primary", className }: StatsBarProp
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 md:gap-10">
+        <div
+          className={cn(
+            "grid grid-cols-2 gap-8 md:gap-10",
+            // Match the column count to the number of stats so the row never
+            // leaves a stranded item on its own line.
+            COLUMN_CLASS[stats.length] ?? "md:grid-cols-4"
+          )}
+        >
           {stats.map((stat) => {
             const parsed = parseStat(stat.value)
             return (
