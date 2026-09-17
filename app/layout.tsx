@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Playfair_Display, Inter, Sora, DM_Sans } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -66,6 +67,7 @@ export default function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
